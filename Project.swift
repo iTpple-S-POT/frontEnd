@@ -1,4 +1,5 @@
 import ProjectDescription
+import Foundation
 
 private let bundleId: String = "com.spot"
 private let version: String = "0.0.1"
@@ -12,7 +13,7 @@ private let appName: String = "SPOT"
 
 // kakao api key
 // TODO: API_KEY보관파일에서 키값 불러오기, .gitignore로 해당파일 무시
-private let kakaoNativeAppKey = ""
+private let kakaoNativeAppKey = getKakaoApiKey()
 
 let project = Project(name: "\(appName)",
                       packages: [
@@ -89,4 +90,30 @@ private func baseSettings() -> Settings {
     return Settings.settings(base: settings,
                              configurations: [],
                              defaultSettings: .recommended)
+}
+
+/// Kakao네이티브 앱 키를 반환하는 함수이다.
+/// - Returns: api key
+private func getKakaoApiKey() -> String {
+    let manager = FileManager.default
+
+    let path = manager.currentDirectoryPath + "/Secrets/secret.json"
+    
+    if manager.fileExists(atPath: path) {
+        if let contentsOfFile = try? Data(contentsOf: URL(filePath: path)) {
+            if let decodedContents = try? JSONDecoder().decode(SecretModel.self, from: contentsOfFile) {
+                return decodedContents.api_key.kakao_native_app_key
+            }
+            return "DecodingFailure"
+        }
+        return "noContents"
+    }
+    return "notFound"
+}
+
+private struct SecretModel: Decodable {
+    struct Api_key: Decodable {
+        var kakao_native_app_key: String
+    }
+    var api_key: Api_key
 }
