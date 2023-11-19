@@ -10,6 +10,10 @@ private let basePath: String = "Targets"
 private let packagePath: String = "Packages"
 private let appName: String = "SPOT"
 
+// kakao api key
+// TODO: API_KEY보관파일에서 키값 불러오기, .gitignore로 해당파일 무시
+private let kakaoNativeAppKey = ""
+
 let project = Project(name: "\(appName)",
                       packages: [
                             .local(path: "\(packagePath)/SplashUI"),
@@ -52,8 +56,11 @@ private func makeInfoPlist(merging other: [String: Plist.Value] = [:]) -> InfoPl
         "CFBundleVersion": "\(bundleVersion)",
         "CFBundleDisplayName": "$(APP_DISPLAY_NAME)",
         "Privacy - Location When In Use Usage Description": "앱을 사용하는 동안 사용자의 위치를 특정합니다.",
+        "LSApplicationQueriesSchemes": ["kakaokompassauth", "kakaolink", "kakaoplus"],
+        "CFBundleURLTypes" : [
+            ["CFBundleURLSchemes" : ["kakao\(kakaoNativeAppKey)"]]
+        ]
     ]
-
     other.forEach { (key: String, value: Plist.Value) in
         extendedPlist[key] = value
     }

@@ -4,32 +4,21 @@
 import PackageDescription
 
 let package = Package(
-    name: "SplashUI",
+    name: "DefaultExtensions",
     platforms: [.iOS(.v16)],
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
-            name: "SplashUI",
-            targets: ["SplashUI"]
-        ),
-    ],
-    dependencies: [
-        .package(name: "DefaultExtensions", path: "../DefaultExtensions"),
+            name: "DefaultExtensions",
+            targets: ["DefaultExtensions"]),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "SplashUI",
-            dependencies: [
-                .byNameItem(name: "DefaultExtensions", condition: .none),
-            ],
-            resources: [
-                .process("Resources/splash_logo.png")
-            ]
-        ),
+            name: "DefaultExtensions"),
         .testTarget(
-            name: "SplashUITests",
-            dependencies: ["SplashUI"]),
+            name: "DefaultExtensionsTests",
+            dependencies: ["DefaultExtensions"]),
     ]
 )
