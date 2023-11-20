@@ -4,35 +4,33 @@
 import PackageDescription
 
 let package = Package(
-    name: "LoginUI",
+    name: "GlobalResource",
     platforms: [.iOS(.v16)],
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
-            name: "LoginUI",
-            targets: ["LoginUI"]),
+            name: "AllGlobalResource",
+            targets: [
+                "GlobalFonts",
+            ]),
+        
+        // Fonts only
+        .library(name: "GlobalFonts", targets: ["GlobalFonts"])
     ],
     dependencies: [
-        .package(name: "DefaultExtensions", path: "../DefaultExtensions"),
-        .package(name: "GlobalResource", path: "../GlobalResource"),
-        .package(url: "https://github.com/kakao/kakao-ios-sdk", .upToNextMajor(from: "2.18.2")),
+        .package(path: "../DefaultExtensions"),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "LoginUI",
+            name: "GlobalFonts",
             dependencies: [
                 .product(name: "DefaultExtensions", package: "DefaultExtensions"),
-                .product(name: "GlobalFonts", package: "GlobalResource"),
-                .product(name: "KakaoSDK", package: "kakao-ios-sdk"),
             ],
             resources: [
-                .process("Resources/kakao_button_image.png")
+                .process("Resources/SUITE")
             ]
-        ),
-        .testTarget(
-            name: "LoginUITests",
-            dependencies: ["LoginUI"]),
+        )
     ]
 )
