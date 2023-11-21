@@ -27,23 +27,34 @@ public struct LoginScreen: View {
             
             Spacer()
             
+            // 메인 텍스트
             HStack {
                 VStack(alignment: .leading) {
                     Text("동네,")
-                        .font(.suite(type: .SUITE_Light, size: 40))
+                        .font(.suite(type: .SUITE_Regular, size: 50))
                     (
                     Text("일상을 ")
-                        .font(.suite(type: .SUITE_Light, size: 40))
+                        .font(.suite(type: .SUITE_Regular, size: 50))
                     +
                     Text("공유하다")
-                        .font(.suite(type: .SUITE_SemiBold, size: 40))
+                        .font(.suite(type: .SUITE_SemiBold, size: 50))
                     )
                 }
                 Spacer()
             }
+            .padding(.horizontal, 12)
+            .padding(.top, 48)
+            .padding(.bottom, 36)
             
-            Rectangle()
-                .frame(height: 287)
+            
+            // 스플래쉬 이미지
+            // TODO: 완성된 이미지 삽입
+            ZStack {
+                Rectangle()
+                    .fill(.gray)
+                Text("일러스트 들어갈예정")
+                    .font(.system(size: 30))
+            }
                 
             Spacer()
         
@@ -53,10 +64,11 @@ public struct LoginScreen: View {
                 .onTapGesture {
                     KakaoLoginManager.shared.executeLogin()
                 }
-                .padding(.bottom, 40)
+                .padding(.horizontal, 12)
+                .padding(.bottom, 27)
+                .padding(.top, 48)
             
         }
-        .padding(.horizontal, 16)
         .onOpenURL { url in
             if (AuthApi.isKakaoTalkLoginUrl(url)) {
                 AuthController.handleOpenUrl(url: url)
