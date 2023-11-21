@@ -13,7 +13,7 @@ private let appName: String = "SPOT"
 
 // kakao api key
 // TODO: API_KEY보관파일에서 키값 불러오기, .gitignore로 해당파일 무시
-private let kakaoNativeAppKey = getKakaoApiKey()
+private let kakaoNativeAppKey = getKakaoAppKey()
 
 let project = Project(name: "\(appName)",
                       packages: [
@@ -31,7 +31,10 @@ let project = Project(name: "\(appName)",
                               deploymentTarget: .iOS(targetVersion: iOSTargetVersion, devices: .iphone),
                               infoPlist: makeInfoPlist(),
                               sources: ["\(basePath)/SPOT_Application/Sources/**"],
-                              resources: ["\(basePath)/SPOT_Application/Resources/**"],
+                              resources: [
+                                "\(basePath)/SPOT_Application/Resources/**",
+                                "Secrets/secret.json",
+                              ],
                               dependencies: [
                                 .package(product: "SplashUI"),
                                 .package(product: "LoginUI"),
@@ -94,7 +97,7 @@ private func baseSettings() -> Settings {
 
 /// Kakao네이티브 앱 키를 반환하는 함수이다.
 /// - Returns: api key
-private func getKakaoApiKey() -> String {
+private func getKakaoAppKey() -> String {
     let manager = FileManager.default
 
     let path = manager.currentDirectoryPath + "/Secrets/secret.json"
@@ -102,7 +105,7 @@ private func getKakaoApiKey() -> String {
     if manager.fileExists(atPath: path) {
         if let contentsOfFile = try? Data(contentsOf: URL(filePath: path)) {
             if let decodedContents = try? JSONDecoder().decode(SecretModel.self, from: contentsOfFile) {
-                return decodedContents.api_key.kakao_native_app_key
+                return decodedContents.keys.kakao_native_app_key
             }
             return "DecodingFailure"
         }
@@ -112,8 +115,8 @@ private func getKakaoApiKey() -> String {
 }
 
 private struct SecretModel: Decodable {
-    struct Api_key: Decodable {
+    struct App_key: Decodable {
         var kakao_native_app_key: String
     }
-    var api_key: Api_key
+    var keys: App_key
 }

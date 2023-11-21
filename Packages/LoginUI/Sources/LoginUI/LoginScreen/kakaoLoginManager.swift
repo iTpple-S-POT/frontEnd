@@ -6,19 +6,34 @@
 //
 
 import Foundation
+import DefaultExtensions
 import KakaoSDKUser
 import KakaoSDKCommon
+import KakaoSDKAuth
 
-class KakaoLoginManager {
+public class KakaoLoginManager {
     
-    static let shared = KakaoLoginManager()
+    public static let shared = KakaoLoginManager()
     
-    private init() {
-        //TODO: API_KEY 보관파일 만들기
-        KakaoSDK.initSDK(appKey: "")
+    private init() { }
+    
+    private var isInitialized = false
+    
+    public func initKakaoSDKWith(appKey: String) {
+        KakaoSDK.initSDK(appKey: appKey)
+        isInitialized = true
     }
     
-    func executeLogin() {
+    public func completeSocialLogin(url: URL) {
+        if (AuthApi.isKakaoTalkLoginUrl(url)) {
+            let _ = AuthController.handleOpenUrl(url: url)
+        }
+    }
+    
+    internal func executeLogin() {
+        guard isInitialized else {
+            fatalError("please initialize KakaoSDK first")
+        }
         
         if (UserApi.isKakaoTalkLoginAvailable()) {
             UserApi.shared.loginWithKakaoTalk {(oauthToken, error) in

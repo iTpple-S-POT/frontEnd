@@ -69,11 +69,6 @@ public struct LoginScreen: View {
                 .padding(.top, 48)
             
         }
-        .onOpenURL { url in
-            if (AuthApi.isKakaoTalkLoginUrl(url)) {
-                AuthController.handleOpenUrl(url: url)
-            }
-        }
     }
 }
 
