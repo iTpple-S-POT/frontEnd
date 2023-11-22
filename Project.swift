@@ -19,7 +19,7 @@ let project = Project(name: "\(appName)",
                       packages: [
                             .local(path: "\(packagePath)/SplashUI"),
                             .local(path: "\(packagePath)/LoginUI"),
-                            .local(path: "\(packagePath)/OnBoardingUI")
+                            .local(path: "\(packagePath)/UserInformationUI")
                       ],
                       settings: Settings.settings(configurations: makeConfiguration()),
                       targets: [
@@ -38,7 +38,7 @@ let project = Project(name: "\(appName)",
                               dependencies: [
                                 .package(product: "SplashUI"),
                                 .package(product: "LoginUI"),
-                                .package(product: "OnBoardingUI"),
+                                .package(product: "UserInformationUI"),
                               ],
                               settings: baseSettings()
                           )
