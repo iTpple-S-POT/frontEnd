@@ -12,10 +12,14 @@ let package = Package(
             name: "AllGlobalResource",
             targets: [
                 "GlobalFonts",
+                "GlobalUIComponents",
             ]),
         
         // Fonts only
-        .library(name: "GlobalFonts", targets: ["GlobalFonts"])
+        .library(name: "GlobalFonts", targets: ["GlobalFonts"]),
+        
+        // UIComponents only
+        .library(name: "GlobalUIComponents", targets: ["GlobalUIComponents"])
     ],
     dependencies: [
         .package(path: "../DefaultExtensions"),
@@ -31,6 +35,13 @@ let package = Package(
             resources: [
                 .process("Resources/SUITE")
             ]
+        ),
+        .target(
+            name: "GlobalUIComponents",
+            dependencies: [
+                .product(name: "DefaultExtensions", package: "DefaultExtensions"),
+            ],
+            resources: [ ]
         )
     ]
 )
