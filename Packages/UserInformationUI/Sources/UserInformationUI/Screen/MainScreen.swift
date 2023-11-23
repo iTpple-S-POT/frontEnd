@@ -95,11 +95,10 @@ struct BarView: View {
                         RoundedRectangle(cornerRadius: 2)
                             .fill(.black)
                             .frame(width: currentBarSize, height: 4)
-                        Spacer()
+                        Spacer(minLength: 0)
                     }
                 }
             }
-            .frame(width: geoWidth)
         }
         .frame(height: 28)
     }
