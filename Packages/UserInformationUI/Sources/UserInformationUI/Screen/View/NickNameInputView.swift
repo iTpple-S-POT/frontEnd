@@ -28,6 +28,7 @@ struct NickNameInputView: View {
     
     var body: some View {
         
+        
         VStack(spacing: 0) {
             
             // Title1
@@ -38,29 +39,29 @@ struct NickNameInputView: View {
                         Text("사용하실 ")
                         +
                         Text("닉네임 ")
-                            .font(.suite(type: .SUITE_SemiBold, size: 30))
+                            .font(.suite(type: .SUITE_SemiBold, size: 28))
                         +
                         Text("입력해주세요")
                     )
                 }
-                .font(.suite(type: .SUITE_Regular, size: 30))
-                .frame(height: 75)
+                .font(.suite(type: .SUITE_Regular, size: 28))
+                .frame(height: 74)
                 
                 Spacer()
             }
             
             // Title2
             HStack {
-                VStack(alignment: .leading, spacing: 3) {
+                VStack(alignment: .leading, spacing: 5) {
                     Text("공백없이 15자 이하로 작성해주세요")
                     Text("특수문자는 _만 사용 가능해요 :)")
                 }
-                .font(.suite(type: .SUITE_Light, size: 15))
-                .frame(height: 45)
+                .font(.suite(type: .SUITE_Light, size: 16))
                 
                 Spacer()
             }
-            .padding(.top, 3)
+            .frame(height: 45)
+            .padding(.top, 6)
             
             
             // Input space
@@ -68,6 +69,7 @@ struct NickNameInputView: View {
                 
                 Spacer()
                 
+                // 상단
                 HStack(spacing: 0) {
                     TextField(text: $viewModel.nickNameInputString) {
                         Text("닉네임을 입력해주세요")
@@ -81,6 +83,7 @@ struct NickNameInputView: View {
                     
                     Spacer()
                     
+                    // 텍스트를 지우는 버튼
                     Group {
                         if !viewModel.isStringEmpty {
                             Button {
@@ -94,7 +97,7 @@ struct NickNameInputView: View {
                             }
                             .transition(.scale)
                         }
-                    }                        
+                    }
                     .animation(.easeIn, value: viewModel.isStringEmpty)
                     
                     
@@ -106,12 +109,13 @@ struct NickNameInputView: View {
                 
                 Spacer()
                 
+                // 하단 바
                 Rectangle()
                     .fill(viewModel.isNickNameInvalid ? .spotRed : .black)
                     .frame(height: 1)
             }
-            .frame(height: 56)
-            .padding(.top, 35)
+            .frame(height: 42)
+            .padding(.top, 24)
             
             
             // Validation Text
@@ -127,8 +131,8 @@ struct NickNameInputView: View {
                             .foregroundStyle(.black)
                     }
                 }
-                .font(.suite(type: .SUITE_Regular, size: 15))
-                    
+                .font(.suite(type: .SUITE_Regular, size: 14))
+                
                 
                 Spacer()
             }
@@ -137,22 +141,37 @@ struct NickNameInputView: View {
             
             Spacer()
         }
+        
+    }
+}
+
+internal struct PreviewForProcessView<Content: View>: View {
+    var content: Content
+    
+    init(@ViewBuilder content: () -> Content) {
+        self.content = content()
+    }
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            Rectangle()
+                .fill(.red)
+                .frame(height: 42)
+            Rectangle()
+                .fill(.orange)
+                .frame(height: 28)
+            Rectangle()
+                .fill(.yellow)
+                .frame(height: 30)
+            content
+            Spacer()
+        }
+        .padding(.horizontal, 16)
     }
 }
 
 #Preview {
-    VStack(spacing: 0) {
-        Rectangle()
-            .fill(.red)
-            .frame(height: 50)
-        Rectangle()
-            .fill(.orange)
-            .frame(height: 28)
-        Rectangle()
-            .fill(.yellow)
-            .frame(height: 42)
+    PreviewForProcessView {
         NickNameInputView()
-        Spacer()
     }
-    .padding(.horizontal, 16)
 }

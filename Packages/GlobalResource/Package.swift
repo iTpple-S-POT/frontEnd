@@ -40,6 +40,7 @@ let package = Package(
             name: "GlobalUIComponents",
             dependencies: [
                 .product(name: "DefaultExtensions", package: "DefaultExtensions"),
+                "GlobalFonts",
             ],
             resources: [ ]
         )

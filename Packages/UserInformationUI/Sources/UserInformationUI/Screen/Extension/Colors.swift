@@ -9,6 +9,9 @@ import SwiftUI
 
 extension ShapeStyle where Self == Color {
     
+    /// 뷰의 기본적인 바탕 색
+    static var defaultBackgroundColor: Color { .white }
+    
     /// TextFeild의 placeHolder Text에 사용되는 색상
     static var greyForText: Color { Color(hex: "6C6C6C") }
     
