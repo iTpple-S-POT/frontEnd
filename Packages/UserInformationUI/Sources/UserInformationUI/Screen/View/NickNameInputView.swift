@@ -74,7 +74,7 @@ struct NickNameInputView: View {
                     TextField(text: $viewModel.nickNameInputString) {
                         Text("닉네임을 입력해주세요")
                             .font(.suite(type: .SUITE_Light, size: 19.5))
-                            .foregroundStyle(.greyForText)
+                            .foregroundStyle(.grayForText)
                     }
                     .font(.suite(type: .SUITE_Light, size: 19.5))
                     .autocorrectionDisabled()

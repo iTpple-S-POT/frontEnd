@@ -31,7 +31,7 @@ class InitialScreenModel: ObservableObject {
     // 세팅 프로세스와 매칭되는 뷰
     let viewForProgressPhase: [SettingPhase : AnyView] = [
         .inputUserNickName : AnyView(NickNameInputView()),
-        .selectUserSex : AnyView(Text("TODO1")),
+        .selectUserSex : AnyView(SelectSexView()),
         .selectUserMBTI : AnyView(Text("TODO2")),
         .selectUserBirthDay : AnyView(Text("TODO3")),
         .selectUserInterests : AnyView(Text("TODO4"))

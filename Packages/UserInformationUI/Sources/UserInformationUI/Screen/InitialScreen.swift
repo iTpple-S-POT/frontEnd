@@ -9,13 +9,15 @@ import SwiftUI
 import GlobalFonts
 import GlobalUIComponents
 
-struct InitialScreen: View {
+public struct InitialScreen: View {
     
     @StateObject private var screenModel = InitialScreenModel()
     
     @State private var isBarActive = false
     
     @State private var initialViewOffset = CGSize.zero
+    
+    public init() { }
     
     var button1Text: String { screenModel.doesProfileSettingStart ? "다음" : "프로필 만들기" }
     
@@ -25,7 +27,7 @@ struct InitialScreen: View {
     
     let screenWidth = UIScreen.main.bounds.size.width
     
-    var body: some View {
+    public var body: some View {
         VStack(spacing: 0) {
             
             // View들이 등장할 공간

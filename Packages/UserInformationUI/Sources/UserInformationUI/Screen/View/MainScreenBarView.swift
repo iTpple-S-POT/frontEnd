@@ -37,7 +37,7 @@ internal struct MainScreenBarView: View {
                 /// 검정바
                 ZStack {
                     RoundedRectangle(cornerRadius: 2)
-                        .fill(.lightGeryForBar)
+                        .fill(.spotLightGray)
                         .frame(height: 4)
                     
                     HStack {

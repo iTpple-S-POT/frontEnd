@@ -1,5 +1,6 @@
 import SwiftUI
 import LoginUI
+import UserInformationUI
 
 @main
 struct SPOTFEApp: App {
@@ -10,10 +11,11 @@ struct SPOTFEApp: App {
     
     var body: some Scene {
         WindowGroup {
-            LoginScreen()
-                .onOpenURL { url in
-                    KakaoLoginManager.shared.completeSocialLogin(url: url)
-                }
+//            LoginScreen()
+//                .onOpenURL { url in
+//                    KakaoLoginManager.shared.completeSocialLogin(url: url)
+//                }
+            InitialScreen()
         }
     }
     
