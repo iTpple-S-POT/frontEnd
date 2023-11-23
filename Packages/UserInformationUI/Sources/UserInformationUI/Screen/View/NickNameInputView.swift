@@ -8,6 +8,7 @@
 import SwiftUI
 import GlobalFonts
 import DefaultExtensions
+import GlobalUIComponents
 
 struct NickNameInputView: View {
     
@@ -89,6 +90,7 @@ struct NickNameInputView: View {
                                     .resizable()
                                     .scaledToFit()
                                     .padding(2.25)
+                                    .frame(width: 24, height: 24)
                             }
                             .transition(.scale)
                         }

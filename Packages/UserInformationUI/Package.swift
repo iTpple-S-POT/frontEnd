@@ -23,7 +23,8 @@ let package = Package(
             name: "UserInformationUI",
             dependencies: [
                 .product(name: "GlobalFonts", package: "GlobalResource"),
-                "DefaultExtensions",
+                .product(name: "GlobalUIComponents", package: "GlobalResource"),
+                .product(name: "DefaultExtensions", package: "DefaultExtensions"),
             ],
             resources: [
                 .process("Resources/UiImage"),

@@ -4,6 +4,7 @@
 
 import SwiftUI
 import GlobalFonts
+import GlobalUIComponents
 
 public struct UserInformationScreen: View {
     @StateObject private var screenModel = MainScreenModel()
@@ -40,11 +41,8 @@ public struct UserInformationScreen: View {
                     Spacer()
                 }
                 .frame(height: 56)
-                .background(
-                    RoundedRectangle(cornerRadius: 28)
-                        .fill(.spotRed)
-                )
             }
+            .buttonStyle(.spotDefault(backgroundColor: .spotRed))
             
             Button {
                 
@@ -75,16 +73,19 @@ struct BarView: View {
             
             VStack(spacing: 0) {
                 
+                /// 숫자텍스트
                 HStack(spacing: 0) {
                     Spacer()
-                    Text("\(state)/\(countOfState)")
+                    Text("\(state)")
                         .animation(nil)
+                    Text("/\(countOfState)")
                 }
                 .font(.suite(type: .SUITE_Regular, size: 17))
                 .frame(height: 20)
                 
                 Spacer()
                 
+                /// 검정바
                 ZStack {
                     RoundedRectangle(cornerRadius: 2)
                         .fill(.lightGeryForBar)
@@ -98,6 +99,7 @@ struct BarView: View {
                     }
                 }
             }
+            .frame(width: geoWidth)
         }
         .frame(height: 28)
     }
