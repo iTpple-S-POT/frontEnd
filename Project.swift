@@ -50,6 +50,7 @@ let project = Project(name: "\(appName)",
 /// - Returns: InfoPlist
 private func makeInfoPlist(merging other: [String: Plist.Value] = [:]) -> InfoPlist {
     var extendedPlist: [String: Plist.Value] = [
+        "localization native development region" : "Korea",
         "UIApplicationSceneManifest": ["UIApplicationSupportsMultipleScenes": true],
         "UILaunchScreen": [],
         "UISupportedInterfaceOrientations":
