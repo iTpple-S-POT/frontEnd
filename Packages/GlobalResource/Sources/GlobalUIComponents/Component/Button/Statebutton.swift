@@ -47,7 +47,7 @@ public struct SpotStateButton<Value: Equatable>: View {
                 .foregroundStyle(isActive ? activeColor : idleColor)
         )
         .onTapGesture(perform: action)
-        .animation(.easeInOut(duration: 0.2), value: isActive)
+        .animation(.easeInOut(duration: 0.1), value: isActive)
     }
 }
 

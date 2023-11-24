@@ -19,7 +19,7 @@ struct SelectSexView: View {
     let userNickName = "닉네임"
     
     var body: some View {
-        VStack {
+        VStack(spacing: 0) {
             // Text1
             //  TODO: 추후 닉네임임 데이터 로드 후 수정
             HStack {

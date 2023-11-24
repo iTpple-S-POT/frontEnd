@@ -145,6 +145,7 @@ struct NickNameInputView: View {
     }
 }
 
+/// SettingView들의 기본 레이아웃을 제공하는 프리뷰 입니다.
 internal struct PreviewForProcessView<Content: View>: View {
     var content: Content
     
@@ -153,20 +154,25 @@ internal struct PreviewForProcessView<Content: View>: View {
     }
     
     var body: some View {
-        VStack(spacing: 0) {
-            Rectangle()
-                .fill(.red)
-                .frame(height: 42)
-            Rectangle()
-                .fill(.orange)
-                .frame(height: 28)
-            Rectangle()
-                .fill(.yellow)
-                .frame(height: 30)
-            content
-            Spacer()
+        ZStack {
+            Color.defaultBackgroundColor
+            VStack(spacing: 0) {
+                Rectangle()
+                    .fill(.red)
+                    .frame(height: 42)
+                Rectangle()
+                    .fill(.orange)
+                    .frame(height: 28)
+                Rectangle()
+                    .fill(.yellow)
+                    .frame(height: 30)
+                content
+                Spacer()
+            }
         }
-        .padding(.horizontal, 16)
+        .padding(.horizontal, 12)
+        .background(Rectangle().fill(.cyan))
+        .background(Rectangle().fill(.indigo).ignoresSafeArea())
     }
 }
 
