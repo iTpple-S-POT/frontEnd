@@ -22,7 +22,7 @@ public struct InitialScreen: View {
     var button1Text: String { screenModel.doesProfileSettingStart ? "다음" : "프로필 만들기" }
     
     var button2Text: String {
-        screenModel.doesProfileSettingStart ? "다음에 하기" : "건너뛰기"
+        screenModel.doesProfileSettingStart ? "건너뛰기" : "다음에 하기"
     }
     
     let screenWidth = UIScreen.main.bounds.size.width
@@ -133,8 +133,8 @@ extension InitialScreen {
     /// 프로필 세팅을 시작하는 애니메이션
     func startProfileSetting() {
         
-        let initialViewDisappearTime = 0.5
-        let barAppearTime = 0.3
+        let initialViewDisappearTime = 0.0
+        let barAppearTime = 0.0
         
         withAnimation(.easeInOut(duration: initialViewDisappearTime)) {
             initialViewOffset = CGSize(width: -screenWidth, height: 0)
@@ -152,6 +152,7 @@ extension InitialScreen {
     func nextSetting() {
         
         let viewTransitionTime = 0.5
+        
         withAnimation(.easeInOut(duration: viewTransitionTime)) {
             initialViewOffset = CGSize(width: -screenWidth, height: 0)
             let _ = screenModel.increateSettingPhaseIndex()
@@ -160,7 +161,9 @@ extension InitialScreen {
     
     /// 이전세팅 사항으로 돌아간다.
     func previousSetting() {
+        
         let viewTransitionTime = 0.5
+        
         withAnimation(.easeInOut(duration: viewTransitionTime)) {
             initialViewOffset = CGSize(width: -screenWidth, height: 0)
             let _ = screenModel.decreateSettingPhaseIndex()

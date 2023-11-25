@@ -32,9 +32,9 @@ class InitialScreenModel: ObservableObject {
     let viewForProgressPhase: [SettingPhase : AnyView] = [
         .inputUserNickName : AnyView(NickNameInputView()),
         .selectUserSex : AnyView(SelectSexView()),
-        .selectUserMBTI : AnyView(Text("TODO2")),
-        .selectUserBirthDay : AnyView(Text("TODO3")),
-        .selectUserInterests : AnyView(Text("TODO4"))
+        .selectUserMBTI : AnyView(SelectMbtiView()),
+        .selectUserBirthDay : AnyView(SelectBirthDayView()),
+        .selectUserInterests : AnyView(SelectInterestsView())
     ]
     
     init() {

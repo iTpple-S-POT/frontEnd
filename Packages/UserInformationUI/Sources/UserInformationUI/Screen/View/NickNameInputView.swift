@@ -33,7 +33,7 @@ struct NickNameInputView: View {
             
             // Title1
             HStack {
-                VStack(alignment: .leading) {
+                VStack(alignment: .leading, spacing: 3) {
                     Text("안녕하세요!")
                     (
                         Text("사용하실 ")
@@ -45,22 +45,22 @@ struct NickNameInputView: View {
                     )
                 }
                 .font(.suite(type: .SUITE_Regular, size: 28))
-                .frame(height: 74)
+                .frame(height: 75)
                 
                 Spacer()
             }
             
             // Title2
             HStack {
-                VStack(alignment: .leading, spacing: 5) {
+                VStack(alignment: .leading, spacing: 3) {
                     Text("공백없이 15자 이하로 작성해주세요")
                     Text("특수문자는 _만 사용 가능해요 :)")
                 }
                 .font(.suite(type: .SUITE_Light, size: 16))
+                .frame(height: 45)
                 
                 Spacer()
             }
-            .frame(height: 45)
             .padding(.top, 6)
             
             
@@ -106,6 +106,7 @@ struct NickNameInputView: View {
                         .frame(width: 14)
                 }
                 .frame(height: 24)
+                .ignoresSafeArea(.keyboard, edges: .bottom)
                 
                 Spacer()
                 
@@ -141,7 +142,6 @@ struct NickNameInputView: View {
             
             Spacer()
         }
-        
     }
 }
 

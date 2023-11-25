@@ -37,7 +37,7 @@ struct SelectBirthDayView: View {
             // Text1
             //  TODO: 추후 닉네임임 데이터 로드 후 수정
             HStack {
-                VStack(alignment: .leading) {
+                VStack(alignment: .leading, spacing: 3) {
                     (
                         Text(userNickName)
                             .font(.suite(type: .SUITE_SemiBold, size: 28))
@@ -47,16 +47,18 @@ struct SelectBirthDayView: View {
                     Text("생년월일을 알려주세요")
                 }
                 .font(.suite(type: .SUITE_Regular, size: 28))
+                .frame(height: 75)
                 
                 Spacer(minLength: 0)
             }
-            .frame(height: 75)
             
             // Date Picker
             DatePicker("", selection: $birthDay, in: dateRange ,displayedComponents: [.date])
                 .labelsHidden()
                 .datePickerStyle(.wheel)
             .padding(.top, 42)
+            
+            Spacer(minLength: 0)
         }
     }
 }

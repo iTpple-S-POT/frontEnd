@@ -8,7 +8,7 @@
 import SwiftUI
 import GlobalUIComponents
 
-enum MbtiType: String, CaseIterable {
+enum UserMbtiType: String, CaseIterable {
     case notDetermined
     case E = "E",
          I = "I",
@@ -20,26 +20,60 @@ enum MbtiType: String, CaseIterable {
          P = "P"
 }
 
+struct UserMbti: Equatable {
+    var type1: UserMbtiType = .notDetermined
+    var type2: UserMbtiType = .notDetermined
+    var type3: UserMbtiType = .notDetermined
+    var type4: UserMbtiType = .notDetermined
+    
+    mutating func setState(mbti: UserMbtiType) {
+        switch mbti {
+        case .notDetermined:
+            return
+        case .E, .I:
+            type1 = mbti
+        case .S, .N:
+            type2 = mbti
+        case .T, .F:
+            type3 = mbti
+        case .J, .P:
+            type4 = mbti
+        }
+    }
+    
+    func isStateMatch(mbti: UserMbtiType) -> Bool {
+        switch mbti {
+        case .notDetermined:
+            return false
+        case .E, .I:
+            return type1 == mbti
+        case .S, .N:
+            return type2 == mbti
+        case .T, .F:
+            return type3 == mbti
+        case .J, .P:
+            return type4 == mbti
+        }
+    }
+}
+
 struct SelectMbtiView: View {
     
     let userNickName = "닉네임"
     
-    @State private var type1: MbtiType = .notDetermined
-    @State private var type2: MbtiType = .notDetermined
-    @State private var type3: MbtiType = .notDetermined
-    @State private var type4: MbtiType = .notDetermined
+    @State private var userMbti = UserMbti()
     
     /// notDetermined를 제외한 리스트 입니다.
-    private var mbtiList: [MbtiType] { MbtiType.allCases.filter {  $0 != .notDetermined } }
+    private var mbtiList: [UserMbtiType] { UserMbtiType.allCases.filter {  $0 != .notDetermined } }
     
-    var columns: [GridItem] = [GridItem(spacing: 16.5), GridItem(.flexible())]
+    private var columns: [GridItem] = [GridItem(spacing: 16.5), GridItem(.flexible())]
     
     var body: some View {
         VStack(spacing: 0) {
             // Text1
             //  TODO: 추후 닉네임임 데이터 로드 후 수정
             HStack {
-                VStack(alignment: .leading) {
+                VStack(alignment: .leading, spacing: 3) {
                     (
                         Text(userNickName)
                             .font(.suite(type: .SUITE_SemiBold, size: 28))
@@ -49,35 +83,22 @@ struct SelectMbtiView: View {
                     Text("MBTI을 알려주세요")
                 }
                 .font(.suite(type: .SUITE_Regular, size: 28))
+                .frame(height: 75)
                 
                 Spacer(minLength: 0)
             }
-            .frame(height: 75)
             
             // Select Mbti
             LazyVGrid(columns: columns, spacing: 16.5) {
-                ForEach(Array(mbtiList.enumerated()), id: \.element) { index, element in
-                    
-                    switch index {
-                    case 0, 1:
-                        SpotStateButton(text: element.rawValue, state: $type1, targetState: element, idleColor: .spotLightGray, activeColor: .spotRed) {
-                            type1 = element
+                ForEach(mbtiList, id: \.self) { element in
+                    GeometryReader { geo in
+                        SpotStateButton(text: Text(element.rawValue).font(.suite(type: .SUITE_Regular, size: 18)), idleColor: .spotLightGray, activeColor: .spotRed, frame: geo.size) {
+                            userMbti.setState(mbti: element)
+                        } activation: {
+                            userMbti.isStateMatch(mbti: element)
                         }
-                    case 2, 3:
-                        SpotStateButton(text: element.rawValue, state: $type2, targetState: element, idleColor: .spotLightGray, activeColor: .spotRed) {
-                            type2 = element
-                        }
-                    case 4, 5:
-                        SpotStateButton(text: element.rawValue, state: $type3, targetState: element, idleColor: .spotLightGray, activeColor: .spotRed) {
-                            type3 = element
-                        }
-                    case 6, 7:
-                        SpotStateButton(text: element.rawValue, state: $type4, targetState: element, idleColor: .spotLightGray, activeColor: .spotRed) {
-                            type4 = element
-                        }
-                    default:
-                        fatalError("잘못된 Mbti리스트 사용")
                     }
+                    .frame(height: 56)
                 }
             }
             .padding(.top, 42)

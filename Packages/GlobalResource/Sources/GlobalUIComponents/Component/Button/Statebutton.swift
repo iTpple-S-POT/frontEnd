@@ -9,45 +9,43 @@ import SwiftUI
 
 /// Equatable인스턴스를 전달받아 일치할 경우 active상태가 되는 버튼이다.
 /// Button의 Height는 고정되어 있으니 Width를 지정해야 한다.
-public struct SpotStateButton<Value: Equatable>: View {
+public struct SpotStateButton: View {
     
-    var text: String
+    var text: Text
     
-    @Binding var state: Value
-    
-    var targetState: Value
+    var frame: CGSize
     
     var idleColor: Color
     var activeColor: Color
     
     var action: () -> ()
     
-    private var isActive: Bool { state == targetState }
+    var activation: () -> Bool
     
-    public init(text: String, state: Binding<Value>, targetState: Value, idleColor: Color, activeColor: Color, action: @escaping () -> Void) {
+    public init(text: Text, idleColor: Color, activeColor: Color, frame: CGSize, action: @escaping () -> Void, activation: @escaping () -> Bool) {
         self.text = text
-        self._state = state
-        self.targetState = targetState
         self.idleColor = idleColor
         self.activeColor = activeColor
+        self.frame = frame
         self.action = action
+        self.activation = activation
     }
+    
     
     public var body: some View {
         HStack(spacing: 0) {
             Spacer(minLength: 0)
-            Text(text)
-                .font(.suite(type: .SUITE_Regular, size: 18))
+            text
             Spacer(minLength: 0)
         }
-        .foregroundStyle(isActive ? .white : .black)
-        .frame(height: 56)
+        .frame(width: frame.width, height: frame.height)
+        .foregroundStyle(activation() ? .white : .black)
         .background(
             PerfectRoundedRectangle()
-                .foregroundStyle(isActive ? activeColor : idleColor)
+                .foregroundStyle(activation() ? activeColor : idleColor)
         )
         .onTapGesture(perform: action)
-        .animation(.easeInOut(duration: 0.1), value: isActive)
+        .animation(.easeInOut(duration: 0.1), value: activation())
     }
 }
 
@@ -57,11 +55,15 @@ fileprivate struct TestView: View {
     var body: some View {
         VStack {
             HStack {
-                SpotStateButton(text: "test1", state: $state, targetState: true, idleColor: .gray, activeColor: .green) {
+                SpotStateButton(text: Text("test1"), idleColor: .gray, activeColor: .green, frame: CGSize(width: CGFloat.infinity, height: 56)) {
                     state = true
+                } activation: {
+                    state == true
                 }
-                SpotStateButton(text: "test2", state: $state, targetState: false, idleColor: .gray, activeColor: .green) {
+                SpotStateButton(text: Text("test2"), idleColor: .gray, activeColor: .green, frame: CGSize(width: CGFloat.infinity, height: 56)) {
                     state = false
+                } activation: {
+                    state == false
                 }
             }
         }
