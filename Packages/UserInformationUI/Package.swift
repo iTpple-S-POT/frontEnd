@@ -28,6 +28,7 @@ let package = Package(
             ],
             resources: [
                 .process("Resources/UiImage"),
+                .process("Resources/Background"),
             ]
         ),
         .testTarget(

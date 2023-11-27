@@ -28,7 +28,7 @@ public struct InitialScreen: View {
     let screenWidth = UIScreen.main.bounds.size.width
     
     public var body: some View {
-        VStack(spacing: 0) {
+        ZStack {
             
             // View들이 등장할 공간
             GeometryReader { geo in
@@ -36,6 +36,7 @@ public struct InitialScreen: View {
                     InitialView()
                         .offset(initialViewOffset)
                     
+                    // 세팅 뷰
                     VStack {
                         // 상단 바
                         ZStack {
@@ -92,37 +93,42 @@ public struct InitialScreen: View {
                     .padding(.horizontal, 12)
                 }
             }
-        
             
-            // 버튼1
-            SpotRoundedButton(text: button1Text, color: .spotRed) {
+            // 고정 버튼들
+            VStack(spacing: 0) {
                 
-                if screenModel.doesProfileSettingStart {
-                    let currentPhase = screenModel.getCurrentSettingPhase
+                Spacer(minLength: 0)
+                
+                // 버튼1
+                SpotRoundedButton(text: button1Text, color: .spotRed) {
                     
-                    //TODO: 입력 데이터를 저장
-                    switch currentPhase {
-                    case .inputUserNickName:
-                        break
-                    default:
-                        break
+                    if screenModel.doesProfileSettingStart {
+                        let currentPhase = screenModel.getCurrentSettingPhase
+                        
+                        //TODO: 입력 데이터를 저장
+                        switch currentPhase {
+                        case .inputUserNickName:
+                            break
+                        default:
+                            break
+                        }
+                        
+                        // 다음 세팅으로 넘어 갑니다.
+                        nextSetting()
+                    } else {
+                        startProfileSetting()
                     }
                     
-                    // 다음 세팅으로 넘어 갑니다.
-                    nextSetting()
-                } else {
-                    startProfileSetting()
                 }
+                .padding(.horizontal, 12)
+                .padding(.top, 48)
                 
+                // 버튼2
+                SpotTextButton(text: button2Text, color: .black) {
+                    //TODO: 디음에 하기
+                }
+                .padding(.top, 12)
             }
-            .padding(.horizontal, 12)
-            .padding(.top, 48)
-            
-            // 버튼2
-            SpotTextButton(text: button2Text, color: .black) {
-                //TODO: 디음에 하기
-            }
-            .padding(.top, 12)
         }
         .ignoresSafeArea(.keyboard, edges: .bottom)
     }

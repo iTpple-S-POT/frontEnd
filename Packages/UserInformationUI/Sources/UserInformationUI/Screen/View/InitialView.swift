@@ -37,6 +37,7 @@ struct InitialView: View {
             Rectangle()
                 .padding(.top, 55)
         }
+        .padding(.bottom, 148)
     }
 }
 

@@ -157,9 +157,6 @@ extension SelectInterestsViewModel {
         var viewHeight: CGFloat { viewWidth < maxWidth ? defaultViewHeight : 56 }
         
         /// UserInterestType 아이템이 사용될 View의 크기를 반환합니다.
-        var viewSize: CGSize {
-            print(CGSize(width: viewWidth, height: viewHeight))
-            return CGSize(width: viewWidth, height: viewHeight)
-        }
+        var viewSize: CGSize { CGSize(width: viewWidth, height: viewHeight) }
     }
 }
