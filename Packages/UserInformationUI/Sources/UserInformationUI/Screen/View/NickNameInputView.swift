@@ -79,6 +79,7 @@ struct NickNameInputView: View {
                     .font(.suite(type: .SUITE_Light, size: 19.5))
                     .autocorrectionDisabled()
                     .textInputAutocapitalization(.never)
+                    .submitLabel(.done)
                     .frame(height: 22)
                     
                     Spacer()
@@ -106,7 +107,6 @@ struct NickNameInputView: View {
                         .frame(width: 14)
                 }
                 .frame(height: 24)
-                .ignoresSafeArea(.keyboard, edges: .bottom)
                 
                 Spacer()
                 

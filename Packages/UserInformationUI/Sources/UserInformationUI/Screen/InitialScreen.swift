@@ -124,6 +124,7 @@ public struct InitialScreen: View {
             }
             .padding(.top, 12)
         }
+        .ignoresSafeArea(.keyboard, edges: .bottom)
     }
 }
 
