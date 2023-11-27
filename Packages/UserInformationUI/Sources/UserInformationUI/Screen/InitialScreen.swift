@@ -13,17 +13,25 @@ public struct InitialScreen: View {
     
     @StateObject private var screenModel = InitialScreenModel()
     
-    @State private var isBarActive = false
-    
-    @State private var initialViewOffset = CGSize.zero
-    
     public init() { }
     
-    var button1Text: String { screenModel.doesProfileSettingStart ? "다음" : "프로필 만들기" }
-    
-    var button2Text: String {
-        screenModel.doesProfileSettingStart ? "건너뛰기" : "다음에 하기"
+    var button1Text: String {
+        
+        var result = ""
+        
+        switch screenModel.screenState {
+        case .initial:
+            result = "프로필 만들기"
+        case .setting:
+            result = "다음"
+        case .final:
+            result = "시작하기"
+        }
+        
+        return result
     }
+    
+    var button2Text: String { screenModel.screenState == .setting ? "건너뛰기" : "다음에 하기" }
     
     let screenWidth = UIScreen.main.bounds.size.width
     
@@ -33,64 +41,75 @@ public struct InitialScreen: View {
             // View들이 등장할 공간
             GeometryReader { geo in
                 ZStack {
-                    InitialView()
-                        .offset(initialViewOffset)
+                    Group {
+                        if screenModel.screenState == .initial {
+                            InitialView()
+                        }
+                        
+                        if screenModel.screenState == .final {
+                            FinalView()
+                        }
+                    }
                     
-                    // 세팅 뷰
-                    VStack {
-                        // 상단 바
-                        ZStack {
-                            Rectangle()
-                                .fill(.clear)
-                                .frame(height: 100)
-                            
-                            HStack {
-                                if screenModel.settingPhaseIndex >= 1 {
-                                    Button(action: previousSetting) {
-                                        ZStack {
-                                            Image(systemName: "chevron.left")
-                                                .resizable()
-                                                .scaledToFit()
-                                                .frame(width: 22, height: 22)
+                    Group {
+                        if screenModel.screenState == .setting {
+                            // 세팅 뷰
+                            VStack {
+                                // 상단 바
+                                ZStack {
+                                    Rectangle()
+                                        .fill(.clear)
+                                        .frame(height: 100)
+                                    
+                                    HStack {
+                                        if screenModel.settingPhaseIndex >= 1 {
+                                            Button(action: previousSetting) {
+                                                ZStack {
+                                                    Image(systemName: "chevron.left")
+                                                        .resizable()
+                                                        .scaledToFit()
+                                                        .frame(width: 22, height: 22)
+                                                }
+                                                .frame(width: 32, height: 32)
+                                            }
+                                            .buttonStyle(.spotDefault(backgroundColor: .clear))
+                                            Spacer()
                                         }
-                                        .frame(width: 32, height: 32)
                                     }
-                                    .buttonStyle(.spotDefault(backgroundColor: .clear))
-                                    Spacer()
-                                }
-                            }
-                            .frame(height: 42)
-                            .padding(.bottom, 58)
-                            .padding(.horizontal, 4)
-                            
-                            Group {
-                                if isBarActive {
+                                    .frame(height: 42)
+                                    .padding(.bottom, 58)
+                                    .padding(.horizontal, 4)
+                                    
                                     let order = screenModel.settingPhaseIndex+1
                                     let countOfState = screenModel.settingPhaseCount
+                                    
                                     MainScreenBarView(state: order, countOfState: countOfState)
                                         .padding(.top, 42)
                                         .padding(.bottom, 30)
                                         .transition(.opacity)
                                 }
-                            }
-                        }
-                        
-                        Spacer(minLength: 0)
-                        // 상단바 아래 뷰(세팅뷰들)
-                        ZStack {
-                            ForEach(Array(screenModel.settingPhases.enumerated()), id: \.element) { index, element in
                                 
-                                let screenWidth = geo.size.width
-                                let viewOffset = CGSize(width: screenWidth*CGFloat(index-screenModel.settingPhaseIndex), height: 0)
                                 
-                                screenModel.viewForProgressPhase[element]
-                                    .offset(viewOffset)
+                                Spacer(minLength: 0)
+                                
+                                
+                                // 상단바 아래 뷰(세팅뷰들)
+                                ZStack {
+                                    ForEach(Array(screenModel.settingPhases.enumerated()), id: \.element) { index, element in
+                                        
+                                        let screenWidth = geo.size.width
+                                        let viewOffset = CGSize(width: screenWidth*CGFloat(index-screenModel.settingPhaseIndex), height: 0)
+                                        
+                                        screenModel.viewForProgressPhase[element]
+                                            .offset(viewOffset)
+                                    }
+                                }
+                                Spacer(minLength: 0)
+                                
                             }
+                            .padding(.horizontal, 12)
                         }
-                        Spacer(minLength: 0)
-                        
                     }
-                    .padding(.horizontal, 12)
                 }
             }
             
@@ -102,7 +121,7 @@ public struct InitialScreen: View {
                 // 버튼1
                 SpotRoundedButton(text: button1Text, color: .spotRed) {
                     
-                    if screenModel.doesProfileSettingStart {
+                    if screenModel.screenState == .setting {
                         let currentPhase = screenModel.getCurrentSettingPhase
                         
                         //TODO: 입력 데이터를 저장
@@ -124,10 +143,17 @@ public struct InitialScreen: View {
                 .padding(.top, 48)
                 
                 // 버튼2
-                SpotTextButton(text: button2Text, color: .black) {
-                    //TODO: 디음에 하기
+                ZStack {
+                    Group {
+                        if screenModel.screenState != .final {
+                            SpotTextButton(text: button2Text, color: .black) {
+                                //TODO: 디음에 하기
+                            }
+                            .padding(.top, 12)
+                        }
+                    }
                 }
-                .padding(.top, 12)
+                .frame(height: 44)
             }
         }
         .ignoresSafeArea(.keyboard, edges: .bottom)
@@ -140,18 +166,12 @@ extension InitialScreen {
     /// 프로필 세팅을 시작하는 애니메이션
     func startProfileSetting() {
         
-        let initialViewDisappearTime = 0.0
-        let barAppearTime = 0.0
+        let viewTransitionTime = 0.5
         
-        withAnimation(.easeInOut(duration: initialViewDisappearTime)) {
-            initialViewOffset = CGSize(width: -screenWidth, height: 0)
-            let _ = screenModel.increateSettingPhaseIndex()
-        }
-        
-        Timer.scheduledTimer(withTimeInterval: initialViewDisappearTime, repeats: false) { _ in
-            withAnimation(.easeOut(duration: barAppearTime)) {
-                isBarActive = true
-            }
+        withAnimation(.easeInOut(duration: viewTransitionTime)) {
+            
+            screenModel.changeState(to: .setting)
+               
         }
     }
     
@@ -161,8 +181,12 @@ extension InitialScreen {
         let viewTransitionTime = 0.5
         
         withAnimation(.easeInOut(duration: viewTransitionTime)) {
-            initialViewOffset = CGSize(width: -screenWidth, height: 0)
-            let _ = screenModel.increateSettingPhaseIndex()
+            
+            // 해당 메서드가 false를 반환한다는 것은 마지막 세팅 화면에서 버튼을 눌렀음을 의미한다.
+            if !screenModel.increateSettingPhaseIndex() {
+                screenModel.changeState(to: .final)
+            }
+            
         }
     }
     
@@ -172,7 +196,6 @@ extension InitialScreen {
         let viewTransitionTime = 0.5
         
         withAnimation(.easeInOut(duration: viewTransitionTime)) {
-            initialViewOffset = CGSize(width: -screenWidth, height: 0)
             let _ = screenModel.decreateSettingPhaseIndex()
         }
     }

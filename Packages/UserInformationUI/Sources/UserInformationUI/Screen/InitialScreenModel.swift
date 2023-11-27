@@ -7,19 +7,14 @@
 
 import SwiftUI
 
-enum SettingPhase {
-    case inputUserNickName
-    case selectUserSex
-    case selectUserMBTI
-    case selectUserBirthDay
-    case selectUserInterests
-}
 
 class InitialScreenModel: ObservableObject {
     
+    @Published private(set) var screenState: InitialScreenState = .initial
+    
     @Published private(set) var doesProfileSettingStart = false
     
-    @Published var settingPhaseIndex: Int = -1
+    @Published var settingPhaseIndex: Int = 0
     @Published private(set) var settingPhases: [SettingPhase] = []
     
     var settingPhaseCount: Int { settingPhases.count }
@@ -55,6 +50,19 @@ class InitialScreenModel: ObservableObject {
         
         return result
     }
+}
+
+/// Setting Screen전환에 사용됩니다.
+extension InitialScreenModel {
+    
+    /// Setting화면을 의미하는 타입입니다.
+    enum SettingPhase {
+        case inputUserNickName
+        case selectUserSex
+        case selectUserMBTI
+        case selectUserBirthDay
+        case selectUserInterests
+    }
     
     /// settingPhaseIndex값을 증가시킨다. 더이상 증가할 수 없으면 false를 반환한다.
     func increateSettingPhaseIndex() -> Bool {
@@ -80,3 +88,16 @@ class InitialScreenModel: ObservableObject {
     }
 }
 
+/// 스크린 상태전환에 사용됩니다.
+extension InitialScreenModel {
+    
+    /// InitialScreen의 상태를 나타냅니다.
+    enum InitialScreenState {
+        case initial, setting, final
+    }
+    
+    /// ScreenState를 설정합니다.
+    func changeState(to: InitialScreenState) {
+        self.screenState = to
+    }
+}
