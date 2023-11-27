@@ -78,7 +78,7 @@ extension SelectInterestsViewModel {
             // 뷰들의 크기는 스크린 사이즈를 넘을 수 없지만 오류의 여지가 있을 수 있음으로 해당코드를 추가했다.
             if selectedItemsIndice.isEmpty {
                 items.forEach { result.append([$0]) }
-                return result
+                break
             }
             
             // selectedItemsIndice는 역순으로 추출되었음으로 배열을 reverse해줍니다.
