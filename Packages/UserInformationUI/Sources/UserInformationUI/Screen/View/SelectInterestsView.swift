@@ -52,7 +52,7 @@ struct SelectInterestsView: View {
                         
                         ForEach(list1D) { element in
                             
-                            SpotStateButton(text: Text(element.rawValue).font(.suite(type: .SUITE_Regular, size: 16)), idleColor: .spotLightGray, activeColor: .spotRed, frame: CGSize(width: element.viewWidth, height: 40)) {
+                            SpotStateButton(text: Text(element.rawValue).font(.suite(type: .SUITE_Regular, size: 16)), idleColor: .spotLightGray, activeColor: .spotRed, frame: element.viewSize) {
                                 
                                 if viewModel.isTypeExists(type: element) {
                                     viewModel.deSelectType(type: element)

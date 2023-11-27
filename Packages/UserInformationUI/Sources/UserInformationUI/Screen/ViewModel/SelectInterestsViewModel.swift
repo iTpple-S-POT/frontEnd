@@ -9,29 +9,6 @@ import SwiftUI
 
 
 class SelectInterestsViewModel: ObservableObject {
-    enum UserInterestType: String, CaseIterable, Identifiable {
-        var id: Self { self }
-        
-        case type1 = "영화",
-        type2 = "자전거",
-        type3 = "글쓰기",
-        type4 = "갓생살기",
-        type5 = "애니메이션",
-        type6 = "산책",
-        type7 = "등산",
-        type8 = "영화감상하기",
-        type9 = "음주",
-        type10 = "갓생살기2",
-        type11 = "애니메이션2",
-        type12 = "산책2",
-        type13 = "등산2",
-        type14 = "영화감상하기2",
-        type15 = "음주2"
-        
-        var viewWidth: Int {
-            (self.rawValue.count * 14) + 40
-        }
-    }
     
     @Published private(set) var userInterestMatrix: [[UserInterestType]] = []
     @Published private(set) var userInterestTypes: [UserInterestType:Bool] = [:]
@@ -60,7 +37,9 @@ class SelectInterestsViewModel: ObservableObject {
     }
 }
 
+/// make2DArray를 정의한 Extension입니다.
 extension SelectInterestsViewModel {
+    
     func make2DArray(horizontalPadding: Int, spacing: Int) -> [[UserInterestType]] {
         // horizontal padding: 24, 요소당 간격 9
         let screenWidth = Int(UIScreen.main.bounds.width) - horizontalPadding*2 + spacing
@@ -73,7 +52,7 @@ extension SelectInterestsViewModel {
             
             for itemNumebr in 1...itemCount {
                 let itemIndex = itemNumebr-1
-                let itemWidth = items[itemIndex].viewWidth + spacing //뷰간 간격 고려
+                let itemWidth = Int(items[itemIndex].viewWidth) + spacing //뷰간 간격 고려
                 
                 for width in 1...screenWidth {
                     if itemWidth <= width {
@@ -92,8 +71,14 @@ extension SelectInterestsViewModel {
                 
                 if dp[itemNumber][w] != dp[itemNumber - 1][w] {
                     selectedItemsIndice.append(itemIndex)
-                    w -= items[itemIndex].viewWidth
+                    w -= Int(items[itemIndex].viewWidth)
                 }
+            }
+            
+            // 뷰들의 크기는 스크린 사이즈를 넘을 수 없지만 오류의 여지가 있을 수 있음으로 해당코드를 추가했다.
+            if selectedItemsIndice.isEmpty {
+                items.forEach { result.append([$0]) }
+                return result
             }
             
             // selectedItemsIndice는 역순으로 추출되었음으로 배열을 reverse해줍니다.
@@ -126,5 +111,55 @@ extension SelectInterestsViewModel {
             items = restItems
         }
         return result
+    }
+}
+
+/// UserInterestType타입을 정의한 extension입니다.
+extension SelectInterestsViewModel {
+    enum UserInterestType: String, CaseIterable, Identifiable {
+        var id: Self { self }
+        
+        private var screenWdith: CGFloat { UIScreen.main.bounds.width }
+        private var screenHorizontalPadding: CGFloat { 12 }
+        private var viewHorizontalPadding: CGFloat { 20 }
+        private var defaultViewHeight: CGFloat { 40 }
+        private var maxWidth: CGFloat { screenWdith - screenHorizontalPadding * 2 }
+        
+        case type1 = "영화",
+        type2 = "자전거",
+        type3 = "글쓰기",
+        type4 = "갓생살기",
+        type5 = "애니메이션",
+        type6 = "산책",
+        type7 = "등산",
+        type8 = "영화감상하기",
+        type9 = "음주",
+        type10 = "갓생살기2",
+        type11 = "애니메이션2",
+        type12 = "산책2",
+        type13 = "등산2",
+        type14 = "영화감상하기2",
+        type15 = "음주2",
+        type16 = "메우긴 텍스트 입니다. 이것은 메우긴 텍스트 입니다. 메우긴 텍스트 입니다. 메우긴 텍스트 입니다. 메우긴 텍스트 입니다.1",
+        type17 = "메우긴 텍스트 입니다. 이것은 메우긴 텍스트 입니다. 메우긴 텍스트 입니다. 메우긴 텍스트 입니다. 메우긴 텍스트 입니다.2"
+        
+        // 한글기준 글자당 View의 길이를 14임으로 다음과 같이 계사합니다.
+        // 영어의 경우 오차가 포함됩니다.
+        // TODO: 알파벳 처리하기
+        var viewWidth: CGFloat {
+            let result = CGFloat(self.rawValue.count * 14) + viewHorizontalPadding * 2
+            return result > maxWidth ? maxWidth : result
+        }
+        
+        // 뷰의 너비가 스크린 크기를 초가한 경우 Text뷰가 두줄로 구성됩니다. 따라서 뷰의 높이를 늘여줍니다.
+        // 뷰의 높이는 16(폰트사이즈와 일치)임으로 40 - 16 = 24 위아래 패딩이 12씩 들어갑니다.
+        // 16 * 2 + 24 = 56
+        var viewHeight: CGFloat { viewWidth < maxWidth ? defaultViewHeight : 56 }
+        
+        /// UserInterestType 아이템이 사용될 View의 크기를 반환합니다.
+        var viewSize: CGSize {
+            print(CGSize(width: viewWidth, height: viewHeight))
+            return CGSize(width: viewWidth, height: viewHeight)
+        }
     }
 }

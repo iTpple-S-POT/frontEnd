@@ -34,9 +34,9 @@ public struct SpotStateButton: View {
     
     public var body: some View {
         HStack(spacing: 0) {
-            Spacer(minLength: 0)
+            Spacer(minLength: 20)
             text
-            Spacer(minLength: 0)
+            Spacer(minLength: 20)
         }
         .frame(width: frame.width, height: frame.height)
         .foregroundStyle(activation() ? .white : .black)
