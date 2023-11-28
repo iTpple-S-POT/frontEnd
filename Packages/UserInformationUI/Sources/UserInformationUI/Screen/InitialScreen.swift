@@ -155,8 +155,8 @@ public struct InitialScreen: View {
                 }
                 .frame(height: 44)
             }
+            .ignoresSafeArea(.keyboard, edges: .bottom)
         }
-        .ignoresSafeArea(.keyboard, edges: .bottom)
     }
 }
 
