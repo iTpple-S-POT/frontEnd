@@ -14,7 +14,7 @@ class SelectInterestsViewModel: ObservableObject {
     @Published private(set) var userInterestTypes: [UserInterestType:Bool] = [:]
     
     init() {
-        self.userInterestMatrix = make2DArray(horizontalPadding: 12, spacing: 9)
+        self.userInterestMatrix = make2DArray()
         
         UserInterestType.allCases.forEach { type in
             userInterestTypes[type] = false
@@ -37,26 +37,31 @@ class SelectInterestsViewModel: ObservableObject {
     }
 }
 
-/// make2DArray를 정의한 Extension입니다.
+
+
+// MARK: - make2DArray를 정의한 Extension입니다.
 extension SelectInterestsViewModel {
     
-    func make2DArray(horizontalPadding: Int, spacing: Int) -> [[UserInterestType]] {
+    func make2DArray() -> [[UserInterestType]] {
         // horizontal padding: 24, 요소당 간격 9
-        let screenWidth = Int(UIScreen.main.bounds.width) - horizontalPadding*2 + spacing
+        let containerWidth = Int(screenWidth - screenHorizontalPadding*2) + 1 + 9
         var items = UserInterestType.allCases
         var result: [[UserInterestType]] = []
         
         while !items.isEmpty {
             let itemCount = items.count
-            var dp = Array(repeating: Array(repeating: 0, count: screenWidth + 1), count: itemCount+1)
+            var dp = Array(repeating: Array(repeating: 0, count: containerWidth + 1), count: itemCount+1)
             
             for itemNumebr in 1...itemCount {
                 let itemIndex = itemNumebr-1
-                let itemWidth = Int(items[itemIndex].viewWidth) + spacing //뷰간 간격 고려
+                let itemWidth = getViewSize(string: items[itemIndex].rawValue).width
                 
-                for width in 1...screenWidth {
-                    if itemWidth <= width {
-                        dp[itemNumebr][width] = max(dp[itemNumebr-1][width], 1 + dp[itemNumebr-1][width - itemWidth])
+                let itemValue = Int(itemWidth)
+                let itemCost = Int(itemWidth) + 1 + 9 //오차로인한 1증가, 뷰간 간격 고려
+                
+                for width in 1...containerWidth {
+                    if itemCost <= width {
+                        dp[itemNumebr][width] = max(dp[itemNumebr-1][width], itemValue+dp[itemNumebr-1][width - itemCost])
                     } else {
                         dp[itemNumebr][width] = dp[itemNumebr-1][width]
                     }
@@ -64,14 +69,16 @@ extension SelectInterestsViewModel {
             }
             
             var selectedItemsIndice: [Int] = []
-            var w = screenWidth
+            var w = containerWidth
             
             for itemNumber in stride(from: itemCount, to: 0, by: -1) {
                 let itemIndex = itemNumber-1
+                let itemWidth = getViewSize(string: items[itemIndex].rawValue).width
+                let itemCost = Int(itemWidth) + 1 + 9
                 
                 if dp[itemNumber][w] != dp[itemNumber - 1][w] {
                     selectedItemsIndice.append(itemIndex)
-                    w -= Int(items[itemIndex].viewWidth)
+                    w -= itemCost
                 }
             }
             
@@ -110,20 +117,18 @@ extension SelectInterestsViewModel {
             // items배열을 선택되지 못한 아이템들로 구성합니다.
             items = restItems
         }
+        
         return result
     }
 }
 
-/// UserInterestType타입을 정의한 extension입니다.
+
+
+
+// MARK: - UserInterestType타입을 정의한 extension입니다.
 extension SelectInterestsViewModel {
     enum UserInterestType: String, CaseIterable, Identifiable {
         var id: Self { self }
-        
-        private var screenWdith: CGFloat { UIScreen.main.bounds.width }
-        private var screenHorizontalPadding: CGFloat { 12 }
-        private var viewHorizontalPadding: CGFloat { 20 }
-        private var defaultViewHeight: CGFloat { 40 }
-        private var maxTextWidth: CGFloat { screenWdith - screenHorizontalPadding*2 - viewHorizontalPadding*2 }
         
         case type1 = "영화",
         type2 = "자전거",
@@ -138,42 +143,43 @@ extension SelectInterestsViewModel {
         type11 = "애니메이션2",
         type12 = "산책2",
         type13 = "등산2",
-        type14 = "영화감상하기2",
-        type15 = "음주2",
-        type16 = "메우긴 텍스트 입니다. 이것은 메우긴 텍스트 입니다. 메우긴 텍스트 입니다. 메우긴 텍스트 입니다. 메우긴 텍스트 입니다.1",
-        type17 = "메우긴 텍스트 입니다. 이것은 메우긴 텍스트 입니다. 메우긴 텍스트 입니다. 메우긴 텍스트 입니다. 메우긴 텍스트 입니다.2"
+        type14 = "English",
+        type15 = "English man in newYork",
+        type16 = "메우긴 텍스트 입니다. 이것은 메우긴 텍스트 입니다. 메우긴 텍스트 입니다. 메우긴 텍스트 입니다. 메우긴 텍스트 입니다."
+    }
+}
+
+
+
+
+// MARK: - 표시될 태그뷰들의 속성들 & 필요 매서드들을 저장한 extension입니다.
+extension SelectInterestsViewModel {
+    
+    private var screenWidth: CGFloat { UIScreen.main.bounds.width }
+    private var screenHorizontalPadding: CGFloat { 12 }
+    private var viewHorizontalPadding: CGFloat { 20 }
+    private var viewVerticalPadding: CGFloat { 12 }
+    private var defaultTextHeight: CGFloat { 16 }
+    private var maxTextWidth: CGFloat { screenWidth - screenHorizontalPadding*2 - viewHorizontalPadding*2 }
+    
+    // font
+    var fontSize: CGFloat { 16 }
+    var applyingFont: Font { .suite(type: .SUITE_Regular, size: fontSize) }
+    var applyingUIFont: UIFont { .suite(type: .SUITE_Regular, size: fontSize) }
+
+    
+    /// Text라인에 상응하는 View의 높이를 반환합니다.
+    func getViewSize(string: String) -> CGSize {
         
+        // width
+        let textWidth = string.getWidthWith(font: applyingUIFont)
+        let viewWidth = (textWidth < maxTextWidth ? textWidth : maxTextWidth) + viewHorizontalPadding*2
         
-        /// 특정 font가 적용된 문자열의 너비를 반환합니다.
-        private func getTextWidthWith() -> CGFloat {
-            let width = self.rawValue.getWidthWith(font: applyingUIFont)
-            print(self.rawValue, width)
-            return width > maxTextWidth ? maxTextWidth : width
-        }
+        // height
+        let lineCount = Int(textWidth / maxTextWidth) + 1
         
-        // font
-        var fontSize: CGFloat { 16 }
-        var applyingFont: Font { .suite(type: .SUITE_Regular, size: fontSize) }
-        var applyingUIFont: UIFont { .suite(type: .SUITE_Regular, size: fontSize) }
+        let viewHeight = defaultTextHeight*CGFloat(lineCount) + viewVerticalPadding*2
         
-        /// View의 Width를 반환합니다.
-        var viewWidth: CGFloat { getTextWidthWith() + viewHorizontalPadding*2 }
-        
-        /// Text라인에 상응하는 View의 높이를 반환합니다.
-        var viewHeight: CGFloat {
-            
-            let verticalPadding = (defaultViewHeight - fontSize) / 2
-            
-            let textWidth = getTextWidthWith()
-            
-            let lineCount = Int(textWidth / maxTextWidth) + 1
-            
-            print(self.rawValue, lineCount)
-            
-            return fontSize * CGFloat(lineCount) + verticalPadding*2
-        }
-        
-        /// UserInterestType 아이템이 사용될 View의 크기를 반환합니다.
-        var viewSize: CGSize { CGSize(width: viewWidth, height: viewHeight) }
+        return CGSize(width: viewWidth, height: viewHeight)
     }
 }
