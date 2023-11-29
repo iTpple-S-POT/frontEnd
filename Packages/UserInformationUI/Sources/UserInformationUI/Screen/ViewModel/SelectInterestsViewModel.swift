@@ -123,7 +123,7 @@ extension SelectInterestsViewModel {
         private var screenHorizontalPadding: CGFloat { 12 }
         private var viewHorizontalPadding: CGFloat { 20 }
         private var defaultViewHeight: CGFloat { 40 }
-        private var maxWidth: CGFloat { screenWdith - screenHorizontalPadding * 2 }
+        private var maxTextWidth: CGFloat { screenWdith - screenHorizontalPadding*2 - viewHorizontalPadding*2 }
         
         case type1 = "영화",
         type2 = "자전거",
@@ -143,18 +143,35 @@ extension SelectInterestsViewModel {
         type16 = "메우긴 텍스트 입니다. 이것은 메우긴 텍스트 입니다. 메우긴 텍스트 입니다. 메우긴 텍스트 입니다. 메우긴 텍스트 입니다.1",
         type17 = "메우긴 텍스트 입니다. 이것은 메우긴 텍스트 입니다. 메우긴 텍스트 입니다. 메우긴 텍스트 입니다. 메우긴 텍스트 입니다.2"
         
-        // 한글기준 글자당 View의 길이를 14임으로 다음과 같이 계사합니다.
-        // 영어의 경우 오차가 포함됩니다.
-        // TODO: 알파벳 처리하기
-        var viewWidth: CGFloat {
-            let result = CGFloat(self.rawValue.count * 14) + viewHorizontalPadding * 2
-            return result > maxWidth ? maxWidth : result
+        
+        /// 특정 font가 적용된 문자열의 너비를 반환합니다.
+        private func getTextWidthWith() -> CGFloat {
+            let width = self.rawValue.getWidthWith(font: applyingUIFont)
+            print(self.rawValue, width)
+            return width > maxTextWidth ? maxTextWidth : width
         }
         
-        // 뷰의 너비가 스크린 크기를 초가한 경우 Text뷰가 두줄로 구성됩니다. 따라서 뷰의 높이를 늘여줍니다.
-        // 뷰의 높이는 16(폰트사이즈와 일치)임으로 40 - 16 = 24 위아래 패딩이 12씩 들어갑니다.
-        // 16 * 2 + 24 = 56
-        var viewHeight: CGFloat { viewWidth < maxWidth ? defaultViewHeight : 56 }
+        // font
+        var fontSize: CGFloat { 16 }
+        var applyingFont: Font { .suite(type: .SUITE_Regular, size: fontSize) }
+        var applyingUIFont: UIFont { .suite(type: .SUITE_Regular, size: fontSize) }
+        
+        /// View의 Width를 반환합니다.
+        var viewWidth: CGFloat { getTextWidthWith() + viewHorizontalPadding*2 }
+        
+        /// Text라인에 상응하는 View의 높이를 반환합니다.
+        var viewHeight: CGFloat {
+            
+            let verticalPadding = (defaultViewHeight - fontSize) / 2
+            
+            let textWidth = getTextWidthWith()
+            
+            let lineCount = Int(textWidth / maxTextWidth) + 1
+            
+            print(self.rawValue, lineCount)
+            
+            return fontSize * CGFloat(lineCount) + verticalPadding*2
+        }
         
         /// UserInterestType 아이템이 사용될 View의 크기를 반환합니다.
         var viewSize: CGSize { CGSize(width: viewWidth, height: viewHeight) }
