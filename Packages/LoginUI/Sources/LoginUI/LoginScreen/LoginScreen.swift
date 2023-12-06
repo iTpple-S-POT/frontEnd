@@ -10,6 +10,7 @@ import DefaultExtensions
 import KakaoSDKAuth
 import GlobalFonts
 import UserInformationUI
+import Alamofire
 
 //TODO: Package에 외부 폰트 등록(otf파일이 문제인가?)
 
