@@ -30,7 +30,7 @@ public class KakaoLoginManager {
         }
     }
     
-    internal func executeLogin() {
+    internal func executeLogin(completion: @escaping (Bool) -> Void) {
         guard isInitialized else {
             fatalError("please initialize KakaoSDK first")
         }
@@ -39,6 +39,7 @@ public class KakaoLoginManager {
             UserApi.shared.loginWithKakaoTalk {(oauthToken, error) in
                 if let error = error {
                     print(error)
+                    completion(false)
                 }
                 else {
                     print("loginWithKakaoTalk() success.")
@@ -46,12 +47,15 @@ public class KakaoLoginManager {
                     //do something
                     _ = oauthToken
                     print(oauthToken!)
+                    
+                    completion(true)
                 }
             }
         } else {
             UserApi.shared.loginWithKakaoAccount {(oauthToken, error) in
                     if let error = error {
                         print(error)
+                        completion(false)
                     }
                     else {
                         print("loginWithKakaoAccount() success.")
@@ -59,6 +63,8 @@ public class KakaoLoginManager {
                         //do something
                         _ = oauthToken
                         print(oauthToken!)
+                        
+                        completion(true)
                     }
                 }
         }
