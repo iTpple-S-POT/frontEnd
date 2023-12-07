@@ -63,14 +63,6 @@ public struct LoginScreen: View {
                 
                 Spacer()
                 
-                NavigationLink(
-                    destination: isKakaoLoginCompleted ? UserInformationScreen() : nil,
-                    isActive: $isKakaoLoginCompleted
-                ) {
-                    EmptyView()
-                }
-                .hidden()
-                
                 kakaoButtonImage
                     .resizable()
                     .scaledToFit()
@@ -82,6 +74,14 @@ public struct LoginScreen: View {
                     .padding(.horizontal, 12)
                     .padding(.bottom, 27)
                     .padding(.top, 48)
+                
+                NavigationLink(
+                    destination: isKakaoLoginCompleted ? UserInformationScreen() : nil,
+                    isActive: $isKakaoLoginCompleted
+                ) {
+                    EmptyView()
+                }
+                .hidden()
                 
             }
         }

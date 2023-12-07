@@ -52,7 +52,7 @@ public class KakaoLoginManager {
                     if let accessToken = oauthToken?.accessToken, let refreshToken = oauthToken?.refreshToken {
                                        // Send accessToken to the server
                         self.sendAccessTokenToServer(accessToken: accessToken, refreshToken: refreshToken) { success in
-                            completion(success)
+                            completion(true)
                         }
                     } else {
                         completion(false)
@@ -75,7 +75,7 @@ public class KakaoLoginManager {
                         if let accessToken = oauthToken?.accessToken, let refreshToken = oauthToken?.refreshToken {
                                            // Send accessToken to the server
                             self.sendAccessTokenToServer(accessToken: accessToken, refreshToken: refreshToken) { success in
-                                completion(success)
+                                completion(true)
                             }
                         } else {
                             completion(false)
@@ -101,7 +101,12 @@ public class KakaoLoginManager {
             .validate(statusCode: 200..<300)
             .responseData{ response in
                 switch response.result {
-                case .success:
+                case .success(let data):
+                    
+                    if let responseDataString = String(data: data, encoding: .utf8) {
+                        print("Response data: \(responseDataString)")
+                    }
+                    
                     completion(true)
                 case .failure(let error):
                     print("Server error: \(error.localizedDescription)")
