@@ -28,7 +28,7 @@ class InitialScreenModel: ObservableObject {
         .inputUserNickName : AnyView(NickNameInputView()),
         .selectUserSex : AnyView(SelectGenderScreenComponent()),
         .selectUserMBTI : AnyView(SelectMbtiScreenComponent()),
-        .selectUserBirthDay : AnyView(SelectBirthDayView()),
+        .selectUserBirthDay : AnyView(SelectBirthDayScreenComponent()),
         .selectUserInterests : AnyView(SelectInterestsScreenComponent())
     ]
     

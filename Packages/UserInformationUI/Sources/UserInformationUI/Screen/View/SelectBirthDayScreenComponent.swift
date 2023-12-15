@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct SelectBirthDayView: View {
+struct SelectBirthDayScreenComponent: View {
     
     let userNickName = "닉네임"
     
@@ -65,6 +65,6 @@ struct SelectBirthDayView: View {
 
 #Preview {
     PreviewForProcessView {
-        SelectBirthDayView()
+        SelectBirthDayScreenComponent()
     }
 }
