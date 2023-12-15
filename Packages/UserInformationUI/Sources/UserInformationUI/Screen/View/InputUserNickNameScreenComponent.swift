@@ -10,7 +10,7 @@ import GlobalFonts
 import DefaultExtensions
 import GlobalUIComponents
 
-struct NickNameInputView: View {
+struct InputUserNickNameScreenComponent: View {
     
     @StateObject private var viewModel = NickNameInputViewModel()
     
@@ -178,6 +178,6 @@ internal struct PreviewForProcessView<Content: View>: View {
 
 #Preview {
     PreviewForProcessView {
-        NickNameInputView()
+        InputUserNickNameScreenComponent()
     }
 }
