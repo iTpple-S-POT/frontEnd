@@ -47,7 +47,7 @@ public struct InitialScreen: View {
                         }
                         
                         if screenModel.screenState == .final {
-                            FinalView()
+                            FinishConfigurationScreenComponent()
                         }
                     }
                     
