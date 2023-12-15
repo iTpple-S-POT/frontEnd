@@ -27,7 +27,7 @@ class InitialScreenModel: ObservableObject {
     let viewForProgressPhase: [SettingPhase : AnyView] = [
         .inputUserNickName : AnyView(NickNameInputView()),
         .selectUserSex : AnyView(SelectGenderScreenComponent()),
-        .selectUserMBTI : AnyView(SelectMbtiView()),
+        .selectUserMBTI : AnyView(SelectMbtiScreenComponent()),
         .selectUserBirthDay : AnyView(SelectBirthDayView()),
         .selectUserInterests : AnyView(SelectInterestsView())
     ]

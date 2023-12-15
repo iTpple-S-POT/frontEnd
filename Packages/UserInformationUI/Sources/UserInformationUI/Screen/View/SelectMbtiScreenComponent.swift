@@ -8,7 +8,7 @@
 import SwiftUI
 import GlobalUIComponents
 
-enum UserMbtiType: String, CaseIterable {
+enum UserMbtiPartCase: String, CaseIterable {
     case notDetermined
     case E = "E",
          I = "I",
@@ -21,12 +21,12 @@ enum UserMbtiType: String, CaseIterable {
 }
 
 struct UserMbti: Equatable {
-    var type1: UserMbtiType = .notDetermined
-    var type2: UserMbtiType = .notDetermined
-    var type3: UserMbtiType = .notDetermined
-    var type4: UserMbtiType = .notDetermined
+    var type1: UserMbtiPartCase = .notDetermined
+    var type2: UserMbtiPartCase = .notDetermined
+    var type3: UserMbtiPartCase = .notDetermined
+    var type4: UserMbtiPartCase = .notDetermined
     
-    mutating func setState(mbti: UserMbtiType) {
+    mutating func setState(mbti: UserMbtiPartCase) {
         switch mbti {
         case .notDetermined:
             return
@@ -41,7 +41,7 @@ struct UserMbti: Equatable {
         }
     }
     
-    func isStateMatch(mbti: UserMbtiType) -> Bool {
+    func isStateMatch(mbti: UserMbtiPartCase) -> Bool {
         switch mbti {
         case .notDetermined:
             return false
@@ -57,14 +57,14 @@ struct UserMbti: Equatable {
     }
 }
 
-struct SelectMbtiView: View {
+struct SelectMbtiScreenComponent: View {
     
     let userNickName = "닉네임"
     
     @State private var userMbti = UserMbti()
     
     /// notDetermined를 제외한 리스트 입니다.
-    private var mbtiList: [UserMbtiType] { UserMbtiType.allCases.filter {  $0 != .notDetermined } }
+    private var mbtiList: [UserMbtiPartCase] { UserMbtiPartCase.allCases.filter {  $0 != .notDetermined } }
     
     private var columns: [GridItem] = [GridItem(spacing: 16.5), GridItem(.flexible())]
     
@@ -111,6 +111,6 @@ struct SelectMbtiView: View {
 
 #Preview {
     PreviewForProcessView {
-        SelectMbtiView()
+        SelectMbtiScreenComponent()
     }
 }
