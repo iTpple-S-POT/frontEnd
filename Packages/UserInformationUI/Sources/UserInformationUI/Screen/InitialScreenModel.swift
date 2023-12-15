@@ -29,7 +29,7 @@ class InitialScreenModel: ObservableObject {
         .selectUserSex : AnyView(SelectGenderScreenComponent()),
         .selectUserMBTI : AnyView(SelectMbtiScreenComponent()),
         .selectUserBirthDay : AnyView(SelectBirthDayView()),
-        .selectUserInterests : AnyView(SelectInterestsView())
+        .selectUserInterests : AnyView(SelectInterestsScreenComponent())
     ]
     
     init() {

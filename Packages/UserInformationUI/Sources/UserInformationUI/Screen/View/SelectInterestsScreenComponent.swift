@@ -9,7 +9,7 @@ import SwiftUI
 import GlobalUIComponents
 import GlobalFonts
 
-struct SelectInterestsView: View {
+struct SelectInterestsScreenComponent: View {
     
     let userNickName = "닉네임"
     
@@ -78,6 +78,6 @@ struct SelectInterestsView: View {
 
 #Preview {
     PreviewForProcessView {
-        SelectInterestsView()
+        SelectInterestsScreenComponent()
     }
 }
