@@ -11,7 +11,7 @@ import GlobalUIComponents
 
 public struct UserInformationConfigurationScreen: View {
     
-    @StateObject private var screenModel = InitialScreenModel()
+    @StateObject private var screenModel = ConfigurationScreenModel()
     
     public init() { }
     

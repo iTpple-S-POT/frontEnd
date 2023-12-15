@@ -8,7 +8,7 @@
 import SwiftUI
 
 
-class InitialScreenModel: ObservableObject {
+class ConfigurationScreenModel: ObservableObject {
     
     @Published private(set) var screenState: InitialScreenState = .initial
     
@@ -53,7 +53,7 @@ class InitialScreenModel: ObservableObject {
 }
 
 /// Setting Screen전환에 사용됩니다.
-extension InitialScreenModel {
+extension ConfigurationScreenModel {
     
     /// Setting화면을 의미하는 타입입니다.
     enum SettingPhase {
@@ -89,7 +89,7 @@ extension InitialScreenModel {
 }
 
 /// 스크린 상태전환에 사용됩니다.
-extension InitialScreenModel {
+extension ConfigurationScreenModel {
     
     /// InitialScreen의 상태를 나타냅니다.
     enum InitialScreenState {
