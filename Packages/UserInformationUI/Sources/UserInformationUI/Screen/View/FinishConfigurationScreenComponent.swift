@@ -12,14 +12,6 @@ struct FinishConfigurationScreenComponent: View {
     
     @State private var safeAreaInsets: EdgeInsets = .init()
     
-    private var backgroundImage: Image {
-        let path = Bundle.module.provideFilePath(name: "FinalViewBackground", ext: "png")
-        
-        guard let uiImage = UIImage(named: path) else { fatalError("FinalViewBackground.png를 찾을 수 없음") }
-        
-        return Image(uiImage: uiImage)
-    }
-    
     private var imageGradient: LinearGradient {
         
         let colors: [Color] = [
@@ -43,7 +35,7 @@ struct FinishConfigurationScreenComponent: View {
             // Background
             Color.clear
                 .background(
-                    backgroundImage
+                    Image.makeImageFromBundle(name: "FinalViewBackground", ext: .png)
                         .resizable()
                         .scaledToFill()
                         .overlay { imageGradient }
