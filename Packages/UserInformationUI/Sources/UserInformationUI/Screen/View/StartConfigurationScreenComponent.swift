@@ -14,8 +14,8 @@ struct StartConfigurationScreenComponent: View {
         VStack(spacing: 0) {
             
             // Text1
-            Text("가입을 축하드려요!")
-                .font(.suite(type: .SUITE_SemiBold, size: 20))
+            Text("시작하기 전")
+                .font(.suite(type: .SUITE_SemiBold, size: 28))
                 .frame(height: 36)
                 .padding(.top, 68)
             

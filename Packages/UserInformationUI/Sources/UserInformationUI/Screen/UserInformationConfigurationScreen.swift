@@ -53,7 +53,7 @@ public struct UserInformationConfigurationScreen: View {
                     
                     Group {
                         if screenModel.screenState == .setting {
-                            // 세팅 뷰
+                            // 세팅 뷰 
                             VStack {
                                 // 상단 바
                                 ZStack {
