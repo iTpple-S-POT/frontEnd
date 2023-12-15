@@ -8,7 +8,7 @@
 import SwiftUI
 import DefaultExtensions
 
-struct FinalView: View {
+struct FinishConfigurationScreenComponent: View {
     
     @State private var safeAreaInsets: EdgeInsets = .init()
     
@@ -79,5 +79,5 @@ struct FinalView: View {
 
 
 #Preview {
-    FinalView()
+    FinishConfigurationScreenComponent()
 }
