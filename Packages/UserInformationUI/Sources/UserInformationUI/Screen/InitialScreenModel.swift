@@ -26,7 +26,7 @@ class InitialScreenModel: ObservableObject {
     // 세팅 프로세스와 매칭되는 뷰
     let viewForProgressPhase: [SettingPhase : AnyView] = [
         .inputUserNickName : AnyView(NickNameInputView()),
-        .selectUserSex : AnyView(SelectSexView()),
+        .selectUserSex : AnyView(SelectGenderScreenComponent()),
         .selectUserMBTI : AnyView(SelectMbtiView()),
         .selectUserBirthDay : AnyView(SelectBirthDayView()),
         .selectUserInterests : AnyView(SelectInterestsView())

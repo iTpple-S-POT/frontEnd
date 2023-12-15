@@ -8,17 +8,17 @@
 import SwiftUI
 import GlobalUIComponents
 
-enum UserSexState: String {
+enum UserGenderCase: String {
     case notDetermined = "notDetermined", male = "남성", female = "여성"
 }
 
-struct SelectSexView: View {
+struct SelectGenderScreenComponent: View {
     
-    @State private var userSexState: UserSexState = .notDetermined
+    @State private var userGenderState: UserGenderCase = .notDetermined
     
     let userNickName = "닉네임"
     
-    private let sexList: [UserSexState] = [ .male, .female ]
+    private let genderCaseList: [UserGenderCase] = [ .male, .female ]
     
     var body: some View {
         VStack(spacing: 0) {
@@ -43,12 +43,12 @@ struct SelectSexView: View {
             // Select Button
             HStack(spacing: 16.5) {
                 
-                ForEach(sexList, id: \.self) { element in
+                ForEach(genderCaseList, id: \.self) { element in
                     GeometryReader { geo in
                         SpotStateButton(text: Text(element.rawValue).font(.suite(type: .SUITE_Regular, size: 18)), idleColor: .spotLightGray, activeColor: .spotRed, frame: geo.size) {
-                            userSexState = element
+                            userGenderState = element
                         } activation: {
-                            userSexState == element
+                            userGenderState == element
                         }
                     }
                     .frame(height: 56)
@@ -63,6 +63,6 @@ struct SelectSexView: View {
 
 #Preview {
     PreviewForProcessView {
-        SelectSexView()
+        SelectGenderScreenComponent()
     }
 }
