@@ -43,7 +43,7 @@ public struct InitialScreen: View {
                 ZStack {
                     Group {
                         if screenModel.screenState == .initial {
-                            InitialView()
+                            StartConfigurationScreenComponent()
                         }
                         
                         if screenModel.screenState == .final {

@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct InitialView: View {
+struct StartConfigurationScreenComponent: View {
     
     var body: some View {
         
@@ -43,7 +43,7 @@ struct InitialView: View {
 
 #Preview {
     VStack(spacing: 0) {
-        InitialView()
+        StartConfigurationScreenComponent()
         Spacer(minLength: 0)
     }
 }
