@@ -9,7 +9,7 @@ import SwiftUI
 import GlobalFonts
 import GlobalUIComponents
 
-public struct InitialScreen: View {
+public struct UserInformationConfigurationScreen: View {
     
     @StateObject private var screenModel = InitialScreenModel()
     
@@ -161,7 +161,7 @@ public struct InitialScreen: View {
 }
 
 /// 화면전환을 위한 매서드들
-extension InitialScreen {
+extension UserInformationConfigurationScreen {
     
     /// 프로필 세팅을 시작하는 애니메이션
     func startProfileSetting() {
@@ -203,5 +203,5 @@ extension InitialScreen {
 }
 
 #Preview {
-    InitialScreen()
+    UserInformationConfigurationScreen()
 }

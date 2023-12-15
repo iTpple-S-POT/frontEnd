@@ -15,7 +15,7 @@ struct SPOTFEApp: App {
 //                .onOpenURL { url in
 //                    KakaoLoginManager.shared.completeSocialLogin(url: url)
 //                }
-            InitialScreen()
+            UserInformationConfigurationScreen()
         }
     }
     
