@@ -60,7 +60,7 @@ public struct UserInformationConfigurationScreen: View {
                     
                     if screenModel.screenState == .setting {
                         
-                        settingScreenComponents
+                        preferenceSettingScreenComponent
                         
                     }
                     
@@ -161,9 +161,12 @@ extension UserInformationConfigurationScreen {
     
 }
 
+
+
+// MARK: - User의 Preference를 설정하는 스크린 컴포넌트
 extension UserInformationConfigurationScreen {
     
-    var settingScreenComponents: some View {
+    var preferenceSettingScreenComponent: some View {
         GeometryReader { geo in
             
             VStack {
