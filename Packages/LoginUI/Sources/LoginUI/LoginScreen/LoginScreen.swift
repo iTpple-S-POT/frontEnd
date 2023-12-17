@@ -76,7 +76,7 @@ public struct LoginScreen: View {
                     .padding(.top, 48)
                 
                 NavigationLink(
-                    destination: isKakaoLoginCompleted ? UserInformationScreen() : nil,
+                    destination: isKakaoLoginCompleted ? UserInformationConfigurationScreen() : nil,
                     isActive: $isKakaoLoginCompleted
                 ) {
                     EmptyView()
