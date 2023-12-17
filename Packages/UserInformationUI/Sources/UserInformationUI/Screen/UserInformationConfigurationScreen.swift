@@ -38,130 +38,89 @@ public struct UserInformationConfigurationScreen: View {
     public var body: some View {
         ZStack {
             
-            // View들이 등장할 공간
-            GeometryReader { geo in
-                ZStack {
-                    Group {
-                        if screenModel.screenState == .initial {
-                            StartConfigurationScreenComponent()
-                        }
+            ZStack {
+                
+                Group {
+                    
+                    if screenModel.screenState == .initial {
                         
-                        if screenModel.screenState == .final {
-                            FinishConfigurationScreenComponent()
-                        }
+                        StartConfigurationScreenComponent()
+                        
                     }
                     
-                    Group {
-                        if screenModel.screenState == .setting {
-                            // 세팅 뷰 
-                            VStack {
-                                // 상단 바
-                                ZStack {
-                                    Rectangle()
-                                        .fill(.clear)
-                                        .frame(height: 100)
-                                    
-                                    HStack {
-                                        if screenModel.settingPhaseIndex >= 1 {
-                                            Button(action: previousSetting) {
-                                                ZStack {
-                                                    Image(systemName: "chevron.left")
-                                                        .resizable()
-                                                        .scaledToFit()
-                                                        .frame(width: 22, height: 22)
-                                                }
-                                                .frame(width: 32, height: 32)
-                                            }
-                                            .buttonStyle(.spotDefault(backgroundColor: .clear))
-                                            Spacer()
-                                        }
-                                    }
-                                    .frame(height: 42)
-                                    .padding(.bottom, 58)
-                                    .padding(.horizontal, 4)
-                                    
-                                    let order = screenModel.settingPhaseIndex+1
-                                    let countOfState = screenModel.settingPhaseCount
-                                    
-                                    MainScreenBarView(state: order, countOfState: countOfState)
-                                        .padding(.top, 42)
-                                        .padding(.bottom, 30)
-                                        .transition(.opacity)
-                                }
-                                
-                                
-                                Spacer(minLength: 0)
-                                
-                                
-                                // 상단바 아래 뷰(세팅뷰들)
-                                ZStack {
-                                    ForEach(Array(screenModel.settingPhases.enumerated()), id: \.element) { index, element in
-                                        
-                                        let screenWidth = geo.size.width
-                                        let viewOffset = CGSize(width: screenWidth*CGFloat(index-screenModel.settingPhaseIndex), height: 0)
-                                        
-                                        screenModel.viewForProgressPhase[element]
-                                            .offset(viewOffset)
-                                    }
-                                }
-                                Spacer(minLength: 0)
-                                
-                            }
-                            .padding(.horizontal, 12)
-                        }
+                    if screenModel.screenState == .final {
+                        
+                        FinishConfigurationScreenComponent()
+                        
                     }
+                    
                 }
-            }
-            
-            // 고정 버튼들
-            VStack(spacing: 0) {
                 
-                Spacer(minLength: 0)
-                
-                // 버튼1
-                SpotRoundedButton(text: button1Text, color: .spotRed) {
+                Group {
                     
                     if screenModel.screenState == .setting {
-                        let currentPhase = screenModel.getCurrentSettingPhase
                         
-                        //TODO: 입력 데이터를 저장
-                        switch currentPhase {
-                        case .inputUserNickName:
-                            break
-                        default:
-                            break
-                        }
+                        settingScreenComponents
                         
-                        // 다음 세팅으로 넘어 갑니다.
-                        nextSetting()
-                    } else {
-                        startProfileSetting()
                     }
                     
                 }
-                .padding(.horizontal, 12)
-                .padding(.top, 48)
                 
-                // 버튼2
-                ZStack {
-                    Group {
-                        if screenModel.screenState != .final {
-                            SpotTextButton(text: button2Text, color: .black) {
-                                //TODO: 디음에 하기
-                            }
-                            .padding(.top, 12)
-                        }
-                    }
-                }
-                .frame(height: 44)
             }
-            .ignoresSafeArea(.keyboard, edges: .bottom)
+            
+            mainButtons
+                .ignoresSafeArea(.keyboard, edges: .bottom)
         }
     }
 }
 
 /// 화면전환을 위한 매서드들
 extension UserInformationConfigurationScreen {
+    
+    var mainButtons: some View {
+        // 고정 버튼들
+        VStack(spacing: 0) {
+            
+            Spacer(minLength: 0)
+            
+            // 버튼1
+            SpotRoundedButton(text: button1Text, color: .spotRed) {
+                
+                if screenModel.screenState == .setting {
+                    let currentPhase = screenModel.getCurrentSettingPhase
+                    
+                    //TODO: 입력 데이터를 저장
+                    switch currentPhase {
+                    case .inputUserNickName:
+                        break
+                    default:
+                        break
+                    }
+                    
+                    // 다음 세팅으로 넘어 갑니다.
+                    nextSetting()
+                } else {
+                    startProfileSetting()
+                }
+                
+            }
+            .padding(.horizontal, 12)
+            .padding(.top, 48)
+            
+            // 버튼2
+            ZStack {
+                Group {
+                    if screenModel.screenState != .final {
+                        SpotTextButton(text: button2Text, color: .black) {
+                            //TODO: 디음에 하기
+                        }
+                        .padding(.top, 12)
+                    }
+                }
+            }
+            .frame(height: 44)
+        }
+    }
     
     /// 프로필 세팅을 시작하는 애니메이션
     func startProfileSetting() {
@@ -201,6 +160,72 @@ extension UserInformationConfigurationScreen {
     }
     
 }
+
+extension UserInformationConfigurationScreen {
+    
+    var settingScreenComponents: some View {
+        GeometryReader { geo in
+            
+            VStack {
+                // 상단 바
+                ZStack {
+                    Rectangle()
+                        .fill(.clear)
+                        .frame(height: 100)
+                    
+                    HStack {
+                        if screenModel.settingPhaseIndex >= 1 {
+                            Button(action: previousSetting) {
+                                ZStack {
+                                    Image(systemName: "chevron.left")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 22, height: 22)
+                                }
+                                .frame(width: 32, height: 32)
+                            }
+                            .buttonStyle(.spotDefault(backgroundColor: .clear))
+                            Spacer()
+                        }
+                    }
+                    .frame(height: 42)
+                    .padding(.bottom, 58)
+                    .padding(.horizontal, 4)
+                    
+                    let order = screenModel.settingPhaseIndex+1
+                    let countOfState = screenModel.settingPhaseCount
+                    
+                    MainScreenBarView(state: order, countOfState: countOfState)
+                        .padding(.top, 42)
+                        .padding(.bottom, 30)
+                        .transition(.opacity)
+                }
+                
+                
+                Spacer(minLength: 0)
+                
+                
+                // 상단바 아래 뷰(세팅뷰들)
+                ZStack {
+                    ForEach(Array(screenModel.settingPhases.enumerated()), id: \.element) { index, element in
+                        
+                        let screenWidth = geo.size.width
+                        let viewOffset = CGSize(width: screenWidth*CGFloat(index-screenModel.settingPhaseIndex), height: 0)
+                        
+                        screenModel.viewForProgressPhase[element]
+                            .offset(viewOffset)
+                    }
+                }
+                Spacer(minLength: 0)
+                
+            }
+            .padding(.horizontal, 12)
+        }
+    }
+}
+
+
+
 
 #Preview {
     UserInformationConfigurationScreen()
