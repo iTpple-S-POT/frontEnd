@@ -35,5 +35,4 @@ class NickNameInputViewModel: ObservableObject {
         
         return regex.firstMatch(in: nickName, range: range) != nil
     }
-    
 }
