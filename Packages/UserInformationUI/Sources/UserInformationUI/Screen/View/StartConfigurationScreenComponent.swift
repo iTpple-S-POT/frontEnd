@@ -39,6 +39,9 @@ struct StartConfigurationScreenComponent: View {
                 .scaledToFit()
                 .padding(.horizontal, 22)
                 .padding(.top, 55)
+            
+            Spacer(minLength: 0)
+            
         }
         .padding(.bottom, 148)
     }
