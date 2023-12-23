@@ -11,9 +11,7 @@ struct MainScreen: View {
     var body: some View {
         VStack(spacing: 0) {
             
-            // 서치바 + 타이틀
-            Rectangle()
-                .fill(.red)
+            TopMostScreenComponent()
                 .frame(height: 56)
             
             // 태그 선택 바
