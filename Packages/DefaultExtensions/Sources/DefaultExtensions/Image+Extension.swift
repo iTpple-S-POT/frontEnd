@@ -1,3 +1,10 @@
+//
+//  Image+Extension.swift
+//  
+//
+//  Created by 최준영 on 2023/12/24.
+//
+
 import SwiftUI
 
 extension Image {
