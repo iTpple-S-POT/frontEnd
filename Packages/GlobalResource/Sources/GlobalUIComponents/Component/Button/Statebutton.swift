@@ -15,18 +15,24 @@ public struct SpotStateButton: View {
     
     var frame: CGSize
     
+    var radius: CGFloat
+    
     var idleColor: Color
     var activeColor: Color
+    
+    var changeTextColor: Bool
     
     var action: () -> ()
     
     var activation: () -> Bool
     
-    public init(innerView: AnyView, idleColor: Color, activeColor: Color, frame: CGSize, action: @escaping () -> Void, activation: @escaping () -> Bool) {
+    public init(innerView: AnyView, idleColor: Color, activeColor: Color, changeTextColor: Bool = true, frame: CGSize, radius: CGFloat, action: @escaping () -> Void, activation: @escaping () -> Bool) {
         self.innerView = innerView
         self.idleColor = idleColor
         self.activeColor = activeColor
+        self.changeTextColor = changeTextColor
         self.frame = frame
+        self.radius = radius
         self.action = action
         self.activation = activation
     }
@@ -34,12 +40,12 @@ public struct SpotStateButton: View {
     
     public var body: some View {
         HStack(spacing: 0) {
-            Spacer(minLength: 20)
+            Spacer(minLength: radius)
             innerView
-            Spacer(minLength: 20)
+            Spacer(minLength: radius)
         }
         .frame(width: frame.width, height: frame.height)
-        .foregroundStyle(activation() ? .white : .black)
+        .foregroundStyle((activation() && changeTextColor) ? .white : .black)
         .background(
             PerfectRoundedRectangle()
                 .foregroundStyle(activation() ? activeColor : idleColor)
@@ -55,12 +61,12 @@ fileprivate struct TestView: View {
     var body: some View {
         VStack {
             HStack {
-                SpotStateButton(innerView: AnyView(Text("test1")), idleColor: .gray, activeColor: .green, frame: CGSize(width: CGFloat.infinity, height: 56)) {
+                SpotStateButton(innerView: AnyView(Text("test1")), idleColor: .gray, activeColor: .green, frame: CGSize(width: CGFloat.infinity, height: 56), radius: 20) {
                     state = true
                 } activation: {
                     state == true
                 }
-                SpotStateButton(innerView: AnyView(Text("test2")), idleColor: .gray, activeColor: .green, frame: CGSize(width: CGFloat.infinity, height: 56)) {
+                SpotStateButton(innerView: AnyView(Text("test2")), idleColor: .gray, activeColor: .green, frame: CGSize(width: CGFloat.infinity, height: 56), radius: 20) {
                     state = false
                 } activation: {
                     state == false

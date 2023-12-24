@@ -48,7 +48,7 @@ struct SelectGenderScreenComponent: View {
                         
                         let innerView = AnyView(Text(element.rawValue).font(.suite(type: .SUITE_Regular, size: 18)))
                         
-                        SpotStateButton(innerView: innerView, idleColor: .spotLightGray, activeColor: .spotRed, frame: geo.size) {
+                        SpotStateButton(innerView: innerView, idleColor: .spotLightGray, activeColor: .spotRed, frame: geo.size, radius: 20) {
                             userGenderState = element
                         } activation: {
                             userGenderState == element
