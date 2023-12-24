@@ -15,6 +15,7 @@ let package = Package(
     dependencies: [
         .package(path: "../GlobalResource"),
         .package(path: "../DefaultExtensions"),
+        .package(path: "../CJMapkit"),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -24,6 +25,7 @@ let package = Package(
             dependencies: [
                 .product(name: "GlobalUIComponents", package: "GlobalResource"),
                 .product(name: "DefaultExtensions", package: "DefaultExtensions"),
+                .product(name: "CJMapkit", package: "CJMapkit"),
             ],
             resources: [
                 .process("Resources/TitlePart"),
