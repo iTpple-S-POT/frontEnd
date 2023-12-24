@@ -92,7 +92,10 @@ struct SelectMbtiScreenComponent: View {
             LazyVGrid(columns: columns, spacing: 16.5) {
                 ForEach(mbtiList, id: \.self) { element in
                     GeometryReader { geo in
-                        SpotStateButton(text: Text(element.rawValue).font(.suite(type: .SUITE_Regular, size: 18)), idleColor: .spotLightGray, activeColor: .spotRed, frame: geo.size) {
+                        
+                        let innerView = AnyView(Text(element.rawValue).font(.suite(type: .SUITE_Regular, size: 18)))
+                        
+                        SpotStateButton(innerView: innerView, idleColor: .spotLightGray, activeColor: .spotRed, frame: geo.size) {
                             userMbti.setState(mbti: element)
                         } activation: {
                             userMbti.isStateMatch(mbti: element)

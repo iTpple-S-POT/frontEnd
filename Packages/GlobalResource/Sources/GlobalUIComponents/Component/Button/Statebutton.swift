@@ -11,7 +11,7 @@ import SwiftUI
 /// Button의 Height는 고정되어 있으니 Width를 지정해야 한다.
 public struct SpotStateButton: View {
     
-    var text: Text
+    var innerView: AnyView
     
     var frame: CGSize
     
@@ -22,8 +22,8 @@ public struct SpotStateButton: View {
     
     var activation: () -> Bool
     
-    public init(text: Text, idleColor: Color, activeColor: Color, frame: CGSize, action: @escaping () -> Void, activation: @escaping () -> Bool) {
-        self.text = text
+    public init(innerView: AnyView, idleColor: Color, activeColor: Color, frame: CGSize, action: @escaping () -> Void, activation: @escaping () -> Bool) {
+        self.innerView = innerView
         self.idleColor = idleColor
         self.activeColor = activeColor
         self.frame = frame
@@ -35,7 +35,7 @@ public struct SpotStateButton: View {
     public var body: some View {
         HStack(spacing: 0) {
             Spacer(minLength: 20)
-            text
+            innerView
             Spacer(minLength: 20)
         }
         .frame(width: frame.width, height: frame.height)
@@ -55,12 +55,12 @@ fileprivate struct TestView: View {
     var body: some View {
         VStack {
             HStack {
-                SpotStateButton(text: Text("test1"), idleColor: .gray, activeColor: .green, frame: CGSize(width: CGFloat.infinity, height: 56)) {
+                SpotStateButton(innerView: AnyView(Text("test1")), idleColor: .gray, activeColor: .green, frame: CGSize(width: CGFloat.infinity, height: 56)) {
                     state = true
                 } activation: {
                     state == true
                 }
-                SpotStateButton(text: Text("test2"), idleColor: .gray, activeColor: .green, frame: CGSize(width: CGFloat.infinity, height: 56)) {
+                SpotStateButton(innerView: AnyView(Text("test2")), idleColor: .gray, activeColor: .green, frame: CGSize(width: CGFloat.infinity, height: 56)) {
                     state = false
                 } activation: {
                     state == false

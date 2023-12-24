@@ -45,7 +45,10 @@ struct SelectGenderScreenComponent: View {
                 
                 ForEach(genderCaseList, id: \.self) { element in
                     GeometryReader { geo in
-                        SpotStateButton(text: Text(element.rawValue).font(.suite(type: .SUITE_Regular, size: 18)), idleColor: .spotLightGray, activeColor: .spotRed, frame: geo.size) {
+                        
+                        let innerView = AnyView(Text(element.rawValue).font(.suite(type: .SUITE_Regular, size: 18)))
+                        
+                        SpotStateButton(innerView: innerView, idleColor: .spotLightGray, activeColor: .spotRed, frame: geo.size) {
                             userGenderState = element
                         } activation: {
                             userGenderState == element
