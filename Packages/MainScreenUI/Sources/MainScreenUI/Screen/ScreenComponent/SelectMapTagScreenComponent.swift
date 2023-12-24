@@ -96,7 +96,7 @@ struct SelectMapTagScreenComponent: View {
         .background(
             Rectangle()
                 .fill(.white)
-                .shadow(color: .gray.opacity(0.5), radius: 2.0, x: 0, y: 2.0)
+                .shadow(color: .gray.opacity(0.3), radius: 2.0, x: 0, y: 2.0)
         )
     }
     

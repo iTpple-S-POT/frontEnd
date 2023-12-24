@@ -9,32 +9,39 @@ import SwiftUI
 
 struct MainScreen: View {
     var body: some View {
-        VStack(spacing: 0) {
+        ZStack {
             
-            TopMostScreenComponent()
-                .frame(height: 56)
+            // 상단
+            VStack(spacing: 0) {
+                TopMostScreenComponent()
+                    .frame(height: 56)
+                SelectMapTagScreenComponent()
+                    .frame(height: 64)
+                
+                Spacer(minLength: 0)
+                
+            }
+            .zIndex(1)
+            
             
             ZStack {
-                VStack {
-                    SelectMapTagScreenComponent()
-                        .frame(height: 64)
-                    Spacer(minLength: 0)
-                }
-                .zIndex(1.0)
-
-                // 팟을 표시하는 지도
-                ZStack {
-                    Rectangle()
-                        .fill(.white)
-                    Text("map")
-                }
-                .padding(.top, 64)
-                .zIndex(0.0)
+                Rectangle()
+                    .fill(.white)
+                Text("map")
             }
+            .padding(.top, 110)
+            .padding(.bottom, 64)
+            .zIndex(0)
             
-            // 탭뷰
-            TabScreenComponent()
-                .frame(height: 64)
+            // 하단
+            VStack(spacing: 0) {
+                
+                Spacer(minLength: 0)
+                
+                TabScreenComponent()
+                    .frame(height: 64)
+            }
+            .zIndex(1)
             
         }
     }
