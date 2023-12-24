@@ -26,7 +26,8 @@ let package = Package(
                 .product(name: "DefaultExtensions", package: "DefaultExtensions"),
             ],
             resources: [
-                .process("Resources/TitlePart")
+                .process("Resources/TitlePart"),
+                .process("Resources/Tags"),
             ]
         ),
         .testTarget(

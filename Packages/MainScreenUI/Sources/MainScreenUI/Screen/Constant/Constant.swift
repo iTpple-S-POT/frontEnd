@@ -9,8 +9,8 @@ import SwiftUI
 
 struct ImageName {
     
-    static let main_screen_title: String = "MainScreen_SpotLogo"
-    static let search: String = "Search"
+    // top most part
+    static let main_screen_title = "MainScreen_SpotLogo"
+    static let search = "Search"
     
 }
-

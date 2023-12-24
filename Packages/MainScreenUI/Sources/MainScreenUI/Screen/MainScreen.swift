@@ -14,16 +14,22 @@ struct MainScreen: View {
             TopMostScreenComponent()
                 .frame(height: 56)
             
-            // 태그 선택 바
-            Rectangle()
-                .fill(.orange)
-                .frame(height: 64)
-            
-            // 팟을 표시하는 지도
             ZStack {
-                Rectangle()
-                    .fill(.white)
-                Text("map")
+                VStack {
+                    SelectMapTagScreenComponent()
+                        .frame(height: 64)
+                    Spacer(minLength: 0)
+                }
+                .zIndex(1.0)
+
+                // 팟을 표시하는 지도
+                ZStack {
+                    Rectangle()
+                        .fill(.white)
+                    Text("map")
+                }
+                .padding(.top, 64)
+                .zIndex(0.0)
             }
             
             // 탭뷰
