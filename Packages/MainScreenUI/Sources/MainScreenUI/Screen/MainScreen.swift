@@ -6,8 +6,6 @@
 //
 
 import SwiftUI
-import CJMapkit
-import CoreLocation
 
 struct MainScreen: View {
     var body: some View {
@@ -27,10 +25,7 @@ struct MainScreen: View {
             
             
             ZStack {
-                CJMapkitView(userLocation: CLLocation(latitude: 37.550756, longitude: 126.9254901), annotations: [
-                    CIAnnotationWithSwiftUI(coordinate: CLLocationCoordinate2D(latitude: 37.550756, longitude: 126.9254901), title: "홍익대학교", subtitle: "대학교", uiImage: UIImage(systemName: "person")!)
-                
-                ])
+                MapScreenComponent()
             }
             .padding(.top, 110)
             .padding(.bottom, 64)

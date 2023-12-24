@@ -1,0 +1,13 @@
+/* 
+  Localizable.strings
+  
+
+  Created by 최준영 on 2023/11/18.
+  
+*/
+
+// Mark: Bundle
+"Bundle_file_not_found" = "해당 이름의 파일을 번들에서 찾을 수 없습니다.";
+
+// Mark: User Location Manager
+"ULM_path_to_dict_error" = "ULM: 해당경로의 파일로 InfoPlist를 생성할 수 없습니다.";
