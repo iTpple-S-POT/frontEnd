@@ -11,13 +11,7 @@ import GlobalFonts
 
 struct SelectMapTagScreenComponent: View {
        
-    // TODO: 현재 스크린 컴포넌트의 상태를 관리하는 타입생성후 이동
-    
-    // 이동예정
-    @State private var selectedTags: [TagCases:Bool] = [:]
-    
-    // 이동예정
-    @State private var nowSelectedTag: TagCases?
+    @StateObject private var viewModel = SelectMapTagViewModel()
     
     var body: some View {
         ScrollViewReader { proxy in
@@ -26,7 +20,7 @@ struct SelectMapTagScreenComponent: View {
                 
                 LazyHStack(spacing: 8) {
                     
-                    ForEach(TagCases.allCases) { tag in
+                    ForEach(SelectMapTagViewModel.TagCases.allCases) { tag in
                         
                         let innerView = AnyView(HStack(spacing: 6) {
                             if tag != .all {
@@ -54,25 +48,13 @@ struct SelectMapTagScreenComponent: View {
                             frame: btn_frame,
                             radius: 16) {
                             
-                            nowSelectedTag = tag
+                                viewModel.selectTag(tag: tag)
                             
-                            if selectedTags[tag] != nil {
-                                
-                                if selectedTags[tag]! {
-                                    selectedTags[tag] = false
-                                } else {
-                                    selectedTags[tag] = true
-                                }
-                                
-                                return
-                            }
-                            
-                            selectedTags[tag] = true
                             
                         } activation: {
                             
-                            return selectedTags[tag] ?? false
-                            
+                            return viewModel.selectedTagDict[tag]!
+                        
                         }
                         .id(tag)
                     
@@ -83,9 +65,9 @@ struct SelectMapTagScreenComponent: View {
                 
             }
             .scrollIndicators(.hidden)
-            .onChange(of: nowSelectedTag) { tag in
+            .onChange(of: viewModel.selectedTag) { tag in
                 withAnimation(.easeInOut(duration: 0.5)) {
-                    nowSelectedTag = nil
+                    viewModel.clearSelectedTag()
                     proxy.scrollTo(tag, anchor: .leading)
                 }
             }
@@ -100,53 +82,6 @@ struct SelectMapTagScreenComponent: View {
         )
     }
     
-}
-
-extension SelectMapTagScreenComponent {
-    
-    enum TagCases: String, Identifiable, CaseIterable {
-        case all = "all"
-        case event = "event"
-        case life = "life"
-        case question = "question"
-        case information = "information"
-        case party = "party"
-        
-        var id: String { self.rawValue }
-        
-        func getIconImage() -> Image {
-            
-            if self == .all {
-                preconditionFailure("all태그는 이미지가 없습니다.")
-            }
-            
-            let imageName = self.rawValue + "_tag"
-            
-            return Image.makeImageFromBundle(bundle: Bundle.module, name: imageName, ext: .png)
-        }
-        
-        func getTextString() -> String {
-            
-            var textStr = ""
-            
-            switch self {
-            case .all:
-                textStr = "모두 보기"
-            case .event:
-                textStr = "사건/사고"
-            case .life:
-                textStr = "일상"
-            case .question:
-                textStr = "질문"
-            case .information:
-                textStr = "정보"
-            case .party:
-                textStr = "모임"
-            }
-            
-            return textStr
-        }
-    }
 }
 
 #Preview {
