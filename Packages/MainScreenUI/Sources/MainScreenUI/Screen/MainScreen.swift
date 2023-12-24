@@ -33,8 +33,7 @@ struct MainScreen: View {
             }
             
             // 탭뷰
-            Rectangle()
-                .fill(.green)
+            TabScreenComponent()
                 .frame(height: 64)
             
         }

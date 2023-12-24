@@ -28,6 +28,7 @@ let package = Package(
             resources: [
                 .process("Resources/TitlePart"),
                 .process("Resources/Tags"),
+                .process("Resources/Tab"),
             ]
         ),
         .testTarget(

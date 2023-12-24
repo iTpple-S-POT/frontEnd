@@ -10,4 +10,7 @@ extension ShapeStyle where Self == Color {
     
     /// 버튼에 사용되는 레드
     static var btn_red: Color { Color(hex: "FF533F", alpha: 0.5) }
+    
+    static var btn_red_nt: Color { Color(hex: "FF533F") }
+    
 }
