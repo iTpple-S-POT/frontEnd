@@ -35,7 +35,7 @@ struct FinishConfigurationScreenComponent: View {
             // Background
             Color.clear
                 .background(
-                    Image.makeImageFromBundle(name: "FinalViewBackground", ext: .png)
+                    Image.makeImageFromBundle(bundle: Bundle.module, name: "FinalViewBackground", ext: .png)
                         .resizable()
                         .scaledToFill()
                         .overlay { imageGradient }

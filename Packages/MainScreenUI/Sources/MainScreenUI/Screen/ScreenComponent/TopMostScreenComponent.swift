@@ -17,7 +17,7 @@ struct TopMostScreenComponent: View {
             Color.mainScreenRed
             
             HStack(spacing: 0) {
-                Image.makeImageFromBundle(name: ImageName.main_screen_title, ext: .png)
+                Image.makeImageFromBundle(bundle: Bundle.module,name: ImageName.main_screen_title, ext: .png)
                     .resizable()
                     .scaledToFit()
                     .frame(width: 120)
@@ -27,7 +27,7 @@ struct TopMostScreenComponent: View {
                 Button {
                     
                 } label: {
-                    Image.makeImageFromBundle(name: ImageName.search, ext: .png)
+                    Image.makeImageFromBundle(bundle: Bundle.module, name: ImageName.search, ext: .png)
                         .resizable()
                         .scaledToFit()
                         .frame(width: 32, height: 32)
