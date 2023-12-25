@@ -11,13 +11,16 @@ class SelectMapTagViewModel: ObservableObject {
     
     @Published private(set) var selectedTag: TagCases?
     @Published private(set) var selectedTagDict: [TagCases:Bool] = [
-        .all : false,
+        .all : true,
         .event : false,
         .life : false,
         .question : false,
         .information : false,
         .party : false
     ]
+    
+    // 현재활성화 되어있는 테그의 수를 추적합니다.
+    private var activeTagCount: Int = 1
     
     func selectTag(tag: TagCases) {
         
@@ -29,11 +32,39 @@ class SelectMapTagViewModel: ObservableObject {
             selectedTagDict.keys.forEach { selectedTagDict[$0] = false }
             
             selectedTagDict[.all] = true
+            
+            activeTagCount = 1
         default:
             // all테그를 inactive상태로 지정
-            selectedTagDict[.all] = false
+            if selectedTagDict[.all]! {
+                selectedTagDict[.all] = false
+                activeTagCount -= 1
+            }
             
-            selectedTagDict[tag] = selectedTagDict[tag]! ? false : true
+            if selectedTagDict[tag]! {
+                
+                activeTagCount -= 1
+                
+                selectedTagDict[tag] = false
+                
+                // 활성화 되어있는 테그가 없는 경우 '모두 보기'로 설정된다
+                if activeTagCount < 1 {
+                    
+                    selectedTagDict[.all] = true
+                    
+                    activeTagCount = 1
+                    
+                }
+                
+                
+            } else {
+                
+                activeTagCount += 1
+                
+                selectedTagDict[tag] = true
+                
+            }
+            
         }
         
     }

@@ -68,7 +68,7 @@ struct SelectMapTagScreenComponent: View {
             .onChange(of: viewModel.selectedTag) { tag in
                 withAnimation(.easeInOut(duration: 0.5)) {
                     viewModel.clearSelectedTag()
-                    proxy.scrollTo(tag, anchor: .leading)
+                    proxy.scrollTo(tag, anchor: .center)
                 }
             }
             
