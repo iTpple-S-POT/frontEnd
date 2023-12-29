@@ -34,7 +34,7 @@ struct StartConfigurationScreenComponent: View {
             .frame(height: 96)
             
             // TODO: illust
-            Image.makeImageFromBundle(name: "StartConfigureScreenILLust", ext: .png)
+            Image.makeImageFromBundle(bundle: Bundle.module, name: "StartConfigureScreenILLust", ext: .png)
                 .resizable()
                 .scaledToFit()
                 .padding(.horizontal, 22)

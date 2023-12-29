@@ -52,7 +52,7 @@ struct SelectInterestsScreenComponent: View {
                         
                         ForEach(list1D) { element in
                             
-                            SpotStateButton(text: Text(element.rawValue).font(.suite(type: .SUITE_Regular, size: 16)), idleColor: .spotLightGray, activeColor: .spotRed, frame: viewModel.getViewSize(string: element.rawValue)) {
+                            SpotStateButton(innerView: AnyView(Text(element.rawValue).font(.suite(type: .SUITE_Regular, size: 16))), idleColor: .spotLightGray, activeColor: .spotRed, frame: viewModel.getViewSize(string: element.rawValue), radius: 20) {
                                 
                                 if viewModel.isTypeExists(type: element) {
                                     viewModel.deSelectType(type: element)

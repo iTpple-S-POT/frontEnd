@@ -1,13 +1,13 @@
 //
 //  Image+Extension.swift
+//  
 //
-//
-//  Created by 최준영 on 2023/12/15.
+//  Created by 최준영 on 2023/12/24.
 //
 
 import SwiftUI
 
-extension Image {
+public extension Image {
     
     enum FileExtensionCase: String {
         case png = "png"
@@ -24,8 +24,9 @@ extension Image {
      
      - Returns: 파일을 불러들여 생성한 Image인스턴스
      */
-    static func makeImageFromBundle(name: String, ext: FileExtensionCase) -> Image {
-        let path = Bundle.module.provideFilePath(name: name, ext: ext.rawValue)
+    static func makeImageFromBundle(bundle: Bundle, name: String, ext: FileExtensionCase) -> Image {
+        
+        let path = bundle.provideFilePath(name: name, ext: ext.rawValue)
         
         guard let uiImage = UIImage(named: path) else { fatalError("\(name).\(ext.rawValue)를 찾을 수 없음") }
         

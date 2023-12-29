@@ -19,7 +19,8 @@ let project = Project(name: "\(appName)",
                       packages: [
                             .local(path: "\(packagePath)/SplashUI"),
                             .local(path: "\(packagePath)/LoginUI"),
-                            .local(path: "\(packagePath)/UserInformationUI")
+                            .local(path: "\(packagePath)/UserInformationUI"),
+                            .local(path: "\(packagePath)/DefaultExtensions"),
                       ],
                       settings: Settings.settings(configurations: makeConfiguration()),
                       targets: [
