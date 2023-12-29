@@ -69,7 +69,7 @@ private func makeInfoPlist(merging other: [String: Plist.Value] = [:]) -> InfoPl
         "CFBundleURLTypes": [
             ["CFBundleURLSchemes" : ["kakao\(kakaoNativeAppKey)"]]
         ],
-        "Privacy - Photo Library Usage Description": "팟에 사용되는 사진을 선택합니다.",
+        "NSPhotoLibraryUsageDescription": "팟에 사용되는 사진을 선택합니다.",
     ]
     other.forEach { (key: String, value: Plist.Value) in
         extendedPlist[key] = value
