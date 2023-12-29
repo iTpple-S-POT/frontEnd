@@ -7,8 +7,11 @@
 
 import SwiftUI
 
-struct MainScreen: View {
-    var body: some View {
+public struct MainScreen: View {
+    
+    public init() { }
+    
+    public var body: some View {
         ZStack {
             
             // 상단

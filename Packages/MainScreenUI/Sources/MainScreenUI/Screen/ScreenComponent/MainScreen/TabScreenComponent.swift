@@ -9,6 +9,9 @@ import SwiftUI
 import GlobalFonts
 
 struct TabScreenComponent: View {
+    
+    @State private var showPotUploadScreen = false
+    
     var body: some View {
         HStack(spacing: 0) {
             
@@ -42,6 +45,8 @@ struct TabScreenComponent: View {
                 .overlay {
                     
                     Button {
+                        
+                        showPotUploadScreen = true
                         
                     } label: {
                         Image.makeImageFromBundle(bundle: .module, name: "tab_plus", ext: .png)
@@ -80,6 +85,9 @@ struct TabScreenComponent: View {
                 .fill(.white)
                 .shadow(color: .gray.opacity(0.3), radius: 2.0, y: -2)
         )
+        .fullScreenCover(isPresented: $showPotUploadScreen, content: {
+            PotUploadScreen()
+        })
         
     }
 }

@@ -21,6 +21,7 @@ let project = Project(name: "\(appName)",
                             .local(path: "\(packagePath)/LoginUI"),
                             .local(path: "\(packagePath)/UserInformationUI"),
                             .local(path: "\(packagePath)/DefaultExtensions"),
+                            .local(path: "\(packagePath)/MainScreenUI"),
                       ],
                       settings: Settings.settings(configurations: makeConfiguration()),
                       targets: [
@@ -40,6 +41,7 @@ let project = Project(name: "\(appName)",
                                 .package(product: "SplashUI"),
                                 .package(product: "LoginUI"),
                                 .package(product: "UserInformationUI"),
+                                .package(product: "MainScreenUI"),
                               ],
                               settings: baseSettings()
                           )
@@ -64,9 +66,10 @@ private func makeInfoPlist(merging other: [String: Plist.Value] = [:]) -> InfoPl
         "CFBundleDisplayName": "$(APP_DISPLAY_NAME)",
         "Privacy - Location When In Use Usage Description": "앱을 사용하는 동안 사용자의 위치를 특정합니다.",
         "LSApplicationQueriesSchemes": ["kakaokompassauth", "kakaolink", "kakaoplus"],
-        "CFBundleURLTypes" : [
+        "CFBundleURLTypes": [
             ["CFBundleURLSchemes" : ["kakao\(kakaoNativeAppKey)"]]
-        ]
+        ],
+        "NSPhotoLibraryUsageDescription": "팟에 사용되는 사진을 선택합니다.",
     ]
     other.forEach { (key: String, value: Plist.Value) in
         extendedPlist[key] = value
