@@ -332,7 +332,7 @@ extension CJPhotoCollectionViewController {
     public override func scrollViewDidScroll(_ scrollView: UIScrollView) {
         
         //스크롤을 할 때마다 캐싱 업데이트 여부를 확인한다.
-        try updateCachedAssets()
+        updateCachedAssets()
         
     }
     
