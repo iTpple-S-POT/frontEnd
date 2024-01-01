@@ -9,6 +9,8 @@ public struct SplashScreen: View {
     var logo_image: Image {
         Image(uiImage: UIImage(named: Bundle.module.provideFilePath(name: "splash_logo", ext: "png"))!)
     }
+    
+    public init() { }
         
     public var body: some View {
         VStack {

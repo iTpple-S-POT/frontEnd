@@ -12,11 +12,18 @@ let package = Package(
             name: "ApplicationUI",
             targets: ["ApplicationUI"]),
     ],
+    dependencies: [
+        .package(path: "../SplashUI")
+    ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "ApplicationUI"),
+            name: "ApplicationUI",
+            dependencies: [
+                .product(name: "SplashUI", package: "SplashUI")
+            ]
+        ),
         .testTarget(
             name: "ApplicationUITests",
             dependencies: ["ApplicationUI"]),
