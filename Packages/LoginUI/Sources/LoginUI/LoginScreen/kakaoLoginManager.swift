@@ -12,7 +12,17 @@ import KakaoSDKCommon
 import KakaoSDKAuth
 import Alamofire
 
+enum SpotNetworkError: Error {
+    
+    // TODO: 네트워크 에러 구체화
+    case serverError
+    case dataTransferError
+    
+}
+
 public class KakaoLoginManager {
+    
+    typealias TokenResponseCompletion = (OAuthToken?, Error?) -> Void
     
     public static let shared = KakaoLoginManager()
     
@@ -31,61 +41,28 @@ public class KakaoLoginManager {
         }
     }
     
-    internal func executeLogin(completion: @escaping (Bool) -> Void) {
+    internal func executeLogin(completion: @escaping (Result<Data, SpotNetworkError>) -> Void) {
         guard isInitialized else {
             fatalError("please initialize KakaoSDK first")
         }
         
         if (UserApi.isKakaoTalkLoginAvailable()) {
-            UserApi.shared.loginWithKakaoTalk {(oauthToken, error) in
-                if let error = error {
-                    print(error)
-                    completion(false)
-                }
-                else {
-                    print("loginWithKakaoTalk() success.")
-
-                    //do something
-                    _ = oauthToken
-                    print(oauthToken!)
-                    
-                    if let accessToken = oauthToken?.accessToken, let refreshToken = oauthToken?.refreshToken {
-                                       // Send accessToken to the server
-                        self.sendAccessTokenToServer(accessToken: accessToken, refreshToken: refreshToken) { success in
-                            completion(true)
-                        }
-                    } else {
-                        completion(false)
-                    }
-                }
+            
+            UserApi.shared.loginWithKakaoTalk {
+                
+                self.tokenLogicCompletion(oauthToken: $0, error: $1, completion: completion)
+                
             }
         } else {
-            UserApi.shared.loginWithKakaoAccount {(oauthToken, error) in
-                    if let error = error {
-                        print(error)
-                        completion(false)
-                    }
-                    else {
-                        print("loginWithKakaoAccount() success.")
-
-                        //do something
-                        _ = oauthToken
-                        print(oauthToken!)
-                        
-                        if let accessToken = oauthToken?.accessToken, let refreshToken = oauthToken?.refreshToken {
-                                           // Send accessToken to the server
-                            self.sendAccessTokenToServer(accessToken: accessToken, refreshToken: refreshToken) { success in
-                                completion(true)
-                            }
-                        } else {
-                            completion(false)
-                        }
-                    }
-                }
+            UserApi.shared.loginWithKakaoAccount {
+                
+                self.tokenLogicCompletion(oauthToken: $0, error: $1, completion: completion)
+                
+            }
         }
     }
     
-    private func sendAccessTokenToServer(accessToken: String, refreshToken: String, completion: @escaping (Bool) -> Void){
+    private func sendAccessTokenToServer(accessToken: String, refreshToken: String, completion: @escaping (Result<Data, SpotNetworkError>) -> Void) {
         let url = "http://43.201.220.214/auth/login/KAKAO"
         
         let headers: HTTPHeaders = [
@@ -103,15 +80,60 @@ public class KakaoLoginManager {
                 switch response.result {
                 case .success(let data):
                     
-                    if let responseDataString = String(data: data, encoding: .utf8) {
-                        print("Response data: \(responseDataString)")
+                    completion(.success(data))
+                    
+                case .failure(let error):
+                    
+                    print("Server error: \(error.localizedDescription)")
+                    
+                    completion(.failure(.serverError))
+                    
+                }
+        }
+    }
+}
+
+
+// MARK: - 공용 completion
+extension KakaoLoginManager {
+    
+    func tokenLogicCompletion(oauthToken: OAuthToken?, error: Error?, completion: @escaping (Result<Data, SpotNetworkError>) -> ()) {
+        if let error = error {
+            
+            // TODO: 추후 에러 구체화
+            completion(.failure(.serverError))
+            
+        }
+        else {
+            print("loginWithKakaoTalk() success.")
+
+            //do something
+            _ = oauthToken
+            print(oauthToken!)
+            
+            if let accessToken = oauthToken?.accessToken, let refreshToken = oauthToken?.refreshToken {
+                               // Send accessToken to the server
+                self.sendAccessTokenToServer(accessToken: accessToken, refreshToken: refreshToken) { result in
+                    
+                    switch result {
+                    case .success(let data):
+                        
+                        completion(.success(data))
+                        
+                    case .failure(let failure):
+                        
+                        // TODO: 추후 구체화
+                        completion(.failure(.serverError))
+                        
                     }
                     
-                    completion(true)
-                case .failure(let error):
-                    print("Server error: \(error.localizedDescription)")
-                    completion(false)
                 }
+            } else {
+                
+                // TODO: 추후 구체화
+                completion(.failure(.dataTransferError))
+                
+            }
         }
     }
 }
