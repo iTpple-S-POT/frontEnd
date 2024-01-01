@@ -17,11 +17,8 @@ private let kakaoNativeAppKey = getKakaoAppKey()
 
 let project = Project(name: "\(appName)",
                       packages: [
-                            .local(path: "\(packagePath)/SplashUI"),
+                            .local(path: "\(packagePath)/ApplicationUI"),
                             .local(path: "\(packagePath)/LoginUI"),
-                            .local(path: "\(packagePath)/UserInformationUI"),
-                            .local(path: "\(packagePath)/DefaultExtensions"),
-                            .local(path: "\(packagePath)/MainScreenUI"),
                       ],
                       settings: Settings.settings(configurations: makeConfiguration()),
                       targets: [
@@ -38,10 +35,8 @@ let project = Project(name: "\(appName)",
                                 "Secrets/secret.json",
                               ],
                               dependencies: [
-                                .package(product: "SplashUI"),
+                                .package(product: "ApplicationUI"),
                                 .package(product: "LoginUI"),
-                                .package(product: "UserInformationUI"),
-                                .package(product: "MainScreenUI"),
                               ],
                               settings: baseSettings()
                           )

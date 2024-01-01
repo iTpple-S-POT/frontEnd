@@ -19,7 +19,10 @@ let package = Package(
         .library(name: "GlobalFonts", targets: ["GlobalFonts"]),
         
         // UIComponents only
-        .library(name: "GlobalUIComponents", targets: ["GlobalUIComponents"])
+        .library(name: "GlobalUIComponents", targets: ["GlobalUIComponents"]),
+        
+        // Object only
+        .library(name: "GlobalObjects", targets: ["GlobalObjects"]),
     ],
     dependencies: [
         .package(path: "../DefaultExtensions"),
@@ -41,6 +44,13 @@ let package = Package(
             dependencies: [
                 .product(name: "DefaultExtensions", package: "DefaultExtensions"),
                 "GlobalFonts",
+            ],
+            resources: [ ]
+        ),
+        .target(
+            name: "GlobalObjects",
+            dependencies: [
+                .product(name: "DefaultExtensions", package: "DefaultExtensions"),
             ],
             resources: [ ]
         )

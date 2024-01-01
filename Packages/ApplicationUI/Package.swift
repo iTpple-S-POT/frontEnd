@@ -13,7 +13,9 @@ let package = Package(
             targets: ["ApplicationUI"]),
     ],
     dependencies: [
-        .package(path: "../SplashUI")
+        .package(path: "../SplashUI"),
+        .package(path: "../LoginUI"),
+        .package(path: "../GlobalResource"),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -21,7 +23,9 @@ let package = Package(
         .target(
             name: "ApplicationUI",
             dependencies: [
-                .product(name: "SplashUI", package: "SplashUI")
+                .product(name: "SplashUI", package: "SplashUI"),
+                .product(name: "LoginUI", package: "LoginUI"),
+                .product(name: "GlobalObjects", package: "GlobalResource"),
             ]
         ),
         .testTarget(
