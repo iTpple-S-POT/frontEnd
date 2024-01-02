@@ -26,6 +26,7 @@ let package = Package(
             dependencies: [
                 .product(name: "DefaultExtensions", package: "DefaultExtensions"),
                 .product(name: "GlobalFonts", package: "GlobalResource"),
+                .product(name: "GlobalObjects", package: "GlobalResource"),
                 .product(name: "UserInformationUI", package: "UserInformationUI"),
                 .product(name: "KakaoSDK", package: "kakao-ios-sdk"),
             ],

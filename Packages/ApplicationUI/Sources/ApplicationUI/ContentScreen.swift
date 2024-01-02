@@ -15,7 +15,7 @@ public struct ContentScreen: View {
     
     @StateObject private var apiRequestManager = APIRequestGlobalObject()
     
-    @StateObject private var screenModel = ContentScreenModel()
+    @StateObject private var screenModel = MainNavigation()
     
     public init() { }
     
@@ -23,9 +23,13 @@ public struct ContentScreen: View {
         NavigationStack(path: $screenModel.navigationStack) {
             
             // root
-            SplashScreen()
+            VStack {
+                
+                SplashScreen()
+                
+            }
             
-                .navigationDestination(for: ContentScreenModel.DestinationType.self) { nav in
+                .navigationDestination(for: MainNavigation.DestinationType.self) { nav in
                     switch nav {
                     case .loginScreen:
                         LoginScreen()
@@ -34,95 +38,41 @@ public struct ContentScreen: View {
                                 KakaoLoginManager.shared.completeSocialLogin(url: url)
                                 
                             }
+                            .navigationBarBackButtonHidden()
                     case .mainScreen:
                         Text("MainScreen")
+                    case .preferenceScreen:
+                        Text("PerferenceScreen")
                     }
                 }
             
         }
         .onAppear {
             
-            let opTokens = screenModel.checkIsSignedInBefore()
+            let opTokens = apiRequestManager.checkTokenExistsInUserDefaults()
             
             if let (acToken, rfToken) = opTokens {
                 
-                apiRequestManager.spotAccessToken = acToken
-                apiRequestManager.spotRefreshToken = rfToken
+                apiRequestManager.setToken(accessToken: acToken, refreshToken: rfToken)
                 
                 screenModel.addToStack(destination: .mainScreen)
                 
             } else {
                 
-                screenModel.addToStack(destination: .loginScreen)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                    
+                    screenModel.addToStack(destination: .loginScreen)
+                    
+                }
                 
             }
             
         }
         .environmentObject(apiRequestManager)
+        .environmentObject(screenModel)
     }
 }
-
-class ContentScreenModel: NavigationController<MainNavDestination> {
-    
-    override init() {
-        
-        
-    }
-    
-}
-
-
-// MARK: - 로그인 여부 판단
-extension ContentScreenModel {
-    
-    // root -> Login session or Main Screen
-    func checkIsSignedInBefore() -> (String, String)? {
-        
-        // TODO: 토큰저장을 UserDefaults에서 KeyChain으로 업그레이드
-        
-        // case: 로그인을 처음시도, 리프래쉬 토큰 삭제
-        if let accessToken = UserDefaults.standard.string(forKey: "spotAccessToken"), let refreshToken = UserDefaults.standard.string(forKey: "spotRefreshToken") {
-            
-            return (accessToken, refreshToken)
-        }
-        
-        return nil
-    }
-    
-}
-
-
 
 #Preview {
     ContentScreen()
-}
-
-enum MainNavDestination {
-    
-    case loginScreen
-    case mainScreen
-    
-}
-
-class NavigationController<Destination>: ObservableObject {
-    
-    typealias DestinationType = Destination
-    
-    @Published var navigationStack: [Destination] = []
-
-    func presentScreen(destination: Destination) {
-        navigationStack = [destination]
-    }
-    
-    func addToStack(destination: Destination) {
-        navigationStack.append(destination)
-    }
-    
-    func popTopView() {
-        let _ = navigationStack.popLast()
-    }
-    
-    func clearStack() {
-        navigationStack = []
-    }
 }

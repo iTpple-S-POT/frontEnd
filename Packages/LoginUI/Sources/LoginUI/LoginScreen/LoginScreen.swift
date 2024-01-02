@@ -9,6 +9,7 @@ import SwiftUI
 import DefaultExtensions
 import KakaoSDKAuth
 import GlobalFonts
+import GlobalObjects
 import UserInformationUI
 import Alamofire
 
@@ -17,7 +18,17 @@ import Alamofire
 
 public struct LoginScreen: View {
     
+    @EnvironmentObject private var apiRequestObject: APIRequestGlobalObject
+    
+    @EnvironmentObject private var mainNavigation: MainNavigation
+    
     @State private var isKakaoLoginCompleted = false
+    
+    // Alert
+    @State private var showingAlert = false
+    @State private var alertMessage = ""
+    
+    let serverErrorMessage = "서버가 불안정합니다."
     
     public init() { }
     
@@ -67,27 +78,45 @@ public struct LoginScreen: View {
                     .resizable()
                     .scaledToFit()
                     .onTapGesture {
-                        KakaoLoginManager.shared.executeLogin { success in
-                            isKakaoLoginCompleted = success
+                        KakaoLoginManager.shared.executeLogin { result in
+                            
+                            switch result {
+                            case .success(let tokens):
+                                
+                                apiRequestObject.setToken(accessToken: tokens.accessToken, refreshToken: tokens.refreshToken, isSaveInUserDefaults: true)
+                                
+                                // 토큰 발급 성공으로 인한 이동
+                                // TODO: 선호도 입력 여뷰를 확인한 후 메인스크린으로 이동 구현
+                                // 수정 예정
+                                mainNavigation.addToStack(destination: .mainScreen)
+                                
+                            case .failure(let failure):
+                                
+                                // TODO: Error에 따른 로직, 추후 구현
+                                showingAlert = true
+                                
+                                alertMessage = serverErrorMessage
+                                
+                            }
+                            
                         }
                     }
                     .padding(.horizontal, 12)
                     .padding(.bottom, 27)
                     .padding(.top, 48)
                 
-                NavigationLink(
-                    destination: isKakaoLoginCompleted ? UserInformationConfigurationScreen() : nil,
-                    isActive: $isKakaoLoginCompleted
-                ) {
-                    EmptyView()
-                }
-                .hidden()
-                
             }
         }
+        .alert("Server Error", isPresented: $showingAlert) {
+            Button("확인") { }
+        } message: {
+            Text(alertMessage)
+        }
+
     }
 }
 
 #Preview {
     LoginScreen()
+        .environmentObject(APIRequestGlobalObject())
 }
