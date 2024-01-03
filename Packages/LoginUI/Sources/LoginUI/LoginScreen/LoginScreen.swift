@@ -18,8 +18,6 @@ import Alamofire
 
 public struct LoginScreen: View {
     
-    @EnvironmentObject private var apiRequestObject: APIRequestGlobalObject
-    
     @EnvironmentObject private var mainNavigation: MainNavigation
     
     @State private var isKakaoLoginCompleted = false
@@ -83,7 +81,7 @@ public struct LoginScreen: View {
                             switch result {
                             case .success(let tokens):
                                 
-                                apiRequestObject.setToken(accessToken: tokens.accessToken, refreshToken: tokens.refreshToken, isSaveInUserDefaults: true)
+                                APIRequestGlobalObject.shared.setToken(accessToken: tokens.accessToken, refreshToken: tokens.refreshToken, isSaveInUserDefaults: true)
                                 
                                 // 토큰 발급 성공으로 인한 이동
                                 // TODO: 선호도 입력 여뷰를 확인한 후 메인스크린으로 이동 구현
@@ -118,5 +116,4 @@ public struct LoginScreen: View {
 
 #Preview {
     LoginScreen()
-        .environmentObject(APIRequestGlobalObject())
 }

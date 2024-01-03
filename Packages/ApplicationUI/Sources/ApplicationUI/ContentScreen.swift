@@ -13,8 +13,6 @@ import GlobalObjects
 
 public struct ContentScreen: View {
     
-    @StateObject private var apiRequestManager = APIRequestGlobalObject()
-    
     @StateObject private var screenModel = MainNavigation()
     
     public init() { }
@@ -49,11 +47,11 @@ public struct ContentScreen: View {
         }
         .onAppear {
             
-            let opTokens = apiRequestManager.checkTokenExistsInUserDefaults()
+            let opTokens = APIRequestGlobalObject.shared.checkTokenExistsInUserDefaults()
             
             if let (acToken, rfToken) = opTokens {
                 
-                apiRequestManager.setToken(accessToken: acToken, refreshToken: rfToken)
+                APIRequestGlobalObject.shared.setToken(accessToken: acToken, refreshToken: rfToken)
                 
                 screenModel.addToStack(destination: .mainScreen)
                 
@@ -68,7 +66,6 @@ public struct ContentScreen: View {
             }
             
         }
-        .environmentObject(apiRequestManager)
         .environmentObject(screenModel)
     }
 }

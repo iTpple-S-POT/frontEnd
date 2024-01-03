@@ -7,17 +7,19 @@
 
 import SwiftUI
 
-public class APIRequestGlobalObject: ObservableObject {
+public struct APIRequestGlobalObject {
     
     public var spotAccessToken: String!
     public var spotRefreshToken: String!
     
-    public init() { }
+    public static var shared: APIRequestGlobalObject = .init()
+    
+    private init() { }
     
     let kAccessTokenKey = "spotAccessToken"
     let kRefreshTokenKey = "spotRefreshToken"
     
-    public func setToken(accessToken: String, refreshToken: String, isSaveInUserDefaults: Bool = false) {
+    public mutating func setToken(accessToken: String, refreshToken: String, isSaveInUserDefaults: Bool = false) {
         
         self.spotAccessToken = accessToken
         self.spotRefreshToken = refreshToken
