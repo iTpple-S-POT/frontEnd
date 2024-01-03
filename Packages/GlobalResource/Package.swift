@@ -26,6 +26,7 @@ let package = Package(
     ],
     dependencies: [
         .package(path: "../DefaultExtensions"),
+        .package(url: "https://github.com/Alamofire/Alamofire.git", exact: .init(5, 7, 1)),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -51,8 +52,17 @@ let package = Package(
             name: "GlobalObjects",
             dependencies: [
                 .product(name: "DefaultExtensions", package: "DefaultExtensions"),
+                .product(name: "Alamofire", package: "Alamofire"),
             ],
             resources: [ ]
+        ),
+        
+        //test
+        .testTarget(
+            name: "GlobalResourceTests",
+            dependencies: [
+                "GlobalObjects"
+            ]
         )
     ]
 )
