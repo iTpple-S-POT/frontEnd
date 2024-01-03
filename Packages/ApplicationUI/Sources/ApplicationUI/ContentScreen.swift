@@ -53,7 +53,11 @@ public struct ContentScreen: View {
                 
                 APIRequestGlobalObject.shared.setToken(accessToken: acToken, refreshToken: rfToken)
                 
-                screenModel.addToStack(destination: .mainScreen)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                    
+                    screenModel.addToStack(destination: .mainScreen)
+                    
+                }
                 
             } else {
                 

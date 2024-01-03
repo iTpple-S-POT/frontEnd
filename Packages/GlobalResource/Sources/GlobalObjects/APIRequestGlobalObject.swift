@@ -76,13 +76,12 @@ extension APIRequestGlobalObject {
         
         self.spotAccessToken = accessToken
         self.spotRefreshToken = refreshToken
-        let refreshToken = UserDefaults.standard.string(forKey: "spotRefreshToken")
         
         if isSaveInUserDefaults {
             
-            UserDefaults.standard.setValue(accessToken, forKey: self.kAccessTokenKey)
-            UserDefaults.standard.setValue(refreshToken, forKey: self.kRefreshTokenKey)
-            
+            UserDefaults.standard.set(accessToken, forKey: self.kAccessTokenKey)
+            UserDefaults.standard.set(refreshToken, forKey: self.kRefreshTokenKey)
+
         }
         
     }
@@ -163,6 +162,19 @@ extension APIRequestGlobalObject {
                     
                 }
         }
+        
+    }
+    
+}
+
+
+// MARK: - Pot 업로드및 조회
+public extension APIRequestGlobalObject {
+    
+    func uploadPot() throws {
+        
+        
+        
     }
     
 }
