@@ -10,6 +10,7 @@ import SwiftUI
 import Photos
 import PhotosUI
 import Combine
+import GlobalObjects
 
 public class CJPhotoCollectionViewController: UICollectionViewController {
     
@@ -373,6 +374,7 @@ public extension CJPhotoCollectionViewController {
     enum ImageInfoKey: CaseIterable {
         
         case pHImageFileUTIKey
+        case pHImageFileOrientationKey
         
         func getStringKey() throws -> String {
             
@@ -380,6 +382,8 @@ public extension CJPhotoCollectionViewController {
                 
             case .pHImageFileUTIKey:
                 return "PHImageFileUTIKey"
+            case .pHImageFileOrientationKey:
+                return "PHImageFileOrientationKey"
             default:
                 throw ImageInfoKeyError.upProcessedStringFromKey(description: "문자열로 지정되지 않은 키존재, 키: \(self)")
                 
@@ -416,17 +420,26 @@ public extension CJPhotoCollectionViewController {
                 
                 var imageInfo = ImageInformation(
                     data: imageData,
-                    name: name,
-                    orientation: orientation
+                    name: name
+//                    orientation: orientation
                 )
                 
-                let keys: [ImageInfoKey] = [.pHImageFileUTIKey]
+                let keys: [ImageInfoKey] = [
+                    .pHImageFileUTIKey,
+                    .pHImageFileOrientationKey
+                ]
                 
                 if let dict = info {
                     
                     for key in keys {
                         
-                        imageInfo.ext = dict[try! key.getStringKey()] as? String
+                        switch key {
+                        case .pHImageFileUTIKey:
+                            imageInfo.ext = dict[try! key.getStringKey()] as? String
+                        case .pHImageFileOrientationKey:
+                            // TODO: 방향 분석
+                            print("")
+                        }
                         
                     }
                     

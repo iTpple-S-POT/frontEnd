@@ -1,20 +1,7 @@
 // The Swift Programming Language
 import SwiftUI
 import Combine
-
-public struct ImageInformation: Identifiable, Equatable {
-    
-    public var id: UUID { UUID() }
-    
-    public var data: Data
-    
-    public var name: String?
-    
-    public var ext: String?
-    
-    public var orientation: CGImagePropertyOrientation
-    
-}
+import GlobalObjects
 
 class MySub {
     

@@ -8,11 +8,11 @@
 import SwiftUI
 import Photos
 import CJPhotoCollection
+import GlobalObjects
 
 internal enum DestinationSC {
     
-    case selectPhotoSc
-    case editPotSC
+    case insertText
     
 }
 
@@ -20,7 +20,9 @@ class PotUploadScreenModel: NavigationController<DestinationSC> {
     
     @Published private(set) var authorizationStatus = PHPhotoLibrary.authorizationStatus(for: .readWrite)
     
-    @Published var photoInfo: ImageInformation?
+    @Published var potUploadData: PotUploadDataModel = PotUploadDataModel()
+    
+    @Published var imageIsSelected: Bool = false
     
     func checkAuthorizationStatus() {
         
@@ -39,9 +41,9 @@ class PotUploadScreenModel: NavigationController<DestinationSC> {
     
     func photoInformationUpdated(info: ImageInformation?) {
         
-        photoInfo = info
+        potUploadData.imageInformation = info
         
-        addToStack(destination: .editPotSC)
+        addToStack(destination: .insertText)
         
     }
     
