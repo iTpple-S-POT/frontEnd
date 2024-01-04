@@ -362,9 +362,34 @@ extension CJPhotoCollectionViewController: PHPhotoLibraryChangeObserver {
 
 
 // MARK: - Cell선택
-extension CJPhotoCollectionViewController {
+public extension CJPhotoCollectionViewController {
     
-    public override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+    enum ImageInfoKeyError: Error {
+        
+        case upProcessedStringFromKey(description: String)
+        
+    }
+    
+    enum ImageInfoKey: CaseIterable {
+        
+        case pHImageFileUTIKey
+        
+        func getStringKey() throws -> String {
+            
+            switch self {
+                
+            case .pHImageFileUTIKey:
+                return "PHImageFileUTIKey"
+            default:
+                throw ImageInfoKeyError.upProcessedStringFromKey(description: "문자열로 지정되지 않은 키존재, 키: \(self)")
+                
+            }
+            
+        }
+        
+    }
+    
+    override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         
         let selectedCell = collectionView.cellForItem(at: indexPath)
         
@@ -383,13 +408,29 @@ extension CJPhotoCollectionViewController {
                 preconditionFailure("localIdentifier로 이미지 가져오기 실패")
             }
             
-            imageManager.requestImageDataAndOrientation(for: asset, options: .none) { data, imageName, orientation, _ in
+            imageManager.requestImageDataAndOrientation(for: asset, options: .none) { data, name, orientation, info in
                 
-                guard let imageData = data, let uiImage = UIImage(data: imageData) else {
+                guard let imageData = data else {
                     preconditionFailure("image data가져오기 실패")
                 }
                 
-                let imageInfo = ImageInformation(image: uiImage, orientation: orientation)
+                var imageInfo = ImageInformation(
+                    data: imageData,
+                    name: name,
+                    orientation: orientation
+                )
+                
+                let keys: [ImageInfoKey] = [.pHImageFileUTIKey]
+                
+                if let dict = info {
+                    
+                    for key in keys {
+                        
+                        imageInfo.ext = dict[try! key.getStringKey()] as? String
+                        
+                    }
+                    
+                }
                 
                 self.pub.send(imageInfo)
             }

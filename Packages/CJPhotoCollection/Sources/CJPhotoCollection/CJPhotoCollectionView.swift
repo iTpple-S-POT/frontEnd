@@ -6,7 +6,11 @@ public struct ImageInformation: Identifiable, Equatable {
     
     public var id: UUID { UUID() }
     
-    public var image: UIImage
+    public var data: Data
+    
+    public var name: String?
+    
+    public var ext: String?
     
     public var orientation: CGImagePropertyOrientation
     
