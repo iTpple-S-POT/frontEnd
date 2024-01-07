@@ -16,40 +16,59 @@ struct SelectPhotoScreenComponent: View {
     var body: some View {
         VStack(spacing: 0) {
             
-            ZStack {
+            Group {
                 
-                if screenModel.authorizationStatus == .authorized {
+                switch screenModel.authorizationStatus {
                     
+                case .authorized:
                     Text("모든 사진에대한 접근권한")
-                    
-                }
-                
-                if screenModel.authorizationStatus == .limited {
-                    
+                case .limited:
                     Text("제한된 접근")
-                    
-                }
-                
-                if screenModel.authorizationStatus == .restricted {
-                    
+                case .restricted:
                     Text("사진앱에 접근 불가한 디바이스입니다.")
-                    
-                }
-                
-                if screenModel.authorizationStatus == .denied {
-                    
+                case .denied:
                     Text("접근이 제한되었습니다.")
-                    
+                default:
+                    Text("처리되지 못한 접근권한")
                 }
                 
             }
             .frame(height: 100)
             
-            Spacer(minLength: 0)
+            Picker("앨범선택", selection: $screenModel.selectedCollectionType) {
+                
+                ForEach(screenModel.collectionTypeList, id: \.self) { item in
+                    
+                    Text(item.title)
+                    
+                }
+                
+            }
             
             if screenModel.authorizationStatus == .authorized || screenModel.authorizationStatus == .limited {
                 
-                CJPhotoCollectionView { screenModel.photoInformationUpdated(info: $0) }
+                CJPhotoCollectionView(collectionType: $screenModel.selectedCollectionType) {
+                    
+                    do {
+                        
+                        try screenModel.photoInformationUpdated(imageInfo: $0)
+                        
+                    } catch {
+                        
+                        if let imageError = error as? SelectPhotoError {
+                            
+                            screenModel.showImageDataUnavailable()
+                            
+                        }
+                        
+                    }
+                    
+                } collectionTypesCompletion: {
+                    
+                    screenModel.collectionTypeList = $0
+                    
+                }
+
                 
             } else {
                 
@@ -64,6 +83,11 @@ struct SelectPhotoScreenComponent: View {
         .onAppear(perform: {
             screenModel.checkAuthorizationStatus()
         })
+        .alert(isPresented: $screenModel.showAlert) {
+            
+            Alert(title: Text(screenModel.alertTitle), message: Text(screenModel.alertMessage), dismissButton: .default(Text("닫기")))
+            
+        }
     }
 }
 

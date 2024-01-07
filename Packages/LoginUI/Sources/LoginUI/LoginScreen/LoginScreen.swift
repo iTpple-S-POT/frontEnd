@@ -81,6 +81,8 @@ public struct LoginScreen: View {
                             switch result {
                             case .success(let tokens):
                                 
+                                print(tokens)
+                                
                                 APIRequestGlobalObject.shared.setToken(accessToken: tokens.accessToken, refreshToken: tokens.refreshToken, isSaveInUserDefaults: true)
                                 
                                 // 토큰 발급 성공으로 인한 이동

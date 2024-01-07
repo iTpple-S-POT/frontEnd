@@ -4,7 +4,6 @@
 //
 //  Created by 최준영 on 2023/12/27.
 //
-
 import UIKit
 import SwiftUI
 import Photos
@@ -26,11 +25,20 @@ public class CJPhotoCollectionViewController: UICollectionViewController {
     
     // 캐싱및 이미지 불러오기
     var fetchedAssets: PHFetchResult<PHAsset>!
+    var fetchedCollections: PHFetchResult<PHAssetCollection>!
     let imageManager = PHCachingImageManager()
     var previousPreheatRect: CGRect = .zero
     
+    // 보여질 컬랙션 옵션 객체
+    var collectionType: [CollectionTypeObject] = [
+        .allPhoto,
+        .likedPhtoto
+    ]
+    
     // 선택된 셀을 전송할 퍼블리셔
-    let pub = PassthroughSubject<ImageInformation?, Never>()
+    let selectedPhotoPub = PassthroughSubject<ImageInformation?, Never>()
+    let collectionTypesPub = PassthroughSubject<[CollectionTypeObject], Never>()
+    
     
     public init() {
         
@@ -44,13 +52,22 @@ public class CJPhotoCollectionViewController: UICollectionViewController {
     
 }
 
-
-
 // MARK: - UIViewController 라이프 사이클
 public extension CJPhotoCollectionViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        // 최초 1회실행, 퍼블리셔 등록을 위해 이렇게 호출
+        if self.fetchedAssets == nil {
+            
+            // 켈렉션 타입 가져오기
+            fetchCollections()
+            
+            // 최초 사진 불러오기 디폴티 = "최근 항목"
+            fetchPhotos(typeObject: .allPhoto)
+            
+        }
         
         // 재사용 Cell타입들을 등록
         collectionView?.register(CJCameraCell.self, forCellWithReuseIdentifier: String(describing: CJCameraCell.self))
@@ -58,9 +75,6 @@ public extension CJPhotoCollectionViewController {
         
         // 캐싱 초기화
         resetCachedAssets()
-        
-        // 사진 불러오기
-        fetchPhotos()
         
     }
     
@@ -113,18 +127,64 @@ public extension CJPhotoCollectionViewController {
 // MARK: - Photos에서 에셋가져오기
 extension CJPhotoCollectionViewController {
     
-    private func fetchPhotos() {
+    private func fetchCollections() {
         
-        if self.fetchedAssets == nil {
+        // collection
+        let collectionFetchOptions = PHFetchOptions()
+        
+        let assetCollections = PHAssetCollection.fetchAssetCollections(with: .album, subtype: .any, options: nil)
+        
+        let numOfCollections = assetCollections.count
+        
+        for index in 0..<numOfCollections {
             
-            // 사진을 불러오는 옵션
-            let fetchOptions = PHFetchOptions()
+            let title = assetCollections[index].localizedTitle
             
-            // 정렬기준설정, ascending = "오름차순"
-            fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
+            let object = CollectionTypeObject(type: .albumPhotos, title: title ?? "제목이 없는 앨범", indexForCollection: index)
+            
+            self.collectionType.append(object)
+            
+        }
+        
+        self.fetchedCollections = assetCollections
+        
+        collectionTypesPub.send(self.collectionType)
+        
+    }
+
+    internal func fetchPhotos(typeObject: CollectionTypeObject) {
+        
+        // 공통 옵션
+        let fetchOptions = PHFetchOptions()
+        
+        // 기본 정렬기준설정, ascending = "오름차순"
+        fetchOptions.sortDescriptors = [
+            NSSortDescriptor(key: "creationDate", ascending: false),
+        ]
+        
+        fetchOptions.wantsIncrementalChangeDetails = true
+        
+        if typeObject.type == .resentAllPhotos {
             
             self.fetchedAssets = PHAsset.fetchAssets(with: fetchOptions)
             
+        }
+        
+        if typeObject.type != .albumPhotos {
+            
+            if typeObject.type == .likedPhotos {
+                
+                fetchOptions.predicate = NSPredicate(format: "isFavorite == %@", NSNumber(value: true))
+                
+            }
+            
+            self.fetchedAssets = PHAsset.fetchAssets(with: fetchOptions)
+            
+        } else {
+            
+            let collection = self.fetchedCollections[typeObject.indexForCollection!]
+            
+            self.fetchedAssets = PHAsset.fetchAssets(in: collection, options: fetchOptions)
             
         }
         
@@ -164,7 +224,7 @@ public extension CJPhotoCollectionViewController {
         
         // 일반 이미지 셀인 경우
         
-        let asset = fetchedAssets.object(at: indexPath.item-1)
+        let asset = fetchedAssets.object(at: indexPath.item-1) as PHAsset
         
         let cellIdentifier = String(describing: CJPhotoCell.self)
         
@@ -180,7 +240,11 @@ public extension CJPhotoCollectionViewController {
             
             if cell.representedAssetId == asset.localIdentifier {
                 
-                cell.thumbNailImage = image
+                DispatchQueue.main.async {
+                    
+                    cell.thumbNailImage = image
+                    
+                }
                 
             }
             
@@ -393,6 +457,7 @@ public extension CJPhotoCollectionViewController {
         
     }
     
+    // 이미지 선택
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         
         let selectedCell = collectionView.cellForItem(at: indexPath)
@@ -412,40 +477,28 @@ public extension CJPhotoCollectionViewController {
                 preconditionFailure("localIdentifier로 이미지 가져오기 실패")
             }
             
-            imageManager.requestImageDataAndOrientation(for: asset, options: .none) { data, name, orientation, info in
+            imageManager.requestImageDataAndOrientation(for: asset, options: .none) { data, type, orientation, _ in
                 
                 guard let imageData = data else {
-                    preconditionFailure("image data가져오기 실패")
+                    // TODO: 데이터를 가져울 수 없는 사진
+                    return self.selectedPhotoPub.send(nil)
                 }
                 
-                var imageInfo = ImageInformation(
+                guard let imageExt = type else {
+                    // TODO: 익스텐션을 가져올 수 없음
+                    return self.selectedPhotoPub.send(nil)
+                }
+                
+                let arr = imageExt.split(separator: ".")
+                
+                let ext = String(arr[arr.endIndex-1])
+                
+                let imageInfo = ImageInformation(
                     data: imageData,
-                    name: name
-//                    orientation: orientation
+                    ext: ext
                 )
                 
-                let keys: [ImageInfoKey] = [
-                    .pHImageFileUTIKey,
-                    .pHImageFileOrientationKey
-                ]
-                
-                if let dict = info {
-                    
-                    for key in keys {
-                        
-                        switch key {
-                        case .pHImageFileUTIKey:
-                            imageInfo.ext = dict[try! key.getStringKey()] as? String
-                        case .pHImageFileOrientationKey:
-                            // TODO: 방향 분석
-                            print("")
-                        }
-                        
-                    }
-                    
-                }
-                
-                self.pub.send(imageInfo)
+                self.selectedPhotoPub.send(imageInfo)
             }
             
             return

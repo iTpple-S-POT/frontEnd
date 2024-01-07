@@ -3,25 +3,34 @@ import SwiftUI
 import Combine
 import GlobalObjects
 
-class MySub {
+public class Coordinator {
     
-    var sub: AnyCancellable?
+    var previousColleciton: CollectionTypeObject = .allPhoto
     
+    var selectedPhotoSub: AnyCancellable?
+    
+    var collectionListSub: AnyCancellable?
+    
+    deinit {
+        
+        selectedPhotoSub?.cancel()
+        collectionListSub?.cancel()
+    }
 }
 
 public struct CJPhotoCollectionView: UIViewControllerRepresentable {
     
-    public typealias SubClosure = (ImageInformation?) -> ()
+    @Binding var collectionType: CollectionTypeObject
     
     // publisher가 퍼블리쉬시 호출되는 클로저 타입입니다.
-    public var completion: SubClosure
+    public var selectedPhotoCompletion: (ImageInformation?) -> ()
+    public var collectionTypesCompletion: ([CollectionTypeObject]) -> ()
     
-    private var mySub = MySub()
-    
-    public init(completion: @escaping SubClosure) {
+    public init(collectionType: Binding<CollectionTypeObject>, selectedPhotoCompletion: @escaping (ImageInformation?) -> (), collectionTypesCompletion: @escaping ([CollectionTypeObject]) -> ()) {
         
-        self.completion = completion
-        
+        self._collectionType = collectionType
+        self.selectedPhotoCompletion = selectedPhotoCompletion
+        self.collectionTypesCompletion = collectionTypesCompletion
     }
     
     public typealias UIViewControllerType = CJPhotoCollectionViewController
@@ -30,7 +39,9 @@ public struct CJPhotoCollectionView: UIViewControllerRepresentable {
         
         let collectionViewController = CJPhotoCollectionViewController()
         
-        mySub.sub = collectionViewController.pub.sink { _ in
+        let coordi = context.coordinator
+        
+        coordi.selectedPhotoSub = collectionViewController.selectedPhotoPub.sink { _ in
             
             print("connecton finished")
             
@@ -38,7 +49,21 @@ public struct CJPhotoCollectionView: UIViewControllerRepresentable {
             
             DispatchQueue.main.async {
                 
-                completion(data)
+                selectedPhotoCompletion(data)
+                
+            }
+            
+        }
+        
+        coordi.collectionListSub = collectionViewController.collectionTypesPub.sink { _ in
+            
+            print("connecton finished")
+            
+        } receiveValue: { data in
+            
+            DispatchQueue.main.async {
+             
+                collectionTypesCompletion(data)
                 
             }
             
@@ -50,8 +75,23 @@ public struct CJPhotoCollectionView: UIViewControllerRepresentable {
     
     public func updateUIViewController(_ uiViewController: UIViewControllerType, context: Context) {
         
-        // Binding 프롵퍼티 수정시 호출
+        let coodi = context.coordinator
         
+        if coodi.previousColleciton == collectionType {
+            
+            return
+        }
+        
+        // Binding 프롵퍼티 수정시 호출
+        coodi.previousColleciton = collectionType
+        
+        uiViewController.fetchPhotos(typeObject: collectionType)
+        uiViewController.collectionView.reloadData()
+        
+    }
+    
+    public func makeCoordinator() -> Coordinator {
+        Coordinator()
     }
     
 }

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import GlobalObjects
 
 public struct MainScreen: View {
     
@@ -44,6 +45,9 @@ public struct MainScreen: View {
             }
             .zIndex(1)
             
+        }
+        .onAppear {
+            APIRequestGlobalObject.shared.getCategory()
         }
     }
 }

@@ -8,17 +8,38 @@
 import SwiftUI
 import Alamofire
 
-public struct APIRequestGlobalObject {
+public class APIRequestGlobalObject {
     
     public var spotAccessToken: String!
     public var spotRefreshToken: String!
+    
+    private var potCategories: [PotCategory]!
     
     public static var shared: APIRequestGlobalObject = .init()
     
     private init() { }
     
+    // tokens
     let kAccessTokenKey = "spotAccessToken"
     let kRefreshTokenKey = "spotRefreshToken"
+    
+    // pot
+    let kPotCategory = "spotPotCategory"
+    
+    private let session: Session = {
+        let configuration = URLSessionConfiguration.default
+        configuration.timeoutIntervalForRequest = 10
+        configuration.timeoutIntervalForResource = 10
+        return Session(configuration: configuration)
+    }()
+    
+    
+    // 연산 프로퍼티
+    private var getBearerAuthorizationValue: String {
+        
+        return "Bearer \(spotAccessToken!)"
+        
+    }
     
 }
 
@@ -30,13 +51,30 @@ enum SpotApiRequestError: Error {
 }
 
 // MARK: - API공통
+
+// 네트워크통신 에러
+public enum SpotNetworkError: Error {
+    
+    // TODO: 네트워크 에러 구체화
+    case serverError
+    case dataTransferError
+    case wrongDataTransfer
+    
+    case cantFindRefreshToken
+    
+    case urlError(description: String)
+    
+}
+
 public extension APIRequestGlobalObject {
     
     enum SpotAPI: CaseIterable {
         
         case getSpotToken
+        case refreshSpotToken
         case getPotCategory
         case postPot
+        case preSignedUrl
         
         static let baseUrl = "http://43.201.220.214"
         
@@ -47,10 +85,14 @@ public extension APIRequestGlobalObject {
             switch self {
             case .getSpotToken:
                 additinalUrl = "/auth/login/KAKAO"
+            case .refreshSpotToken:
+                additinalUrl = "/auth/refresh"
             case .getPotCategory:
                 additinalUrl = "/pot/category"
             case .postPot:
                 additinalUrl = "/pot"
+            case .preSignedUrl:
+                additinalUrl = "/pot/image/pre-signed-url"
             @unknown default:
                 throw SpotApiRequestError.apiUrlError(discription: "주소가 지정되지 않은 API가 있습니다.")
             }
@@ -72,7 +114,7 @@ public extension APIRequestGlobalObject {
 extension APIRequestGlobalObject {
     
     // 토큰 저장
-    public mutating func setToken(accessToken: String, refreshToken: String, isSaveInUserDefaults: Bool = false) {
+    public func setToken(accessToken: String, refreshToken: String, isSaveInUserDefaults: Bool = false) {
         
         self.spotAccessToken = accessToken
         self.spotRefreshToken = refreshToken
@@ -81,7 +123,7 @@ extension APIRequestGlobalObject {
             
             UserDefaults.standard.set(accessToken, forKey: self.kAccessTokenKey)
             UserDefaults.standard.set(refreshToken, forKey: self.kRefreshTokenKey)
-
+            
         }
         
     }
@@ -110,18 +152,9 @@ public struct SpotTokenResponse {
     
 }
 
-public enum SpotNetworkError: Error {
+public extension APIRequestGlobalObject {
     
-    // TODO: 네트워크 에러 구체화
-    case serverError
-    case dataTransferError
-    case wrongDataTransfer
-    
-}
-
-extension APIRequestGlobalObject {
-    
-    public func sendAccessTokenToServer(accessToken: String, refreshToken: String, completion: @escaping (Result<SpotTokenResponse, SpotNetworkError>) -> Void) {
+    func sendAccessTokenToServer(accessToken: String, refreshToken: String, completion: @escaping (Result<SpotTokenResponse, SpotNetworkError>) -> Void) {
         
         let url = try! SpotAPI.getSpotToken.getApiUrl()
         
@@ -135,32 +168,52 @@ extension APIRequestGlobalObject {
         ]
         
         AF.request(url, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: headers)
-            .validate(statusCode: 200..<300)
-            .responseData{ response in
-                switch response.result {
-                case .success(let data):
-                    
-                    if let decoded = try? JSONDecoder().decode(SpotTokenResponseModel.self, from: data) {
-                        
-                        let tokenData = SpotTokenResponse(accessToken: decoded.accessToken, refreshToken: decoded.refreshToken)
-                        
-                        completion(.success(tokenData))
-                        
-                        return
-                        
-                    }
-                    
-                    // 잘못된 데이터 전송으로인한 디코딩 실패
-                    completion(.failure(.wrongDataTransfer))
-                    
-                    
-                case .failure(let error):
-                    
-                    print("Server error: \(error.localizedDescription)")
-                    
-                    completion(.failure(.serverError))
-                    
-                }
+            .validate()
+            .responseData { self.tokenRequestCompletionHandler(response: $0, completion: completion) }
+        
+    }
+    
+    func refreshTokens(completion: @escaping (Result<SpotTokenResponse, SpotNetworkError>) -> Void) {
+        
+        let url = try! SpotAPI.refreshSpotToken.getApiUrl()
+        
+        let parameter: [String: Any] = [
+            "refreshToken": spotRefreshToken!
+        ]
+        
+        let headers: HTTPHeaders = [
+            "Content-Type": "application/json"
+        ]
+        
+        AF
+            .request(url, method: .post, parameters: parameter, encoding: JSONEncoding.default, headers: headers)
+            .validate()
+            .responseData { self.tokenRequestCompletionHandler(response: $0, completion: completion) }
+        
+    }
+    
+    private func tokenRequestCompletionHandler(response: AFDataResponse<Data>, completion: (Result<SpotTokenResponse, SpotNetworkError>) -> Void) {
+        
+        switch response.result {
+        case .success(let data):
+            
+            if let decoded = try? JSONDecoder().decode(SpotTokenResponseModel.self, from: data) {
+                
+                let tokenData = SpotTokenResponse(accessToken: decoded.accessToken, refreshToken: decoded.refreshToken)
+                
+                completion(.success(tokenData))
+                
+                return
+                
+            }
+            
+            // 잘못된 데이터 전송으로인한 디코딩 실패
+            completion(.failure(.wrongDataTransfer))
+            
+        case .failure(let error):
+            
+            completion(.failure(.cantFindRefreshToken))
+            
         }
         
     }
@@ -168,13 +221,170 @@ extension APIRequestGlobalObject {
 }
 
 
-// MARK: - Pot 업로드및 조회
+// MARK: - API: 팟업로드및 조회
 public extension APIRequestGlobalObject {
     
-    func uploadPot() throws {
+    func getCategory() {
         
+        getCategory { result in
+            
+            switch result {
+            case .success(let data):
+                
+                self.potCategories = data
+                
+            case .failure(let error):
+                
+                switch error {
+                    // TODO: 추후 구현
+                default:
+                    return
+                }
+            }
+            
+        }
         
         
     }
     
+    // 카테고리 탐색
+    private func getCategory(completion: @escaping (Result<[PotCategory], SpotNetworkError>) -> Void) {
+        
+        if let data = UserDefaults.standard.data(forKey: kPotCategory) {
+            
+            let decoded = try? JSONDecoder().decode([PotCategory].self, from: data)
+            
+            self.potCategories = decoded
+            
+            return
+        }
+        
+        let url = try! SpotAPI.getPotCategory.getApiUrl()
+        
+        let headers: HTTPHeaders = [
+            "Authorization": "Bearer \(spotAccessToken!)",
+            "Content-Type": "application/json",
+        ]
+        
+        AF
+            .request(url, method: .get, headers: headers)
+            .validate(statusCode: 200..<300)
+            .responseData { reponse in
+                switch reponse.result {
+                case .success(let data):
+                    
+                    guard let decoded = try? JSONDecoder().decode(SpotPotCategoryModel.self, from: data) else {
+                        return completion(.failure(.wrongDataTransfer))
+                    }
+                    
+                    completion(.success(decoded.categoryList))
+                    
+                case .failure(let error):
+                    
+                    // TODO: 에러 구체화
+                    completion(.failure(.serverError))
+                    
+                }
+            }
+        
+        
+    }
+    
+    // 팟 업로드
+    func uploadPot(imageInfo: ImageInformation) {
+        
+        Task {
+            
+            do {
+                let psObject = try await getPreSignedUrl(imageInfo: imageInfo)
+                
+                try uploadImageToS3(psUrlString: psObject.preSignedUrl, imageData: imageInfo.data) {
+                    result in
+                    
+                    switch result {
+                    case .success( _ ):
+                        
+                        return
+                        
+                    case .failure(let error):
+                        print(error.localizedDescription)
+                    }
+                    
+                }
+                
+                
+            }
+            catch {
+                
+            }
+            
+        }
+    }
+    
+    
+    private func getPreSignedUrl(
+        imageInfo: ImageInformation) async throws -> PreSignedUrlObject {
+            
+            let url = try! SpotAPI.preSignedUrl.getApiUrl()
+            
+            let fileName = imageInfo.id.uuidString + "." + imageInfo.ext
+            
+
+            var request = try URLRequest(url: url, method: .post)
+            
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.setValue(getBearerAuthorizationValue, forHTTPHeaderField: "Authorization")
+            
+            request.timeoutInterval = 10
+            
+            
+            // POST 로 보낼 정보
+            let params: [String: Any] = [
+                "fileName" : fileName
+            ]
+            
+            try request.httpBody = JSONSerialization.data(withJSONObject: params, options: [])
+            
+            let re = AF.request(request)
+            
+            let dataTask = re.serializingDecodable(PreSignedUrlResponseModel.self)
+            
+            switch await dataTask.result {
+                
+            case .success(let object):
+                return PreSignedUrlObject(preSignedUrl: object.preSignedUrl, fileKey: object.fileKey)
+            case .failure:
+                throw SpotNetworkError.dataTransferError
+            }
+        }
+    
+    
+    func uploadImageToS3(psUrlString: String, imageData: Data, comepletion: @escaping (Result<Bool, SpotNetworkError>) -> Void) throws {
+        
+        print(psUrlString)
+        
+        guard let url = URL(string: psUrlString) else {
+            throw SpotNetworkError.urlError(description: "presigned url, url 전환 에러")
+        }
+        
+        var request = try URLRequest(url: url, method: .put)
+        request.timeoutInterval = 0
+        request.setValue("binary/octet-stream", forHTTPHeaderField: "Content-Type")
+        request.httpBody = imageData
+        
+        
+        AF
+            .request(request)
+            .validate()
+            .response { response in
+                switch response.result {
+                case .success( _ ):
+                    comepletion(.success(true))
+                case .failure( _ ):
+                    comepletion(.failure(.serverError))
+                }
+            }
+        
+        
+    }
 }

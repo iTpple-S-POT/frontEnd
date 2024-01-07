@@ -42,15 +42,13 @@ struct PotUploadScreen: View {
                 SelectPhotoScreenComponent(screenModel: screenModel)
             }
             
-                .navigationDestination(for: DestinationSC.self) { type in
+                .navigationDestination(for: PotUploadDestination.self) { type in
                     
                     switch type {
-                    case .editPotSC:
-                        Image(uiImage: screenModel.photoInfo?.image ?? UIImage(systemName: "x.circle")!)
-                            .resizable()
-                            .scaledToFit()
-                    case .selectPhotoSc:
-                        fatalError("Navigation Error")
+                        
+                    case .insertText:
+                        InsetTextScreenComponent(screenModel: screenModel)
+                        
                     }
                     
                 }

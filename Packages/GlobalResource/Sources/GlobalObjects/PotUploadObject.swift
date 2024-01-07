@@ -13,16 +13,24 @@ public struct ImageInformation: Identifiable, Equatable {
     
     public var data: Data
     
-    public var name: String?
-    
-    public var ext: String?
+    public var ext: String
     
 //    public var orientation: CGImagePropertyOrientation
     
-    public init(data: Data, name: String? = nil, ext: String? = nil) {
+    public init(data: Data, ext: String) {
         self.data = data
-        self.name = name
         self.ext = ext
     }
     
 }
+
+struct PotUploadObject {
+    
+    // 위치
+    // 카테고리
+    
+    var imageInfo: ImageInformation
+    
+}
+
+

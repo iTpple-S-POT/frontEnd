@@ -10,19 +10,39 @@ import Photos
 import CJPhotoCollection
 import GlobalObjects
 
-internal enum DestinationSC {
+public enum PotUploadDestination {
     
     case insertText
     
 }
 
-class PotUploadScreenModel: NavigationController<DestinationSC> {
+public enum SelectPhotoError: Error {
+    
+    case dataUnavailableForPhoto
+    
+}
+
+public class PotUploadScreenModel: NavigationController<PotUploadDestination> {
     
     @Published private(set) var authorizationStatus = PHPhotoLibrary.authorizationStatus(for: .readWrite)
     
-    @Published var potUploadData: PotUploadDataModel = PotUploadDataModel()
+    @Published var imageInfo: ImageInformation!
+    
+    @Published var potText: String = ""
     
     @Published var imageIsSelected: Bool = false
+    
+    @Published var selectedCollectionType: CollectionTypeObject = .allPhoto
+    
+    @Published var collectionTypeList: [CollectionTypeObject] = [
+        .allPhoto,
+        .likedPhtoto
+    ]
+    
+    // 데이터를 받을 수 없는 사진의 경우 Alert표시
+    @Published var showAlert = false
+    @Published private(set) var alertTitle = ""
+    @Published private(set) var alertMessage = ""
     
     func checkAuthorizationStatus() {
         
@@ -39,33 +59,34 @@ class PotUploadScreenModel: NavigationController<DestinationSC> {
         
     }
     
-    func photoInformationUpdated(info: ImageInformation?) {
+    func photoInformationUpdated(imageInfo: ImageInformation?) throws {
         
-        potUploadData.imageInformation = info
+        if imageInfo != nil {
+            
+            self.imageInfo = imageInfo
+            
+            addToStack(destination: .insertText)
+            
+        } else {
+            
+            throw SelectPhotoError.dataUnavailableForPhoto
+        }
         
-        addToStack(destination: .insertText)
+    }
+    
+    func showImageDataUnavailable() {
         
+        showAlert = true
+        alertTitle = "사용할 수 없는 이미지"
+        alertMessage = "다른 이미지를 선택해주세요."
     }
     
 }
 
 
-class NavigationController<Destination>: ObservableObject {
-    @Published var navigationStack: [Destination] = []
-
-    func presentScreen(destination: Destination) {
-        navigationStack = [destination]
-    }
+// MARK: - 팟 업로드용 데이터
+extension PotUploadScreenModel {
     
-    func addToStack(destination: Destination) {
-        navigationStack.append(destination)
-    }
     
-    func popTopView() {
-        let _ = navigationStack.popLast()
-    }
     
-    func clearStack() {
-        navigationStack = []
-    }
 }

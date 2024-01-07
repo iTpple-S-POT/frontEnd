@@ -12,6 +12,8 @@ open class NavigationController<Destination>: ObservableObject {
     public typealias DestinationType = Destination
     
     @Published public var navigationStack: [Destination] = []
+    
+    public init() { }
 
     public func presentScreen(destination: Destination) {
         navigationStack = [destination]

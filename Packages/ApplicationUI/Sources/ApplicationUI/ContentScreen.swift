@@ -10,6 +10,7 @@ import SplashUI
 import LoginUI
 import Alamofire
 import GlobalObjects
+import MainScreenUI
 
 public struct ContentScreen: View {
     
@@ -38,7 +39,8 @@ public struct ContentScreen: View {
                             }
                             .navigationBarBackButtonHidden()
                     case .mainScreen:
-                        Text("MainScreen")
+                        MainScreen()
+                            .navigationBarBackButtonHidden()
                     case .preferenceScreen:
                         Text("PerferenceScreen")
                     }
@@ -53,9 +55,39 @@ public struct ContentScreen: View {
                 
                 APIRequestGlobalObject.shared.setToken(accessToken: acToken, refreshToken: rfToken)
                 
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                    
-                    screenModel.addToStack(destination: .mainScreen)
+                // refresh
+                APIRequestGlobalObject.shared.refreshTokens { result in
+                    switch result {
+                    case .success(let success):
+                        print("리프래쉬 성공")
+                        APIRequestGlobalObject.shared.setToken(accessToken: success.accessToken, refreshToken: success.refreshToken, isSaveInUserDefaults: true)
+                        
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                            
+                            screenModel.addToStack(destination: .mainScreen)
+                            
+                        }
+                    case .failure(let error):
+                        
+                        switch error {
+                        case .cantFindRefreshToken:
+                            print("리프래쉬 토큰을 찾을 수 없음")
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                                
+                                screenModel.addToStack(destination: .loginScreen)
+                                
+                            }
+                        default:
+                            print("오류")
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                                
+                                screenModel.addToStack(destination: .loginScreen)
+                                
+                            }
+                            
+                        }
+                        
+                    }
                     
                 }
                 
