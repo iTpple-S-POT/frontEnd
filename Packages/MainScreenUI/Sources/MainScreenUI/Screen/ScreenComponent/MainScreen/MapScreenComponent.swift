@@ -7,9 +7,6 @@
 
 import SwiftUI
 import CJMapkit
-import MapKit
-import CoreLocation
-import Combine
 
 struct MapScreenComponent: View {
     

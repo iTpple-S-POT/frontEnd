@@ -1,11 +1,14 @@
 //
 //  MapScreenComponentModel.swift
-//  
+//
 //
 //  Created by 최준영 on 2024/01/08.
 //
 
 import SwiftUI
+import CoreLocation
+import Combine
+import CJMapkit
 
 enum SpotLocationError: Error {
     
