@@ -13,7 +13,7 @@ public class APIRequestGlobalObject {
     public var spotAccessToken: String!
     public var spotRefreshToken: String!
     
-    private var potCategories: [PotCategory]!
+    public var potCategories: [PotCategory]!
     
     public static var shared: APIRequestGlobalObject = .init()
     
