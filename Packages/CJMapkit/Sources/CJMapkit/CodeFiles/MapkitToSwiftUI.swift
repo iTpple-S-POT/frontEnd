@@ -4,18 +4,13 @@ import MapKit
 
 
 // MARK: - Coordinator
-internal class MkMapViewCoordinator: NSObject, MKMapViewDelegate, CLLocationManagerDelegate {
+public class MkMapViewCoordinator: NSObject, MKMapViewDelegate, CLLocationManagerDelegate {
     
     var mapView: MKMapView?
     
     override init() {
         super.init()
         registerAnnotation()
-        
-        // Closure등록
-        CJLocationManager.shared.registerUpdatingCenterClosure(closure: updateCenter(location:))
-        
-        CJLocationManager.shared.requestAuthorization()
     }
     
     
@@ -44,28 +39,31 @@ internal class MkMapViewCoordinator: NSObject, MKMapViewDelegate, CLLocationMana
 }
 
 // MARK: - UIViewRepresentable
-internal struct MapkitView: UIViewRepresentable {
+public struct MapkitViewRepresentable: UIViewRepresentable {
     
-    typealias UIViewType = MKMapView
+    public typealias UIViewType = MKMapView
     
-    var center: CLLocationCoordinate2D
+    @Binding var userLocation: CLLocationCoordinate2D
     
     var annotations: [AnnotationClassType]
     
-    init(firstLocation: CLLocation, annotations: [AnnotationClassType]) {
+    public init(userLocation: Binding<CLLocationCoordinate2D>, annotations: [AnnotationClassType]) {
+        self._userLocation = userLocation
         self.annotations = annotations
-        self.center = firstLocation.coordinate
     }
     
-    func makeUIView(context: Context) -> MKMapView {
+    public func makeUIView(context: Context) -> MKMapView {
+        
         let mapView = MKMapView()
+        
+        context.coordinator.mapView = mapView
+        
         mapView.delegate = context.coordinator
         context.coordinator.mapView = mapView
         
-        // Set span
-        let mapCenterCoordinate = self.center
-        let cr = MKCoordinateRegion(center: mapCenterCoordinate, latitudinalMeters: 500, longitudinalMeters: 500)
-        mapView.region = cr
+        let centerLocation = CJLocationManager.getUserLocationFromLocal()
+
+        mapView.region = MKCoordinateRegion(center: centerLocation, latitudinalMeters: 500, longitudinalMeters: 500)
         mapView.isZoomEnabled = false
         
         // Add annotations
@@ -74,24 +72,13 @@ internal struct MapkitView: UIViewRepresentable {
         return mapView
     }
     
-    func makeCoordinator() -> MkMapViewCoordinator {
+    public func makeCoordinator() -> MkMapViewCoordinator {
         MkMapViewCoordinator()
     }
     
-    func updateUIView(_ uiView: MKMapView, context: Context) { }
-}
-
-// MARK: - SwiftUI View
-public struct CJMapkitView: View {
-    public var userLocation: CLLocation
-    public var annotations: [AnnotationClassType]
-    
-    public init(userLocation: CLLocation, annotations: [AnnotationClassType]) {
-        self.userLocation = userLocation
-        self.annotations = annotations
-    }
-
-    public var body: some View {
-        MapkitView(firstLocation: userLocation, annotations: annotations)
+    public func updateUIView(_ uiView: MKMapView, context: Context) {
+        
+        uiView.camera.centerCoordinate = self.userLocation
+        
     }
 }

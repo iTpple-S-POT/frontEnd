@@ -8,34 +8,48 @@
 import Foundation
 import CoreLocation
 
-public class CJLocationManager: NSObject, CLLocationManagerDelegate {
+public enum UserLocationError: Error {
+    
+    case cantGetUserLocation
+    
+}
+
+public class CJLocationManager: NSObject {
     public let manager = CLLocationManager()
     
-    public static let shared = CJLocationManager()
+    public var currentLocationCompletion: GetLocationClosure!
     
-    private var updateMapViewCenter: ((CLLocation) -> ())?
+    public typealias GetLocationClosure = (Result<CLLocation, UserLocationError>) -> ()
     
-    private override init() {
+    // Userdefults
+    static let kLatestUserLocation = "userLocation"
+    
+    public override init() {
         super.init()
+        
         manager.delegate = self
+        manager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
+        
+        // TODO: 업데이트 거리를 몇미터로 할 것인지 정하기
+        manager.distanceFilter = 10
     }
     
-    public func registerUpdatingCenterClosure(closure: @escaping (CLLocation) -> ()) {
-        updateMapViewCenter = closure
+    /// 권한 요구 프롬프트 실행
+    public func requestAuthorization() {
+        
+        manager.requestWhenInUseAuthorization()
     }
+}
+
+// MARK: - CLLocationManagerDelegate
+extension CJLocationManager: CLLocationManagerDelegate {
     
     public func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         let status = manager.authorizationStatus
         
         switch status {
-        case .notDetermined:
-            manager.requestWhenInUseAuthorization()
-            return
-        case .authorizedWhenInUse:
-            manager.requestLocation()
-            return
-        case .restricted, .denied:
-            return
+        case .authorizedAlways, .authorizedWhenInUse:
+            requestCurrentLocation()
         default:
             return
         }
@@ -43,20 +57,53 @@ public class CJLocationManager: NSObject, CLLocationManagerDelegate {
     
     /// location property로 부터 retrieve실패
     public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        print(error.localizedDescription)
+        
+        self.currentLocationCompletion(.failure(.cantGetUserLocation))
+        
     }
     
-    /// location이 업데이트 되면 해당 맵의 center를 업데이트
     public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        if let currentLoc = locations.last {
-            updateMapViewCenter?(currentLoc)
-        }
+        
+        let currentLocation = locations.first!
+        
+        currentLocationCompletion(.success(currentLocation))
+        
+        print("로케이션이 없데이트 되었습니다.")
+        
+        // 새로운 위치 로컬에 저장
+        Self.saveUserLocationToLocal(coordinate: currentLocation.coordinate)
     }
     
-    /// 권한 요구 프롬프트 실행
-    public func requestAuthorization() {
-        if manager.authorizationStatus == .notDetermined {
-            manager.requestWhenInUseAuthorization()
-        }
+}
+
+// MARK: - 현재위치 요청
+public extension CJLocationManager {
+    
+    func requestCurrentLocation() {
+        
+        manager.startUpdatingLocation()
+        
     }
+    
+    static func getUserLocationFromLocal() -> CLLocationCoordinate2D {
+        
+        // 기본 주소: 서울특별시
+        let defaultLocation = CLLocationCoordinate2D(latitude: 37.5518911, longitude: 126.9917937)
+        
+        if let coordinateArray = UserDefaults.standard.object(forKey: Self.kLatestUserLocation) as? [Double] {
+            
+            return CLLocationCoordinate2D(latitude: coordinateArray[0], longitude: coordinateArray[1])
+            
+        }
+        
+        return defaultLocation
+    }
+    
+    static func saveUserLocationToLocal(coordinate: CLLocationCoordinate2D) {
+        
+        let coordinateArray = [coordinate.latitude, coordinate.longitude]
+        UserDefaults.standard.set(coordinateArray, forKey: kLatestUserLocation)
+        
+    }
+    
 }

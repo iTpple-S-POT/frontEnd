@@ -59,7 +59,7 @@ private func makeInfoPlist(merging other: [String: Plist.Value] = [:]) -> InfoPl
         "CFBundleShortVersionString": "\(version)",
         "CFBundleVersion": "\(bundleVersion)",
         "CFBundleDisplayName": "$(APP_DISPLAY_NAME)",
-        "Privacy - Location When In Use Usage Description": "앱을 사용하는 동안 사용자의 위치를 특정합니다.",
+        "NSLocationWhenInUseUsageDescription": "앱을 사용하는 동안 사용자의 위치를 특정합니다.",
         "LSApplicationQueriesSchemes": ["kakaokompassauth", "kakaolink", "kakaoplus"],
         "CFBundleURLTypes": [
             ["CFBundleURLSchemes" : ["kakao\(kakaoNativeAppKey)"]]

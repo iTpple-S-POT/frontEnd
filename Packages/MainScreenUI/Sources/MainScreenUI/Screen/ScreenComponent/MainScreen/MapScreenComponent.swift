@@ -7,28 +7,81 @@
 
 import SwiftUI
 import CJMapkit
+import MapKit
 import CoreLocation
 
 struct MapScreenComponent: View {
     
-    var annotationDummies: [PotAnnotation] {
+    @StateObject private var screenModel = MapScreenComponentModel()
+    
+    var body: some View {
+        MapkitViewRepresentable(userLocation: $screenModel.userLocation, annotations: [])
+            .onAppear {
+                
+                do {
+                    try screenModel.checkLocationAuthorization()
+                }
+                catch {
+                    
+                }
+                
+            }
         
-        let longRange = 126.9244669...126.9254901
-        let latRange = 37.550756...37.557527
+    }
+}
+
+enum SpotLocationError: Error {
+    
+    case unAuthorized
+    
+}
+
+class MapScreenComponentModel: ObservableObject {
+    
+    @Published var userLocation = CLLocationCoordinate2D()
+    
+    let locationManager = CJLocationManager()
+    
+    init() {
         
-        return PotAnnotationType.allCases.map {
-            
-            let long = Double.random(in: longRange)
-            let lat = Double.random(in: latRange)
-            
-            return PotAnnotation(type: $0, coordinate: CLLocationCoordinate2DMake(lat, long))
-            
+        locationManager.currentLocationCompletion = { result in
+            switch result {
+            case .success(let location):
+                DispatchQueue.main.async {
+                    
+                    self.userLocation = location.coordinate
+                    
+                }
+            case .failure( _ ):
+                // 1초후 위치요청을 다시보냅니다.
+                Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { _ in
+                    self.requestCurrentLocation()
+                }
+            }
+        }
+    }
+    
+    func checkLocationAuthorization() throws {
+        
+        let authorization = locationManager.manager.authorizationStatus
+        
+        switch authorization {
+        case .notDetermined:
+            locationManager.requestAuthorization()
+        case .restricted, .denied:
+            throw SpotLocationError.unAuthorized
+        case .authorizedAlways, .authorizedWhenInUse, .authorized:
+            requestCurrentLocation()
+        @unknown default:
+            print("새로운 위치 인증 권한이 추가되었음")
+            locationManager.requestAuthorization()
         }
         
     }
     
-    var body: some View {
-        CJMapkitView(userLocation: CLLocation(latitude: 37.550756, longitude: 126.9254901), annotations: annotationDummies)
+    private func requestCurrentLocation() {
+        
+        locationManager.requestCurrentLocation()
     }
 }
 
