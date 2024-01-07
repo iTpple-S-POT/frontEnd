@@ -7,6 +7,7 @@
 
 import Foundation
 import CoreLocation
+import Combine
 
 public enum UserLocationError: Error {
     
@@ -17,9 +18,10 @@ public enum UserLocationError: Error {
 public class CJLocationManager: NSObject {
     public let manager = CLLocationManager()
     
-    public var currentLocationCompletion: GetLocationClosure!
+    public var currentLocationPublisher = PassthroughSubject<CLLocationCoordinate2D, UserLocationError>()
     
-    public typealias GetLocationClosure = (Result<CLLocation, UserLocationError>) -> ()
+    // 현재 유저 위치 저장
+    public static var currentUserLocation: CLLocationCoordinate2D?
     
     // Userdefults
     static let kLatestUserLocation = "userLocation"
@@ -55,23 +57,16 @@ extension CJLocationManager: CLLocationManagerDelegate {
         }
     }
     
-    /// location property로 부터 retrieve실패
-    public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        
-        self.currentLocationCompletion(.failure(.cantGetUserLocation))
-        
-    }
-    
     public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         
-        let currentLocation = locations.first!
+        let coordinate = locations.first!.coordinate
         
-        currentLocationCompletion(.success(currentLocation))
+        currentLocationPublisher.send(coordinate)
         
         print("로케이션이 없데이트 되었습니다.")
         
         // 새로운 위치 로컬에 저장
-        Self.saveUserLocationToLocal(coordinate: currentLocation.coordinate)
+        Self.saveUserLocationToLocal(coordinate: coordinate)
     }
     
 }
