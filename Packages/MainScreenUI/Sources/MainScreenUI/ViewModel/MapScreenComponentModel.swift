@@ -18,7 +18,7 @@ enum SpotLocationError: Error {
 
 class MapScreenComponentModel: ObservableObject {
     
-    @Published var explicitUserLocation = CLLocationCoordinate2D()
+    @Published var mapCenterCoordinate = CLLocationCoordinate2D()
     
     private var updatedUserLocation: CLLocationCoordinate2D!
     
@@ -37,11 +37,13 @@ class MapScreenComponentModel: ObservableObject {
             
             DispatchQueue.main.async {
                 
+                // 첫 요청시에만 자동 업데이트
+                // 이후에는 버튼 눌렀을 때만 업데이트
                 if self.isFirstUpdate {
                     
                     self.isFirstUpdate = false
                     
-                    self.explicitUserLocation = coordinate
+                    self.mapCenterCoordinate = coordinate
                     
                 }
                 
@@ -77,7 +79,7 @@ class MapScreenComponentModel: ObservableObject {
     
     public func moveMapToCurrentLocation() {
         
-        self.explicitUserLocation = updatedUserLocation
+        self.mapCenterCoordinate = updatedUserLocation
         
     }
 }

@@ -26,3 +26,18 @@ struct Location: Codable {
 }
 
 
+public struct SpotPotUploadObject {
+    
+    let category: Int
+    let text: String
+    let latitude: Double
+    let longitude: Double
+    
+    public init(category: Int, text: String, latitude: Double, longitude: Double) {
+        self.category = category
+        self.text = text
+        self.latitude = latitude
+        self.longitude = longitude
+    }
+    
+}

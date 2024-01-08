@@ -18,14 +18,14 @@ struct SelectBirthDayScreenComponent: View {
         let min = Calendar.current.date(
           byAdding: .year,
           value: -80,
-          to: birthDay
+          to: Date.now
         )!
         
         // 생일년도는 현재년도부터 가능
         let max = Calendar.current.date(
             byAdding: .day,
             value: 0,
-            to: birthDay
+            to: Date.now
         )!
         
         return min...max

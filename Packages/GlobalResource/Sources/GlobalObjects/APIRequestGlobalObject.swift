@@ -291,7 +291,8 @@ public extension APIRequestGlobalObject {
     }
     
     // 팟 업로드
-    func uploadPot(imageInfo: ImageInformation) {
+    // TODO: 카테고리 수정
+    func uploadPot(imageInfo: ImageInformation, uploadObject: SpotPotUploadObject) {
         
         Task {
             
@@ -303,9 +304,11 @@ public extension APIRequestGlobalObject {
                     
                     switch result {
                     case .success( _ ):
+                            
+                        // TODO: await 처리방법 생각하기
                         
                         return
-                        
+       
                     case .failure(let error):
                         print(error.localizedDescription)
                     }
@@ -359,7 +362,7 @@ public extension APIRequestGlobalObject {
         }
     
     
-    func uploadImageToS3(psUrlString: String, imageData: Data, comepletion: @escaping (Result<Bool, SpotNetworkError>) -> Void) throws {
+    private func uploadImageToS3(psUrlString: String, imageData: Data, comepletion: @escaping (Result<Bool, SpotNetworkError>) -> Void) throws {
         
         print(psUrlString)
         
@@ -386,5 +389,44 @@ public extension APIRequestGlobalObject {
             }
         
         
+    }
+    
+    // TODO: 카테고리 수정
+    private func uploadPotData(fileKey: String, uploadObject: SpotPotUploadObject) async throws -> Bool {
+        
+        let data = SpotPotUploadRequestModel(
+            categoryID: uploadObject.category,
+            imageKey: fileKey,
+            type: "IMAGE",
+            location: Location(lat: uploadObject.latitude, lon: uploadObject.longitude),
+            content: uploadObject.text
+        )
+        
+        let url = try! SpotAPI.postPot.getApiUrl()
+        
+        var request = try URLRequest(url: url, method: .post)
+        
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(getBearerAuthorizationValue, forHTTPHeaderField: "Authorization")
+        
+        request.timeoutInterval = 10
+        
+        try request.httpBody = JSONEncoder().encode(data)
+        
+        let re = AF.request(request)
+        
+        let dataTask = re.serializingDecodable(SpotPotUploadResponseModel.self)
+        
+        switch await dataTask.result {
+            
+        case .success(let data):
+            
+            print(data)
+            
+            return true
+        case .failure:
+            throw SpotNetworkError.dataTransferError
+            
+        }
     }
 }

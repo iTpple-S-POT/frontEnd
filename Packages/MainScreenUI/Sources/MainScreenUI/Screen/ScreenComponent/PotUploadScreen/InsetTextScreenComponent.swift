@@ -25,7 +25,7 @@ struct InsetTextScreenComponent: View {
                         
                         if let info = screenModel.imageInfo {
                          
-                            APIRequestGlobalObject.shared.uploadPot(imageInfo: info)
+//                            APIRequestGlobalObject.shared.uploadPot(imageInfo: info)
                             
                         }
                         
@@ -47,6 +47,7 @@ struct InsetTextScreenComponent: View {
                 .zIndex(1)
             
         }
+        .padding(.horizontal, 20)
             
     }
 }

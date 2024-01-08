@@ -1,24 +1,63 @@
 import SwiftUI
 import UIKit
 import MapKit
+import Combine
+
+public enum MapViewState {
+    
+    case notDetermined
+    case userMapNotEqual
+    case userMapEqual
+    
+}
+
+extension CLLocationCoordinate2D: Equatable {
+    
+    public static func == (lhs: CLLocationCoordinate2D, rhs: CLLocationCoordinate2D) -> Bool {
+        lhs.latitude == rhs.latitude && lhs.longitude == rhs.longitude
+    }
+    
+}
 
 
 // MARK: - Coordinator
-public class MkMapViewCoordinator: NSObject, MKMapViewDelegate, CLLocationManagerDelegate {
+public class MkMapViewCoordinator: NSObject {
     
-    var mapView: MKMapView?
+    var mapView: MKMapView!
+    
+    var state: MapViewState = .notDetermined
+    
+    let mapCenterPublisher = PassthroughSubject<CLLocationCoordinate2D, Never>()
     
     override init() {
         super.init()
         registerAnnotation()
     }
     
-    
+    // Annotation
     private func registerAnnotation() {
         guard let mapView = self.mapView else { return }
         
         mapView.register(PotAnnotationView.self, forAnnotationViewWithReuseIdentifier: NSStringFromClass(PotAnnotationView.self))
     }
+    
+    func setUserMapEqual(location: CLLocationCoordinate2D) {
+        
+        state = .userMapEqual
+        
+        
+        var currentRegion = mapView.region
+        
+        currentRegion.center = location
+        
+        mapView.setRegion(currentRegion, animated: true)
+    }
+    
+}
+
+// MARK: - MKMapViewDelegate
+
+extension MkMapViewCoordinator: MKMapViewDelegate {
     
     public func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
         
@@ -32,11 +71,27 @@ public class MkMapViewCoordinator: NSObject, MKMapViewDelegate, CLLocationManage
         }
     }
     
-    /// User의 현재 위치로 center를 지정
-    func updateCenter(location: CLLocation) {
-        mapView?.region.center = location.coordinate
+    public func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
+        
+        print("리전 업데이트")
+        
+        // 위치가 같은 상태에서 달라질 경우만 호출
+        if state == .userMapEqual || state == .notDetermined {
+            
+            let movedCoordinate = mapView.region.center
+            
+            // 무조건 일치하지 않음으로
+            state = .userMapNotEqual
+            
+            // 맵 스크린 컴포넌트 모델의 현재 위치를 업데이트
+            mapCenterPublisher.send(movedCoordinate)
+            
+        }
+        
     }
+    
 }
+
 
 // MARK: - UIViewRepresentable
 public struct MapkitViewRepresentable: UIViewRepresentable {
@@ -59,7 +114,20 @@ public struct MapkitViewRepresentable: UIViewRepresentable {
         context.coordinator.mapView = mapView
         
         mapView.delegate = context.coordinator
+        
         context.coordinator.mapView = mapView
+        
+        context.coordinator.mapCenterPublisher.sink { _ in
+            print("맵 센터 퍼블리셔 연결 종료")
+        } receiveValue: { coordinate in
+            
+            // 메인에서 실행할 필요 없음
+            userLocation = coordinate
+            
+            print("유저가 맵을 움직임")
+            
+        }
+
         
         let centerLocation = CJLocationManager.getUserLocationFromLocal()
 
@@ -78,7 +146,9 @@ public struct MapkitViewRepresentable: UIViewRepresentable {
     
     public func updateUIView(_ uiView: MKMapView, context: Context) {
         
-        uiView.camera.centerCoordinate = self.userLocation
+        let coordi = context.coordinator
+        
+        coordi.setUserMapEqual(location: userLocation)
         
     }
 }

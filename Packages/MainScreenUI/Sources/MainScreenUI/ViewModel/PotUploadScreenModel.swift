@@ -87,6 +87,11 @@ public class PotUploadScreenModel: NavigationController<PotUploadDestination> {
 // MARK: - 팟 업로드용 데이터
 extension PotUploadScreenModel {
     
-    
+    func uploadPot() {
+        
+        
+        
+        
+    }
     
 }
