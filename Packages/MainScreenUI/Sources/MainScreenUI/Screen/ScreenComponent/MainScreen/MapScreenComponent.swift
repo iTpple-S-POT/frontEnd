@@ -14,8 +14,7 @@ struct MapScreenComponent: View {
     
     var body: some View {
         ZStack {
-            
-            MapkitViewRepresentable(userLocation: $screenModel.mapCenterCoordinate, annotations: [])
+            MapkitViewRepresentable(isLastestCenterAndMapEqual: $screenModel.isLastestCenterAndMapEqual, latestCenter: screenModel.lastestCenter, annotations: [])
             
             VStack {
                 
