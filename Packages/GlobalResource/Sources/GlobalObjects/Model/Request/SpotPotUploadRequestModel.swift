@@ -9,7 +9,7 @@ import Foundation
 
 struct SpotPotUploadRequestModel: Codable {
     let categoryID: Int
-    let imageKey: String?
+    let imageKey: String
     let type: String
     let location: Location
     let content: String

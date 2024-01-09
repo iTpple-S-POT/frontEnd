@@ -306,8 +306,8 @@ public extension APIRequestGlobalObject {
                     case .success( _ ):
                             
                         // TODO: await 처리방법 생각하기
-                        
-                        return
+                        try? self.uploadPotData(fileKey: psObject.fileKey, uploadObject: uploadObject)
+
        
                     case .failure(let error):
                         print(error.localizedDescription)
@@ -318,6 +318,8 @@ public extension APIRequestGlobalObject {
                 
             }
             catch {
+                
+                print(error.localizedDescription)
                 
             }
             
@@ -345,6 +347,8 @@ public extension APIRequestGlobalObject {
             let params: [String: Any] = [
                 "fileName" : fileName
             ]
+            
+            print(fileName)
             
             try request.httpBody = JSONSerialization.data(withJSONObject: params, options: [])
             
@@ -375,7 +379,6 @@ public extension APIRequestGlobalObject {
         request.setValue("binary/octet-stream", forHTTPHeaderField: "Content-Type")
         request.httpBody = imageData
         
-        
         AF
             .request(request)
             .validate()
@@ -392,7 +395,7 @@ public extension APIRequestGlobalObject {
     }
     
     // TODO: 카테고리 수정
-    private func uploadPotData(fileKey: String, uploadObject: SpotPotUploadObject) async throws -> Bool {
+    private func uploadPotData(fileKey: String, uploadObject: SpotPotUploadObject) throws {
         
         let data = SpotPotUploadRequestModel(
             categoryID: uploadObject.category,
@@ -402,31 +405,47 @@ public extension APIRequestGlobalObject {
             content: uploadObject.text
         )
         
+        print(data)
+        
         let url = try! SpotAPI.postPot.getApiUrl()
         
         var request = try URLRequest(url: url, method: .post)
         
+        print(getBearerAuthorizationValue)
+        
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue(getBearerAuthorizationValue, forHTTPHeaderField: "Authorization")
-        
         request.timeoutInterval = 10
+        request.httpBody = try JSONEncoder().encode(data)
         
-        try request.httpBody = JSONEncoder().encode(data)
+        AF
+            .request(request)
+            .validate()
+            .response { result in
+                
+                switch result.result {
+                case .success(_):
+                    print("success")
+                case .failure(_):
+                    print("failure")
+                }
+                
+            }
         
-        let re = AF.request(request)
-        
-        let dataTask = re.serializingDecodable(SpotPotUploadResponseModel.self)
-        
-        switch await dataTask.result {
-            
-        case .success(let data):
-            
-            print(data)
-            
-            return true
-        case .failure:
-            throw SpotNetworkError.dataTransferError
-            
-        }
+//        let re = AF.request(request)
+//        
+//        let dataTask = re.serializingDecodable(SpotPotUploadResponseModel.self)
+//        
+//        switch await dataTask.result {
+//            
+//        case .success(let data):
+//            
+//            print(data)
+//            
+//            return true
+//        case .failure:
+//            throw SpotNetworkError.dataTransferError
+//            
+//        }
     }
 }

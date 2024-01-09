@@ -10,6 +10,8 @@ import GlobalObjects
 
 struct InsetTextScreenComponent: View {
     
+    @EnvironmentObject var mainNavigation: MainNavigation
+    
     @ObservedObject var screenModel: PotUploadScreenModel
     
     var body: some View {
@@ -23,9 +25,19 @@ struct InsetTextScreenComponent: View {
                     
                     Button("팟 업로드") {
                         
-                        if let info = screenModel.imageInfo {
-                         
-//                            APIRequestGlobalObject.shared.uploadPot(imageInfo: info)
+                        do {
+                            try screenModel.uploadPot()
+                        } catch {
+                            
+                            if let prepareError = error as? PotUploadPrepareError {
+                                
+                                if prepareError == .cantGetUserLocation {
+                                    
+                                    print("권한")
+                                    
+                                }
+                                
+                            }
                             
                         }
                         
@@ -48,10 +60,18 @@ struct InsetTextScreenComponent: View {
             
         }
         .padding(.horizontal, 20)
+        .alert(isPresented: $screenModel.showAlert) {
+            Alert(title: Text(screenModel.alertTitle), message: Text(screenModel.alertMessage), dismissButton: .default(Text("닫기"), action: {
+                
+                mainNavigation.popTopView()
+                
+            }))
+        }
             
     }
 }
 
 #Preview {
     InsetTextScreenComponent(screenModel: PotUploadScreenModel())
+        .environmentObject(MainNavigation())
 }

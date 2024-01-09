@@ -46,6 +46,10 @@ struct MapScreenComponent: View {
             .onAppear {
                 
                 do {
+                    
+                    // makeUIView이후에 정보가 들어오도록 설정
+                    screenModel.registerLocationSubscriber()
+                    
                     try screenModel.checkLocationAuthorization()
                 }
                 catch {

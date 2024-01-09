@@ -9,16 +9,12 @@ import SwiftUI
 import Photos
 import CJPhotoCollection
 import GlobalObjects
+import CJMapkit
 
+// 추후 추가 가능
 public enum PotUploadDestination {
     
     case insertText
-    
-}
-
-public enum SelectPhotoError: Error {
-    
-    case dataUnavailableForPhoto
     
 }
 
@@ -59,18 +55,11 @@ public class PotUploadScreenModel: NavigationController<PotUploadDestination> {
         
     }
     
-    func photoInformationUpdated(imageInfo: ImageInformation?) throws {
+    func photoInformationUpdated(imageInfo: ImageInformation) {
         
-        if imageInfo != nil {
-            
-            self.imageInfo = imageInfo
-            
-            addToStack(destination: .insertText)
-            
-        } else {
-            
-            throw SelectPhotoError.dataUnavailableForPhoto
-        }
+        self.imageInfo = imageInfo
+        
+        addToStack(destination: .insertText)
         
     }
     
@@ -83,13 +72,26 @@ public class PotUploadScreenModel: NavigationController<PotUploadDestination> {
     
 }
 
+enum PotUploadPrepareError: Error {
+    
+    case cantGetUserLocation
+    
+}
 
 // MARK: - 팟 업로드용 데이터
 extension PotUploadScreenModel {
     
-    func uploadPot() {
+    func uploadPot() throws {
         
+        guard let location = CJLocationManager.shared.currentUserLocation else {
+            
+            throw PotUploadPrepareError.cantGetUserLocation
+        }
         
+        // TODO: 카테고리 업데이트
+        let object = SpotPotUploadObject(category: 0, text: potText, latitude: location.latitude, longitude: location.longitude)
+        
+        APIRequestGlobalObject.shared.uploadPot(imageInfo: imageInfo, uploadObject: object)
         
         
     }
