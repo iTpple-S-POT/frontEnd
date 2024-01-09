@@ -36,7 +36,7 @@ public class CJPhotoCollectionViewController: UICollectionViewController {
     ]
     
     // 선택된 셀을 전송할 퍼블리셔
-    let selectedPhotoPub = PassthroughSubject<ImageInformation?, Never>()
+    let selectedPhotoPub = PassthroughSubject<Result<ImageInformation, SelectImageCellError>, Never>()
     let collectionTypesPub = PassthroughSubject<[CollectionTypeObject], Never>()
     
     
@@ -429,31 +429,20 @@ extension CJPhotoCollectionViewController: PHPhotoLibraryChangeObserver {
 // MARK: - Cell선택
 public extension CJPhotoCollectionViewController {
     
-    enum ImageInfoKeyError: Error {
+    enum SelectImageCellError: Error {
         
-        case upProcessedStringFromKey(description: String)
+        case invalidLocalIndentifier
+        case imageDataNotAvailable
+        case imageSuffixDataNotAvailable
+        case invalidSuffix(originalExt: String)
         
     }
     
-    enum ImageInfoKey: CaseIterable {
+    enum SpotValidSuffix: String {
         
-        case pHImageFileUTIKey
-        case pHImageFileOrientationKey
-        
-        func getStringKey() throws -> String {
-            
-            switch self {
-                
-            case .pHImageFileUTIKey:
-                return "PHImageFileUTIKey"
-            case .pHImageFileOrientationKey:
-                return "PHImageFileOrientationKey"
-            default:
-                throw ImageInfoKeyError.upProcessedStringFromKey(description: "문자열로 지정되지 않은 키존재, 키: \(self)")
-                
-            }
-            
-        }
+        case jpg = "jpg"
+        case jpeg = "jpeg"
+        case png = "png"
         
     }
     
@@ -474,29 +463,54 @@ public extension CJPhotoCollectionViewController {
             let localIdentifier = imageCell.representedAssetId!
             
             guard let asset = PHAsset.fetchAssets(withLocalIdentifiers: [localIdentifier], options: .none).firstObject else {
-                preconditionFailure("localIdentifier로 이미지 가져오기 실패")
+                
+                return self.selectedPhotoPub.send(.failure(.invalidLocalIndentifier))
             }
             
             imageManager.requestImageDataAndOrientation(for: asset, options: .none) { data, type, orientation, _ in
                 
                 guard let imageData = data, let uiImage = UIImage(data: imageData) else {
                     // TODO: 데이터를 가져울 수 없는 사진
-                    return self.selectedPhotoPub.send(nil)
+                    return self.selectedPhotoPub.send(.failure(.imageDataNotAvailable))
                 }
                 
-                guard let pngData = uiImage.pngData() else {
-                    // TODO: 데이터를 png로 변환할 수 없음
-                    return self.selectedPhotoPub.send(nil)
+                guard let suffixData = type else {
+                    // TODO: 확장자 정보를 얻을 수 없음
+                    return self.selectedPhotoPub.send(.failure(.imageSuffixDataNotAvailable))
                 }
                 
-                let ext = "png"
+                let splited = suffixData.split(separator: ".")
                 
-                let imageInfo = ImageInformation(
-                    data: pngData,
-                    ext: ext
-                )
+                let lastIndex = splited.endIndex-1
                 
-                self.selectedPhotoPub.send(imageInfo)
+                let ext = String(splited[lastIndex])
+                
+                if let validSuffix = SpotValidSuffix(rawValue: ext) {
+                    
+                    let imageInfo = ImageInformation(
+                        data: imageData,
+                        ext: ext
+                    )
+                    
+                    self.selectedPhotoPub.send(.success(imageInfo))
+                    
+                } else {
+                    
+                    guard let uiImage = UIImage(data: imageData), let pngData = uiImage.pngData() else {
+                        
+                        return self.selectedPhotoPub.send(.failure(.invalidSuffix(originalExt: ext)))
+                        
+                    }
+                    
+                    let imageInfo = ImageInformation(
+                        data: pngData,
+                        ext: "png"
+                    )
+                    
+                    self.selectedPhotoPub.send(.success(imageInfo))
+                    
+                }
+                
             }
             
             return

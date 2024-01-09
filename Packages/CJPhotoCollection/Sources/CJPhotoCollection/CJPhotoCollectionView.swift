@@ -45,12 +45,25 @@ public struct CJPhotoCollectionView: UIViewControllerRepresentable {
             
             print("connecton finished")
             
-        } receiveValue: { data in
+        } receiveValue: { result in
             
-            DispatchQueue.main.async {
+            switch result {
+            case .success(let data):
+                DispatchQueue.main.async {
+                    
+                    selectedPhotoCompletion(data)
+                    
+                }
+            case .failure(let error):
+                switch error {
+                    
+                case .invalidSuffix(let orignalExt):
+                    print("\(orignalExt)를 png로 변경 실패")
+                default:
+                    print(error.localizedDescription)
+                }
                 
-                selectedPhotoCompletion(data)
-                
+                selectedPhotoCompletion(nil)
             }
             
         }

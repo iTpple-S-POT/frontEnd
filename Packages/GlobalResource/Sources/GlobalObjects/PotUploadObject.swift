@@ -15,8 +15,6 @@ public struct ImageInformation: Identifiable, Equatable {
     
     public var ext: String
     
-//    public var orientation: CGImagePropertyOrientation
-    
     public init(data: Data, ext: String) {
         self.data = data
         self.ext = ext
