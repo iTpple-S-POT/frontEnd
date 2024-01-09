@@ -479,22 +479,20 @@ public extension CJPhotoCollectionViewController {
             
             imageManager.requestImageDataAndOrientation(for: asset, options: .none) { data, type, orientation, _ in
                 
-                guard let imageData = data else {
+                guard let imageData = data, let uiImage = UIImage(data: imageData) else {
                     // TODO: 데이터를 가져울 수 없는 사진
                     return self.selectedPhotoPub.send(nil)
                 }
                 
-                guard let imageExt = type else {
-                    // TODO: 익스텐션을 가져올 수 없음
+                guard let pngData = uiImage.pngData() else {
+                    // TODO: 데이터를 png로 변환할 수 없음
                     return self.selectedPhotoPub.send(nil)
                 }
                 
-                let arr = imageExt.split(separator: ".")
-                
-                let ext = String(arr[arr.endIndex-1])
+                let ext = "png"
                 
                 let imageInfo = ImageInformation(
-                    data: imageData,
+                    data: pngData,
                     ext: ext
                 )
                 
