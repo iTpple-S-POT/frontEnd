@@ -49,17 +49,14 @@ struct SelectPhotoScreenComponent: View {
                 
                 CJPhotoCollectionView(collectionType: $screenModel.selectedCollectionType) {
                     
-                    do {
+                    // 이미지 데이터 획득 성공
+                    if let imageInfo = $0 {
+                        screenModel.photoInformationUpdated(imageInfo: imageInfo)
                         
-                        try screenModel.photoInformationUpdated(imageInfo: $0)
+                    } else {
                         
-                    } catch {
-                        
-                        if let imageError = error as? SelectPhotoError {
-                            
-                            screenModel.showImageDataUnavailable()
-                            
-                        }
+                        // 실패시 alert표시
+                        screenModel.showImageDataUnavailable()
                         
                     }
                     
