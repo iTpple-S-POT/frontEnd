@@ -27,13 +27,13 @@ class MapScreenComponentModel: ObservableObject {
     // 유저의 가장최근 위치
     private var userPosition: CLLocationCoordinate2D!
     
-    let locationManager = CJLocationManager()
+    let locationManager = CJLocationManager.shared
     
     var userLocationSubscriber: AnyCancellable?
     
     private var isFirstUpdate = true
     
-    init() {
+    func registerLocationSubscriber() {
         
         self.userLocationSubscriber = locationManager.currentLocationPublisher.sink { _ in
         } receiveValue: { coordinate in
@@ -59,7 +59,6 @@ class MapScreenComponentModel: ObservableObject {
                 }
                 
             }
-            
             
         }
         

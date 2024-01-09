@@ -48,11 +48,14 @@ public class MkMapViewCoordinator: NSObject {
         print("맵과 유저위치를 일치시킵니다..")
         state = .movingToEqual
         
-        var currentRegion = mapView.region
+        mapView.setRegion(regionWith(center: location), animated: true)
+    }
+    
+    // span을 동일하게 유지하기 위해
+    func regionWith(center: CLLocationCoordinate2D) -> MKCoordinateRegion {
         
-        currentRegion.center = location
+        return MKCoordinateRegion(center: center, latitudinalMeters: 500, longitudinalMeters: 500)
         
-        mapView.setRegion(currentRegion, animated: true)
     }
     
 }
@@ -135,21 +138,26 @@ public struct MapkitViewRepresentable: UIViewRepresentable {
             // 위치일치후 유저가 맵을 움직였을 때 한번만 호출됨
             
             // 메인에서 실행할 필요 없음
-            self._isLastestCenterAndMapEqual.wrappedValue = false
+            DispatchQueue.main.async {
+                self._isLastestCenterAndMapEqual.wrappedValue = false
+            }
             
             print("유저가 맵을 움직임")
             
         }
 
         
-        let centerLocation = CJLocationManager.getUserLocationFromLocal()
+        let center = CJLocationManager.getUserLocationFromLocal()
 
-        mapView.region = MKCoordinateRegion(center: centerLocation, latitudinalMeters: 500, longitudinalMeters: 500)
-        mapView.isZoomEnabled = false
+        mapView.setRegion(coordi.regionWith(center: center), animated: false)
+        
+        // TODO: 상의하기
+        mapView.isZoomEnabled = true
         
         // Add annotations
         mapView.addAnnotations(self.annotations)
         
+        print("초기 설정 완")
         return mapView
     }
     

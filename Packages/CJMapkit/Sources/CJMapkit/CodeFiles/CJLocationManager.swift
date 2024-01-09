@@ -21,12 +21,14 @@ public class CJLocationManager: NSObject {
     public var currentLocationPublisher = PassthroughSubject<CLLocationCoordinate2D, UserLocationError>()
     
     // 현재 유저 위치 저장
-    public static var currentUserLocation: CLLocationCoordinate2D?
+    public var currentUserLocation: CLLocationCoordinate2D?
     
     // Userdefults
     static let kLatestUserLocation = "userLocation"
     
-    public override init() {
+    public static let shared = CJLocationManager()
+    
+    private override init() {
         super.init()
         
         manager.delegate = self
@@ -60,6 +62,8 @@ extension CJLocationManager: CLLocationManagerDelegate {
     public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         
         let coordinate = locations.first!.coordinate
+        
+        currentUserLocation = coordinate
         
         currentLocationPublisher.send(coordinate)
         
