@@ -34,7 +34,7 @@ public class KakaoLoginManager {
         }
     }
     
-    internal func executeLogin(completion: @escaping (Result<SpotTokenResponse, SpotNetworkError>) -> Void) {
+    internal func executeLogin(completion: @escaping (Result<TokenObject, SpotNetworkError>) -> Void) {
         guard isInitialized else {
             fatalError("please initialize KakaoSDK first")
         }
@@ -60,37 +60,43 @@ public class KakaoLoginManager {
 // MARK: - 공용 completion
 extension KakaoLoginManager {
     
-    func tokenLogicCompletion(oauthToken: OAuthToken?, error: Error?, completion: @escaping (Result<SpotTokenResponse, SpotNetworkError>) -> ()) {
+    func tokenLogicCompletion(oauthToken: OAuthToken?, error: Error?, completion: @escaping (Result<TokenObject, SpotNetworkError>) -> ()) {
         
         if let error = error {
             
-            // TODO: 추후 에러 구체화
-            completion(.failure(.serverError))
+            completion(.failure(.kakaoServerError))
             
         }
         else {
             
             if let accessToken = oauthToken?.accessToken, let refreshToken = oauthToken?.refreshToken {
-                               // Send accessToken to the server
-                APIRequestGlobalObject.shared.sendAccessTokenToServer(accessToken: accessToken, refreshToken: refreshToken) { result in
+                
+                // 토큰을 서버로 전송
+                Task {
                     
-                    switch result {
-                    case .success(let data):
+                    do {
                         
-                        completion(.success(data))
+                        let token = try await APIRequestGlobalObject.shared.sendAccessTokenToServer(accessToken: accessToken, refreshToken: refreshToken)
                         
-                    case .failure(let failure):
-                        
-                        // TODO: 추후 구체화
-                        completion(.failure(.serverError))
+                        completion(.success(token))
                         
                     }
-                    
+                    catch {
+                        
+                        if let netError = error as? SpotNetworkError {
+                            
+                            completion(.failure(netError))
+                            
+                        }
+                        
+                        completion(.failure(.unownedError))
+                        
+                    }
                 }
+                
             } else {
                 
-                // TODO: 추후 구체화
-                completion(.failure(.dataTransferError))
+                completion(.failure(.kakaoServerError))
                 
             }
         }

@@ -81,20 +81,21 @@ public struct LoginScreen: View {
                             switch result {
                             case .success(let tokens):
                                 
-                                print(tokens)
-                                
                                 APIRequestGlobalObject.shared.setToken(accessToken: tokens.accessToken, refreshToken: tokens.refreshToken, isSaveInUserDefaults: true)
                                 
-                                // 토큰 발급 성공으로 인한 이동
                                 // TODO: 선호도 입력 여뷰를 확인한 후 메인스크린으로 이동 구현
-                                // 수정 예정
-                                mainNavigation.addToStack(destination: .mainScreen)
+                                // 토큰 발급 성공으로 인한 이동, 최초 입력 여부 확인 예정
+                                Task { @MainActor in
+                                    
+                                    mainNavigation.addToStack(destination: .mainScreen)
+                                    
+                                }
                                 
-                            case .failure(let failure):
+                            case .failure(let error):
                                 
-                                // TODO: Error에 따른 로직, 추후 구현
+                                print("카카오 소셜로그인 에러 \(error)")
+                                
                                 showingAlert = true
-                                
                                 alertMessage = serverErrorMessage
                                 
                             }

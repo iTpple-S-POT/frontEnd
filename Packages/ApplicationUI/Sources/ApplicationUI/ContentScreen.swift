@@ -53,45 +53,15 @@ public struct ContentScreen: View {
             
             if let (acToken, rfToken) = opTokens {
                 
+                // 로컬에 저장된 토큰을 저장
                 APIRequestGlobalObject.shared.setToken(accessToken: acToken, refreshToken: rfToken)
                 
-                // refresh
-                APIRequestGlobalObject.shared.refreshTokens { result in
-                    switch result {
-                    case .success(let success):
-                        print("리프래쉬 성공")
-                        APIRequestGlobalObject.shared.setToken(accessToken: success.accessToken, refreshToken: success.refreshToken, isSaveInUserDefaults: true)
-                        
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                            
-                            screenModel.addToStack(destination: .mainScreen)
-                            
-                        }
-                    case .failure(let error):
-                        
-                        switch error {
-                        case .cantFindRefreshToken:
-                            print("리프래쉬 토큰을 찾을 수 없음")
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                                
-                                screenModel.addToStack(destination: .loginScreen)
-                                
-                            }
-                        default:
-                            print("오류")
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                                
-                                screenModel.addToStack(destination: .loginScreen)
-                                
-                            }
-                            
-                        }
-                        
-                    }
-                    
-                }
+                // 토큰 리프래쉬
+                refreshSpotToken()
                 
             } else {
+                
+                print("로컬에 토큰이 존재하지 않음")
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                     
@@ -104,6 +74,51 @@ public struct ContentScreen: View {
         }
         .environmentObject(screenModel)
     }
+}
+
+extension ContentScreen {
+    
+    func refreshSpotToken() {
+        
+        Task {
+            
+            do {
+                
+                let newTokens = try await APIRequestGlobalObject.shared.refreshTokens()
+                
+                print("토큰 리프래쉬 성공")
+                
+                // 새로운 토큰을 로컬에 저장
+                APIRequestGlobalObject.shared.setToken(accessToken: newTokens.accessToken, refreshToken: newTokens.refreshToken, isSaveInUserDefaults: true)
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                    
+                    screenModel.addToStack(destination: .mainScreen)
+                    
+                }
+                
+            }
+            catch {
+                
+                if let netError = error as? SpotNetworkError {
+                    
+                    print("토큰 리프래쉬 실패 \(netError)")
+                    
+                }
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                    
+                    screenModel.addToStack(destination: .loginScreen)
+                    
+                }
+                
+            }
+            
+        }
+        
+        
+    }
+    
 }
 
 #Preview {
