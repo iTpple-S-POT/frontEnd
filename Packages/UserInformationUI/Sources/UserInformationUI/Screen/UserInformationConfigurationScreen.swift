@@ -104,7 +104,7 @@ extension UserInformationConfigurationScreen {
                 }
                 
             }
-            .padding(.horizontal, 12)
+            .padding(.horizontal, 21)
             .padding(.top, 48)
             
             // 버튼2
@@ -137,26 +137,44 @@ extension UserInformationConfigurationScreen {
     /// 다음세팅 사항으로 화면을 넘긴다.
     func nextSetting() {
         
-        let viewTransitionTime = 0.5
-        
-        withAnimation(.easeInOut(duration: viewTransitionTime)) {
+        // 해당 메서드가 false를 반환한다는 것은 마지막 세팅 화면에서 버튼을 눌렀음을 의미한다.
+        if !screenModel.increateSettingPhaseIndex() {
             
-            // 해당 메서드가 false를 반환한다는 것은 마지막 세팅 화면에서 버튼을 눌렀음을 의미한다.
-            if !screenModel.increateSettingPhaseIndex() {
+            let viewTransitionTime = 0.5
+            
+            withAnimation(.easeInOut(duration: viewTransitionTime))  {
+             
                 screenModel.changeState(to: .final)
+                
             }
-            
         }
+        
+        // TODO: 최적화 문제
+        
+//        let viewTransitionTime = 0.5
+//        
+//        withAnimation(.easeInOut(duration: viewTransitionTime)) {
+//            
+//            // 해당 메서드가 false를 반환한다는 것은 마지막 세팅 화면에서 버튼을 눌렀음을 의미한다.
+//            if !screenModel.increateSettingPhaseIndex() {
+//                screenModel.changeState(to: .final)
+//            }
+//            
+//        }
     }
     
     /// 이전세팅 사항으로 돌아간다.
     func previousSetting() {
         
-        let viewTransitionTime = 0.5
+        let _ = screenModel.decreateSettingPhaseIndex()
         
-        withAnimation(.easeInOut(duration: viewTransitionTime)) {
-            let _ = screenModel.decreateSettingPhaseIndex()
-        }
+        // TODO: 최적화 문제
+        
+//        let viewTransitionTime = 0.5
+//        
+//        withAnimation(.easeInOut(duration: viewTransitionTime)) {
+//            let _ = screenModel.decreateSettingPhaseIndex()
+//        }
     }
     
 }

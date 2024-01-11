@@ -12,8 +12,6 @@ class ConfigurationScreenModel: ObservableObject {
     
     @Published private(set) var screenState: InitialScreenState = .initial
     
-    @Published private(set) var doesProfileSettingStart = false
-    
     @Published var settingPhaseIndex: Int = 0
     @Published private(set) var settingPhases: [SettingPhase] = []
     
@@ -67,9 +65,6 @@ extension ConfigurationScreenModel {
     /// settingPhaseIndex값을 증가시킨다. 더이상 증가할 수 없으면 false를 반환한다.
     func increateSettingPhaseIndex() -> Bool {
         if settingPhaseIndex+1 < settingPhaseCount {
-            
-            // 프로필 세팅이 식작됨을 알린다
-            doesProfileSettingStart = true
             
             settingPhaseIndex += 1
             

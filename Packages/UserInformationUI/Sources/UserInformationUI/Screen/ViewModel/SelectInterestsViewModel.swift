@@ -136,16 +136,22 @@ extension SelectInterestsViewModel {
         type4 = "갓생살기",
         type5 = "애니메이션",
         type6 = "산책",
-        type7 = "등산",
-        type8 = "영화감상하기",
-        type9 = "음주",
-        type10 = "갓생살기2",
-        type11 = "애니메이션2",
-        type12 = "산책2",
-        type13 = "등산2",
-        type14 = "English",
-        type15 = "English man in newYork",
-        type16 = "메우긴 텍스트 입니다. 이것은 메우긴 텍스트 입니다. 메우긴 텍스트 입니다. 메우긴 텍스트 입니다. 메우긴 텍스트 입니다."
+        type7 = "다꾸",
+        type8 = "독서",
+        type9 = "뜨개질",
+        type10 = "자동차",
+        type11 = "와국어",
+        type12 = "콘서트",
+        type13 = "패션",
+        type14 = "커리어",
+        type15 = "식집자",
+        type16 = "블로그",
+        type17 = "인스타 그램",
+        type18 = "개발",
+        type19 = "디자인",
+        type20 = "기획",
+        type21 = "베이킹",
+        type22 = "피아노"
     }
 }
 
