@@ -64,7 +64,7 @@ extension KakaoLoginManager {
         
         let functionName = #function
         
-        if let error = error {
+        if error != nil {
             
             completion(.failure(.kakaoServerError(function: functionName)))
             

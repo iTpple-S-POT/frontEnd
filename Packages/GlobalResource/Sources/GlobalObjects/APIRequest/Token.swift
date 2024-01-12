@@ -8,6 +8,13 @@
 import SwiftUI
 import Alamofire
 
+public enum SpotTokenError: Error {
+    
+    case tokenDoentExistInLocal
+    
+}
+
+
 // MARK: - 로컬에 저장된 토큰 체크
 extension APIRequestGlobalObject {
     
@@ -26,16 +33,30 @@ extension APIRequestGlobalObject {
         
     }
     
+    // 토큰 삭제
+    public func deleteTokenInLocal() {
+        
+        UserDefaults.standard.removeObject(forKey: self.kAccessTokenKey)
+        UserDefaults.standard.removeObject(forKey: self.kRefreshTokenKey)
+        
+        self.spotAccessToken = nil
+        self.spotRefreshToken = nil
+    
+    }
+    
     // 로컬 토큰 존재확인
-    public func checkTokenExistsInUserDefaults() -> (String, String)? {
+    public func checkTokenExistsInUserDefaults() throws {
         
         if let accessToken = UserDefaults.standard.string(forKey: self.kAccessTokenKey), let refreshToken = UserDefaults.standard.string(forKey: self.kRefreshTokenKey) {
             
-            return (accessToken, refreshToken)
+            // 로컬에 저장된 토큰을 저장
+            setToken(accessToken: accessToken, refreshToken: refreshToken)
+            
+            return
             
         }
         
-        return nil
+        throw SpotTokenError.tokenDoentExistInLocal
         
     }
     
@@ -79,7 +100,7 @@ public extension APIRequestGlobalObject {
         }
     }
     
-    func refreshTokens() async throws -> TokenObject{
+    func refreshTokens() async throws -> TokenObject {
         
         let url = try SpotAPI.refreshSpotToken.getApiUrl()
         

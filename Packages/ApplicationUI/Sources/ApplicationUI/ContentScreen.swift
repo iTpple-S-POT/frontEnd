@@ -14,12 +14,15 @@ import MainScreenUI
 
 public struct ContentScreen: View {
     
-    @StateObject private var screenModel = MainNavigation()
+    @StateObject private var mainNavigation = MainNavigation()
+    
+    @StateObject private var screenModel = ContentScreenModel()
+    
     
     public init() { }
     
     public var body: some View {
-        NavigationStack(path: $screenModel.navigationStack) {
+        NavigationStack(path: $mainNavigation.navigationStack) {
             
             // root
             VStack {
@@ -49,53 +52,37 @@ public struct ContentScreen: View {
         }
         .onAppear {
             
-            let opTokens = APIRequestGlobalObject.shared.checkTokenExistsInUserDefaults()
-            
-            if let (acToken, rfToken) = opTokens {
-                
-                // 로컬에 저장된 토큰을 저장
-                APIRequestGlobalObject.shared.setToken(accessToken: acToken, refreshToken: rfToken)
-                
-                // 토큰 리프래쉬
-                refreshSpotToken()
-                
-            } else {
-                
-                print("로컬에 토큰이 존재하지 않음")
-                
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                    
-                    screenModel.addToStack(destination: .loginScreen)
-                    
-                }
-                
-            }
+            // 토큰
+            initialTokenTask()
             
         }
-        .environmentObject(screenModel)
+        .environmentObject(mainNavigation)
     }
 }
 
 extension ContentScreen {
     
-    func refreshSpotToken() {
+    
+    func initialTokenTask() {
         
         Task {
             
             do {
                 
-                let newTokens = try await APIRequestGlobalObject.shared.refreshTokens()
+                // 테스트를 위한 토큰 삭제
+                // APIRequestGlobalObject.shared.deleteTokenInLocal()
                 
-                print("토큰 리프래쉬 성공")
+                try APIRequestGlobalObject.shared.checkTokenExistsInUserDefaults()
+                    
+                // 토큰 리프래쉬
+                try await screenModel.refreshSpotToken()
                 
-                // 새로운 토큰을 로컬에 저장
-                APIRequestGlobalObject.shared.setToken(accessToken: newTokens.accessToken, refreshToken: newTokens.refreshToken, isSaveInUserDefaults: true)
-                
+                // 리프래쉬 성공후 이동
                 try await Task.sleep(for: .seconds(1))
                 
                 DispatchQueue.main.async {
                     
-                    screenModel.addToStack(destination: .mainScreen)
+                    mainNavigation.addToStack(destination: .mainScreen)
                     
                 }
                 
@@ -107,19 +94,26 @@ extension ContentScreen {
                     print("토큰 리프래쉬 실패 \(netError)")
                     
                 }
+                else if let tokenError = error as? SpotTokenError {
+                    
+                    print("로컬에 저장된 토큰이 없음, \(tokenError)")
+                    
+                } else {
+                    
+                    return
+                }
                 
                 try await Task.sleep(for: .seconds(1))
                 
                 DispatchQueue.main.async {
                     
-                    screenModel.addToStack(destination: .loginScreen)
+                    mainNavigation.addToStack(destination: .loginScreen)
                     
                 }
                 
             }
             
         }
-        
         
     }
     
