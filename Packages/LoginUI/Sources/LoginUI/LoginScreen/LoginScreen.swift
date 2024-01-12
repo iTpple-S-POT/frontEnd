@@ -93,7 +93,7 @@ public struct LoginScreen: View {
                                 
                             case .failure(let error):
                                 
-                                print("카카오 소셜로그인 에러 \(error)")
+                                print("로그인 실패, \(error)")
                                 
                                 showingAlert = true
                                 alertMessage = serverErrorMessage

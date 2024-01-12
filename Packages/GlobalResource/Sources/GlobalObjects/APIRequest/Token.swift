@@ -43,11 +43,22 @@ extension APIRequestGlobalObject {
 
 public extension APIRequestGlobalObject {
     
-    func sendAccessTokenToServer(accessToken: String, refreshToken: String) async throws -> TokenObject {
+    enum SocialLogInType {
         
-        let url = try SpotAPI.getSpotToken.getApiUrl()
+        case kakao, apple
+        
+    }
+    
+    func sendAccessTokenToServer(accessToken: String, refreshToken: String, type: SocialLogInType) async throws -> TokenObject {
+        
+        let logInApi: SpotAPI = type == .kakao ? .getSpotTokenFromKakao : .getSpotTokenFromApple
+        
+        let url = try logInApi.getApiUrl()
         
         var request = try getURLRequest(url: url, method: .post, isAuth: false)
+        
+        print(accessToken)
+        print(refreshToken)
         
         request.httpBody = try jsonEncoder.encode(TokenModel(accessToken: accessToken, refreshToken: refreshToken))
         
@@ -55,56 +66,43 @@ public extension APIRequestGlobalObject {
         
         if let httpResponse = response as? HTTPURLResponse {
             
-            switch httpResponse.statusCode {
-            case 200..<300:
-                // status code 정상
-                let severToken = try jsonDecoder.decode(TokenModel.self, from: data)
-                
-                return TokenObject(accessToken: severToken.accessToken, refreshToken: severToken.refreshToken)
-            case 400..<500:
-                throw SpotNetworkError.clientError
-            case 500..<600:
-                throw SpotNetworkError.serverError
-            default:
-                throw SpotNetworkError.unProcessedStatusCode
-            }
+            try defaultCheckStatusCode(response: httpResponse, functionName: #function, data: data)
             
+            // status code 정상
+            let severToken = try jsonDecoder.decode(TokenModel.self, from: data)
+            
+            return TokenObject(accessToken: severToken.accessToken, refreshToken: severToken.refreshToken)
+            
+        } else {
+            
+            throw SpotNetworkError.unownedError(function: #function)
         }
-        
-        throw SpotNetworkError.unownedError
-        
     }
     
     func refreshTokens() async throws -> TokenObject{
         
-        let url = try! SpotAPI.refreshSpotToken.getApiUrl()
+        let url = try SpotAPI.refreshSpotToken.getApiUrl()
         
         var request = try getURLRequest(url: url, method: .post)
         
-        request.httpBody = try jsonEncoder.encode(RefreshTokenModel(refreshToken: spotRefreshToken!))
+        let jsonObject: [String: Any] = ["refreshToken": spotRefreshToken!]
+        
+        request.httpBody = try JSONSerialization.data(withJSONObject: jsonObject)
         
         let (data, response) = try await URLSession.shared.data(for: request)
         
         if let httpResponse = response as? HTTPURLResponse {
             
-            switch httpResponse.statusCode {
-            case 200..<300:
-                // status code 정상
-                let newSeverToken = try jsonDecoder.decode(TokenModel.self, from: data)
-                
-                return TokenObject(accessToken: newSeverToken.accessToken, refreshToken: newSeverToken.refreshToken)
-            case 400..<500:
-                throw SpotNetworkError.clientError
-            case 500..<600:
-                throw SpotNetworkError.serverError
-            default:
-                throw SpotNetworkError.unProcessedStatusCode
-            }
+            try defaultCheckStatusCode(response: httpResponse, functionName: #function, data: data)
             
+            // status code 정상
+            let newSeverToken = try jsonDecoder.decode(TokenModel.self, from: data)
+            
+            return TokenObject(accessToken: newSeverToken.accessToken, refreshToken: newSeverToken.refreshToken)
+            
+        } else {
+            
+            throw SpotNetworkError.unownedError(function: #function)
         }
-        
-        throw SpotNetworkError.unownedError
-        
     }
-    
 }

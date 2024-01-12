@@ -62,9 +62,11 @@ extension KakaoLoginManager {
     
     func tokenLogicCompletion(oauthToken: OAuthToken?, error: Error?, completion: @escaping (Result<TokenObject, SpotNetworkError>) -> ()) {
         
+        let functionName = #function
+        
         if let error = error {
             
-            completion(.failure(.kakaoServerError))
+            completion(.failure(.kakaoServerError(function: functionName)))
             
         }
         else {
@@ -76,7 +78,7 @@ extension KakaoLoginManager {
                     
                     do {
                         
-                        let token = try await APIRequestGlobalObject.shared.sendAccessTokenToServer(accessToken: accessToken, refreshToken: refreshToken)
+                        let token = try await APIRequestGlobalObject.shared.sendAccessTokenToServer(accessToken: accessToken, refreshToken: refreshToken, type: .kakao)
                         
                         completion(.success(token))
                         
@@ -85,18 +87,18 @@ extension KakaoLoginManager {
                         
                         if let netError = error as? SpotNetworkError {
                             
-                            completion(.failure(netError))
+                            return completion(.failure(netError))
                             
                         }
                         
-                        completion(.failure(.unownedError))
+                        completion(.failure(.unownedError(function: functionName)))
                         
                     }
                 }
                 
             } else {
                 
-                completion(.failure(.kakaoServerError))
+                completion(.failure(.kakaoServerError(function: functionName)))
                 
             }
         }

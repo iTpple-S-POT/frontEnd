@@ -22,7 +22,7 @@ public class PotUploadScreenModel: NavigationController<PotUploadDestination> {
     
     @Published private(set) var authorizationStatus = PHPhotoLibrary.authorizationStatus(for: .readWrite)
     
-    @Published var imageInfo: ImageInformation!
+    @Published var imageInfo: ImageInformation?
     
     @Published var potText: String = ""
     
@@ -63,36 +63,67 @@ public class PotUploadScreenModel: NavigationController<PotUploadDestination> {
         
     }
     
-    func showImageDataUnavailable() {
-        
-        showAlert = true
-        alertTitle = "사용할 수 없는 이미지"
-        alertMessage = "다른 이미지를 선택해주세요."
-    }
-    
-}
-
-enum PotUploadPrepareError: Error {
-    
-    case cantGetUserLocation
-    
 }
 
 // MARK: - 팟 업로드용 데이터
 extension PotUploadScreenModel {
     
-    func uploadPot() throws {
+    func uploadPot() async throws {
         
         guard let location = CJLocationManager.shared.currentUserLocation else {
             
-            throw PotUploadPrepareError.cantGetUserLocation
+            throw PotUploadPrepareError.cantGetUserLocation(function: #function)
         }
         
         // TODO: 카테고리 업데이트
-        let object = SpotPotUploadObject(category: 0, text: potText, latitude: location.latitude, longitude: location.longitude)
+        let object = SpotPotUploadObject(category: 1, text: potText, latitude: location.latitude, longitude: location.longitude)
         
-        APIRequestGlobalObject.shared.uploadPot(imageInfo: imageInfo, uploadObject: object)
+        guard let imageInfo_unwrapped = imageInfo else {
+            
+            throw PotUploadPrepareError.imageInfoDoesntExist(function: #function)
+        }
+                
+        try await APIRequestGlobalObject.shared.executePotUpload(imageInfo: imageInfo_unwrapped, uploadObject: object)
+    }
+    
+}
+
+
+// MARK: - Alert
+extension PotUploadScreenModel {
+    
+    func showImageDataUnavailable() {
         
+        showAlert = true
+        alertTitle = "사용할 수 없는 이미지"
+        alertMessage = "다른 이미지를 선택해주세요"
+    }
+    
+    func showImageDoesntLoaded() {
+        
+        showAlert = true
+        alertTitle = "이미지가 로드되지 않음"
+        alertMessage = "잠시만 기다려 주세요"
+    }
+    
+    func showLocationAuthorizationError() {
+        
+        showAlert = true
+        alertTitle = "위치정보를 얻을 수 없습니다"
+        alertMessage = "설정 > SPOT 위치정보에 동의해 주세요"
+    }
+    
+    func showNetworkError(errorCase: SpotNetworkError) {
+        
+        showAlert = true
+        alertTitle = "네트워크 에러"
+        
+        switch errorCase {
+        case .serverError(_):
+            alertMessage = "SPOT서버가 불안정합니다."
+        default:
+            alertMessage = "업로드 과정에서 문제가 발생했습니다."
+        }
         
     }
     

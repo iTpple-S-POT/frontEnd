@@ -7,7 +7,7 @@
 
 import Foundation
 
-// MARK: - Welcome
+// MARK: - pot response
 struct SpotPotUploadResponseModel: Codable {
     let id, userID, categoryID: Int
     let type, content, imageKey: String

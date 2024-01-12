@@ -10,8 +10,6 @@ import GlobalObjects
 
 struct InsetTextScreenComponent: View {
     
-    @EnvironmentObject var mainNavigation: MainNavigation
-    
     @ObservedObject var screenModel: PotUploadScreenModel
     
     var body: some View {
@@ -25,21 +23,7 @@ struct InsetTextScreenComponent: View {
                     
                     Button("팟 업로드") {
                         
-                        do {
-                            try screenModel.uploadPot()
-                        } catch {
-                            
-                            if let prepareError = error as? PotUploadPrepareError {
-                                
-                                if prepareError == .cantGetUserLocation {
-                                    
-                                    print("권한")
-                                    
-                                }
-                                
-                            }
-                            
-                        }
+                        uploadPot()
                         
                     }
                     .padding(.trailing, 20)
@@ -63,12 +47,54 @@ struct InsetTextScreenComponent: View {
         .alert(isPresented: $screenModel.showAlert) {
             Alert(title: Text(screenModel.alertTitle), message: Text(screenModel.alertMessage), dismissButton: .default(Text("닫기"), action: {
                 
-                mainNavigation.popTopView()
+                // TODO: 업로드 실패시
                 
             }))
         }
             
     }
+}
+
+extension InsetTextScreenComponent {
+    
+    func uploadPot() {
+        
+        Task {
+            
+            do {
+                
+                // 팟업로드 시작
+                try await screenModel.uploadPot()
+                
+            } catch {
+                
+                if let prepareError = error as? PotUploadPrepareError {
+                    
+                    print("팟 업로드 준비중 실패, \(prepareError)")
+                    
+                    switch prepareError {
+                    case .cantGetUserLocation( _ ):
+                        screenModel.showLocationAuthorizationError()
+                    case .imageInfoDoesntExist( _ ):
+                        screenModel.showImageDoesntLoaded()
+                    }
+                    
+                }
+                
+                if let netError = error as? SpotNetworkError {
+                    
+                    print("팟 업로드 실패, \(netError)")
+                    
+                    screenModel.showNetworkError(errorCase: netError)
+                    
+                }
+                
+            }
+            
+        }
+        
+    }
+
 }
 
 #Preview {

@@ -91,7 +91,9 @@ extension ContentScreen {
                 // 새로운 토큰을 로컬에 저장
                 APIRequestGlobalObject.shared.setToken(accessToken: newTokens.accessToken, refreshToken: newTokens.refreshToken, isSaveInUserDefaults: true)
                 
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                try await Task.sleep(for: .seconds(1))
+                
+                DispatchQueue.main.async {
                     
                     screenModel.addToStack(destination: .mainScreen)
                     
@@ -106,7 +108,9 @@ extension ContentScreen {
                     
                 }
                 
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                try await Task.sleep(for: .seconds(1))
+                
+                DispatchQueue.main.async {
                     
                     screenModel.addToStack(destination: .loginScreen)
                     

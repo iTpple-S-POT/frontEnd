@@ -21,14 +21,3 @@ public struct ImageInformation: Identifiable, Equatable {
     }
     
 }
-
-struct PotUploadObject {
-    
-    // 위치
-    // 카테고리
-    
-    var imageInfo: ImageInformation
-    
-}
-
-

@@ -8,16 +8,11 @@
 import Foundation
 
 struct SpotPotUploadRequestModel: Codable {
-    let categoryID: Int
+    let categoryId: Int64
     let imageKey: String
     let type: String
     let location: Location
     let content: String
-
-    enum CodingKeys: String, CodingKey {
-        case categoryID = "categoryId"
-        case imageKey, type, location, content
-    }
 }
 
 // MARK: - Location
@@ -28,12 +23,12 @@ struct Location: Codable {
 
 public struct SpotPotUploadObject {
     
-    let category: Int
+    let category: Int64
     let text: String
     let latitude: Double
     let longitude: Double
     
-    public init(category: Int, text: String, latitude: Double, longitude: Double) {
+    public init(category: Int64, text: String, latitude: Double, longitude: Double) {
         self.category = category
         self.text = text
         self.latitude = latitude

@@ -14,13 +14,6 @@ struct TokenModel: Codable {
     
 }
 
-struct RefreshTokenModel: Codable {
-    
-    var refreshToken: String
-    
-}
-
-
 public struct TokenObject {
     
     public var accessToken: String

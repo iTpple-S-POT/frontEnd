@@ -11,106 +11,55 @@ import Alamofire
 // MARK: - API: 팟업로드및 조회
 public extension APIRequestGlobalObject {
     
-    func getCategory() {
+    func getCategory() async throws {
         
-        getCategory { result in
+        // 로컬에서 가져오기
+        if let data = UserDefaults.standard.data(forKey: kPotCategory), let categories = try? JSONDecoder().decode([CategoryObject].self, from: data) {
             
-            switch result {
-            case .success(let data):
-                
-                self.potCategories = data
-                
-            case .failure(let error):
-                
-                switch error {
-                    // TODO: 추후 구현
-                default:
-                    return
-                }
-            }
+            self.potCategories = categories
             
+            return
         }
         
-        
+        // 서버 요청
+        self.potCategories = try await getCategoryFromServer()
     }
     
     // 카테고리 탐색
-    private func getCategory(completion: @escaping (Result<[PotCategory], SpotNetworkError>) -> Void) {
+    private func getCategoryFromServer() async throws -> [CategoryObject] {
         
-//        if let data = UserDefaults.standard.data(forKey: kPotCategory) {
-//            
-//            let decoded = try? JSONDecoder().decode([PotCategory].self, from: data)
-//            
-//            self.potCategories = decoded
-//            
-//            return
-//        }
-//        
-//        let url = try! SpotAPI.getPotCategory.getApiUrl()
-//        
-//        let headers: HTTPHeaders = [
-//            "Authorization": "Bearer \(spotAccessToken!)",
-//            "Content-Type": "application/json",
-//        ]
-//        
-//        AF
-//            .request(url, method: .get, headers: headers)
-//            .validate(statusCode: 200..<300)
-//            .responseData { reponse in
-//                switch reponse.result {
-//                case .success(let data):
-//                    
-//                    guard let decoded = try? JSONDecoder().decode(SpotPotCategoryModel.self, from: data) else {
-//                        return completion(.failure(.wrongDataTransfer))
-//                    }
-//                    
-//                    completion(.success(decoded.categoryList))
-//                    
-//                case .failure(let error):
-//                    
-//                    // TODO: 에러 구체화
-//                    completion(.failure(.serverError))
-//                    
-//                }
-//            }
+        let url = try SpotAPI.getPotCategory.getApiUrl()
         
+        let request = try getURLRequest(url: url, method: .get)
         
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        if let httpResponse = response as? HTTPURLResponse {
+            
+            try defaultCheckStatusCode(response: httpResponse, functionName: #function, data: data)
+            
+            // status code 정상
+            let decoded = try jsonDecoder.decode(PotCategoryModel.self, from: data)
+            
+            return decoded.categoryList.map { CategoryObject(id: $0.id, name: $0.name, description: $0.description) }
+            
+        }
+        
+        throw SpotNetworkError.unownedError(function: #function)
     }
     
     // 팟 업로드
-    // TODO: 카테고리 수정
-    func uploadPot(imageInfo: ImageInformation, uploadObject: SpotPotUploadObject) {
+    func executePotUpload(imageInfo: ImageInformation, uploadObject: SpotPotUploadObject) async throws {
         
-//        Task {
-//            
-//            do {
-//                let psObject = try await getPreSignedUrl(imageInfo: imageInfo)
-//                
-//                try uploadImageToS3(psUrlString: psObject.preSignedUrl, imageData: imageInfo.data) {
-//                    result in
-//                    
-//                    switch result {
-//                    case .success( _ ):
-//                            
-//                        // TODO: await 처리방법 생각하기
-//                        try? self.uploadPotData(fileKey: psObject.fileKey, uploadObject: uploadObject)
-//
-//       
-//                    case .failure(let error):
-//                        print(error.localizedDescription)
-//                    }
-//                    
-//                }
-//                
-//                
-//            }
-//            catch {
-//                
-//                print(error.localizedDescription)
-//                
-//            }
-//            
-//        }
+        let s3Object = try await getPreSignedUrl(imageInfo: imageInfo)
+        
+        guard let preUrl = URL(string: s3Object.preSignedUrl) else {
+            throw SpotNetworkError.notFoundError(description: "pre-signed-url 생성 에러")
+        }
+        
+        try await uploadImageToS3(url: preUrl, imageData: imageInfo.data)
+        try await uploadPotData(fileKey: s3Object.fileKey, uploadObject: uploadObject)
+        
     }
     
     
@@ -121,118 +70,78 @@ public extension APIRequestGlobalObject {
             
             let fileName = imageInfo.id.uuidString + "." + imageInfo.ext
             
-
-            var request = try URLRequest(url: url, method: .post)
+            var request = try getURLRequest(url: url, method: .post)
             
-            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-//            request.setValue(getBearerAuthorizationValue, forHTTPHeaderField: "Authorization")
+            let jsonObject: [String: Any] = ["fileName": fileName]
             
-            request.timeoutInterval = 10
+            request.httpBody = try JSONSerialization.data(withJSONObject: jsonObject)
             
+            let (data, response) = try await URLSession.shared.data(for: request)
             
-            // POST 로 보낼 정보
-            let params: [String: Any] = [
-                "fileName" : fileName
-            ]
-            
-            print(fileName)
-            
-            try request.httpBody = JSONSerialization.data(withJSONObject: params, options: [])
-            
-            let re = AF.request(request)
-            
-            let dataTask = re.serializingDecodable(PreSignedUrlResponseModel.self)
-            
-            switch await dataTask.result {
+            if let httpResponse = response as? HTTPURLResponse {
                 
-            case .success(let object):
-                return PreSignedUrlObject(preSignedUrl: object.preSignedUrl, fileKey: object.fileKey)
-            case .failure:
-                throw SpotNetworkError.dataRequestError
+                try defaultCheckStatusCode(response: httpResponse, functionName: #function, data: data)
+                
+                // status code 정상
+                let decoded = try jsonDecoder.decode(PreSignedUrlResponseModel.self, from: data)
+                
+                return PreSignedUrlObject(preSignedUrl: decoded.preSignedUrl, fileKey: decoded.fileKey)
+            } else {
+                
+                throw SpotNetworkError.unownedError(function: #function)
             }
-
+            
         }
     
     
-    private func uploadImageToS3(psUrlString: String, imageData: Data, comepletion: @escaping (Result<Bool, SpotNetworkError>) -> Void) throws {
+    private func uploadImageToS3(url: URL, imageData: Data) async throws {
         
-        print(psUrlString)
-        
-        guard let url = URL(string: psUrlString) else {
-            throw SpotNetworkError.urlError(description: "presigned url, url 전환 에러")
-        }
-        
-        var request = try URLRequest(url: url, method: .put)
-        request.timeoutInterval = 0
+        var request = try getURLRequest(url: url, method: .put, isAuth: false)
         request.setValue("binary/octet-stream", forHTTPHeaderField: "Content-Type")
-        request.httpBody = imageData
         
-        AF
-            .request(request)
-            .validate()
-            .response { response in
-                switch response.result {
-                case .success( _ ):
-                    comepletion(.success(true))
-                case .failure( _ ):
-                    comepletion(.failure(.serverError))
-                }
-            }
+        let (data, response) = try await URLSession.shared.upload(for: request, from: imageData)
         
+        if let httpResponse = response as? HTTPURLResponse {
+            
+            try defaultCheckStatusCode(response: httpResponse, functionName: #function, data: data)
+            
+            print("S3 업로드 성공")
+            
+        } else {
+            
+            throw SpotNetworkError.unownedError(function: #function)
+        }
         
     }
     
-    // TODO: 카테고리 수정
-    private func uploadPotData(fileKey: String, uploadObject: SpotPotUploadObject) throws {
+    // 팟업로드
+    private func uploadPotData(fileKey: String, uploadObject: SpotPotUploadObject) async throws {
         
-        let data = SpotPotUploadRequestModel(
-            categoryID: uploadObject.category,
+        let object = SpotPotUploadRequestModel(
+            categoryId: uploadObject.category,
             imageKey: fileKey,
             type: "IMAGE",
             location: Location(lat: uploadObject.latitude, lon: uploadObject.longitude),
             content: uploadObject.text
         )
         
-        print(data)
+        let url = try SpotAPI.postPot.getApiUrl()
         
-        let url = try! SpotAPI.postPot.getApiUrl()
+        var request = try getURLRequest(url: url, method: .post)
         
-        var request = try URLRequest(url: url, method: .post)
+        request.httpBody = try JSONEncoder().encode(object)
         
+        let (data, response) = try await URLSession.shared.data(for: request)
         
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-//        request.setValue(getBearerAuthorizationValue, forHTTPHeaderField: "Authorization")
-        request.timeoutInterval = 10
-        request.httpBody = try JSONEncoder().encode(data)
-        
-        AF
-            .request(request)
-            .validate()
-            .response { result in
-                
-                switch result.result {
-                case .success(_):
-                    print("success")
-                case .failure(_):
-                    print("failure")
-                }
-                
-            }
-        
-//        let re = AF.request(request)
-//
-//        let dataTask = re.serializingDecodable(SpotPotUploadResponseModel.self)
-//
-//        switch await dataTask.result {
-//
-//        case .success(let data):
-//
-//            print(data)
-//
-//            return true
-//        case .failure:
-//            throw SpotNetworkError.dataTransferError
-//
-//        }
+        if let httpResponse = response as? HTTPURLResponse {
+            
+            try defaultCheckStatusCode(response: httpResponse, functionName: #function, data: data)
+            
+            print("팟 업로드 성공")
+            
+        } else {
+            
+            throw SpotNetworkError.unownedError(function: #function)
+        }
     }
 }

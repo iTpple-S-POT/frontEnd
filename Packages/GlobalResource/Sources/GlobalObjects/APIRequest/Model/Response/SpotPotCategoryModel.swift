@@ -7,13 +7,19 @@
 
 import Foundation
 
-struct SpotPotCategoryModel: Decodable {
+struct PotCategoryModel: Decodable {
     
-    var categoryList: [PotCategory]
+    var categoryList: [CategoryModel]
     
 }
 
-public struct PotCategory: Decodable {
+struct CategoryModel: Decodable {
+    var id: Int
+    var name: String
+    var description: String
+}
+
+public struct CategoryObject: Decodable {
     
     var id: Int
     var name: String
