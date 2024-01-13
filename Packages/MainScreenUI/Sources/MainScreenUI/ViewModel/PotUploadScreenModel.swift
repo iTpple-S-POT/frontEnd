@@ -20,11 +20,13 @@ public enum PotUploadDestination {
 
 public class PotUploadScreenModel: NavigationController<PotUploadDestination> {
     
+    // 카테고리
+    @Published var selectedCategoryId: Int64?
+    
+    // 이미지
     @Published private(set) var authorizationStatus = PHPhotoLibrary.authorizationStatus(for: .readWrite)
     
     @Published var imageInfo: ImageInformation?
-    
-    @Published var potText: String = ""
     
     @Published var imageIsSelected: Bool = false
     
@@ -35,12 +37,19 @@ public class PotUploadScreenModel: NavigationController<PotUploadDestination> {
         .likedPhtoto
     ]
     
+    // 팟 텍스트
+    @Published var potText: String = ""
+    
+    
+    
+    
+    
     // 데이터를 받을 수 없는 사진의 경우 Alert표시
     @Published var showAlert = false
     @Published private(set) var alertTitle = ""
     @Published private(set) var alertMessage = ""
     
-    var dismiss: (() -> Void)?
+    var dismiss: DismissAction?
     
     func checkAuthorizationStatus() {
         

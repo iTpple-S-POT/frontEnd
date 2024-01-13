@@ -8,6 +8,7 @@
 import SwiftUI
 import Photos
 import CJPhotoCollection
+import DefaultExtensions
 
 struct SelectPhotoScreenComponent: View {
     

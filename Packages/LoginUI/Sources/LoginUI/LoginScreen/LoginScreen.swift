@@ -13,9 +13,6 @@ import GlobalObjects
 import UserInformationUI
 import Alamofire
 
-//TODO: Package에 외부 폰트 등록(otf파일이 문제인가?)
-
-
 public struct LoginScreen: View {
     
     @EnvironmentObject private var mainNavigation: MainNavigation

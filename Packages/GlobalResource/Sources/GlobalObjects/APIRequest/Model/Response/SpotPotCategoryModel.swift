@@ -19,10 +19,16 @@ struct CategoryModel: Decodable {
     var description: String
 }
 
-public struct CategoryObject: Codable {
+public struct CategoryObject: Codable, Hashable {
     
-    var id: Int64
-    var name: String
-    var description: String
+    public var id: Int64
+    public var name: String
+    public var description: String
+    
+    public init(id: Int64, name: String, description: String) {
+        self.id = id
+        self.name = name
+        self.description = description
+    }
     
 }

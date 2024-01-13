@@ -19,41 +19,22 @@ struct PotUploadScreen: View {
         
         NavigationStack(path: $screenModel.navigationStack) {
             
-            VStack(spacing: 0) {
-                HStack {
-                    Spacer()
-                    
-                    Button {
-                        
-                        dismiss()
-                        
-                    } label: {
-                        
-                        Image(systemName: "x.circle")
-                            .resizable()
-                            .scaledToFit()
-                            .foregroundStyle(.black)
-                        
-                    }
-                    .padding(.trailing, 20)
-                }
-                .frame(height: 50)
-                
-                SelectPhotoScreenComponent(screenModel: screenModel)
-            }
+            SelectCategoryScreenComponent()
             
-                .navigationDestination(for: PotUploadDestination.self) { type in
-                    
-                    switch type {
-                        
-                    case .insertText:
-                        InsetTextScreenComponent(screenModel: screenModel)
-                        
-                    }
-                    
-                }
+            //                .navigationDestination(for: PotUploadDestination.self) { type in
+            //
+            //                    switch type {
+            //
+            //                    case .insertText:
+            //                        InsetTextScreenComponent(screenModel: screenModel)
+            //
+            //                    }
+            //
+            //                }
             
         }
+        .environmentObject(screenModel)
+        .onAppear { screenModel.dismiss = dismiss }
         
     }
     
