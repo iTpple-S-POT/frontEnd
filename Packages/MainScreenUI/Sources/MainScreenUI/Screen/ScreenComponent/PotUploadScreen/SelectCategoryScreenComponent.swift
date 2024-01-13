@@ -12,6 +12,7 @@ import GlobalUIComponents
 struct SelectCategoryScreenComponent: View {
     
     @EnvironmentObject var screenModelWithNav: PotUploadScreenModel
+    @EnvironmentObject var globalObject: GlobalStateObject
     
     let test = [
         CategoryObject(id: 1, name: "테스트1", description: "지금의 동네는 어떤가요? 지금 이 순간의 소소한 일상을 공유해 주세요"),
@@ -23,45 +24,14 @@ struct SelectCategoryScreenComponent: View {
     private var isButtonValid: Bool { screenModelWithNav.selectedCategoryId != nil }
     
     var body: some View {
-        VStack {
+        VStack(spacing: 0) {
             
             // 최상단
-            ZStack {
+            SpotNavigationBarView(title: "업로드") {
                 
-                HStack(spacing: 0) {
-                    
-                    Spacer(minLength: 28)
-                    
-                    Text("업로드")
-                        .font(.system(size: 20, weight: .semibold))
-                    
-                    Spacer()
-                    
-                }
-                
-                HStack(spacing: 0) {
-                    
-                    Image(systemName: "chevron.backward")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 28, height: 28)
-                        .onTapGesture {
-                            
-                            screenModelWithNav.dismiss?()
-                            
-                        }
-                    
-                    Spacer(minLength: 0)
-                    
-                }
+                screenModelWithNav.dismiss?()
                 
             }
-            .padding(.horizontal, 21)
-            .frame(height: 56)
-            .background(
-                Rectangle().fill(.white)
-            )
-            .shadow(color: .gray.opacity(0.3), radius: 2.0, y: 2)
             
             // 카테리들 + 버튼
             VStack {
@@ -89,7 +59,7 @@ struct SelectCategoryScreenComponent: View {
                     
                     VStack(spacing: 16) {
                         
-                        ForEach(test, id: \.self) {
+                        ForEach(globalObject.categories ?? [], id: \.self) {
                             
                             CategoryBox(selected: $screenModelWithNav.selectedCategoryId, object: $0)
                             
@@ -100,13 +70,13 @@ struct SelectCategoryScreenComponent: View {
                 }
                 .padding(.top, 28)
                 
-                Spacer()
+                Spacer(minLength: 0)
                 
                 // 다음
                 SpotRoundedButton(text: "다음", color: .btn_red_nt.opacity(isButtonValid ? 1 : 0.3)) {
                     
-                    // 네비게이션 이동
-                    
+                    // 업로드 화면으로 이동
+                    screenModelWithNav.addToStack(destination: .uploadScreen)
                     
                 }
                 .disabled(!isButtonValid)
@@ -115,68 +85,12 @@ struct SelectCategoryScreenComponent: View {
             }
             .padding(.horizontal, 21)
             .padding(.top, 40)
-            
-            Spacer()
         }
     }
-}
-
-// TODO: 이주 예정
-
-struct CategoryBox: View {
-    
-    @Binding var selected: Int64?
-    
-    var object: CategoryObject
-    
-    private var isSelected: Bool { selected == object.id }
-    
-    var body: some View {
-        
-        HStack(spacing: 0) {
-            
-            Circle()
-                .fill(.white)
-                .frame(width: 80, height: 80)
-            
-            VStack(alignment: .leading, spacing: 8) {
-                Text(object.name)
-                    .font(.system(size: 20, weight: .semibold))
-                
-                Text(object.description)
-                    .font(.system(size: 12))
-                    .lineSpacing(5)
-            }
-            .padding(.leading, 16)
-            
-        }
-        .padding(10)
-        .background{
-            
-            ZStack {
-                
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(isSelected ? .mainScreenRed.opacity(0.2) : .btn_light_grey)
-                
-                if isSelected {
-                        
-                    RoundedRectangle(cornerRadius: 10)
-                        .strokeBorder(.red, lineWidth: 1)
-                    
-                }
-                
-            }
-        }
-        .frame(height: 100)
-        .onTapGesture {
-            selected = object.id
-        }
-        
-    }
-    
 }
 
 #Preview {
     SelectCategoryScreenComponent()
         .environmentObject(PotUploadScreenModel())
+        .environmentObject(GlobalStateObject())
 }

@@ -91,7 +91,7 @@ public struct LoginScreen: View {
                                 // 토큰 발급 성공으로 인한 이동, 최초 입력 여부 확인 예정
                                 Task { @MainActor in
                                     
-                                    mainNavigation.addToStack(destination: .mainScreen)
+                                    mainNavigation.addToStack(destination: .dataLoadingScreen)
                                     
                                 }
                                 

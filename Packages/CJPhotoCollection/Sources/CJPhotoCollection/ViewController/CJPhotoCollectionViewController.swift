@@ -36,7 +36,10 @@ public class CJPhotoCollectionViewController: UICollectionViewController {
     ]
     
     // 선택된 셀을 전송할 퍼블리셔
-    let selectedPhotoPub = PassthroughSubject<Result<ImageInformation, SelectImageCellError>, Never>()
+    let selectedPhotoPub = PassthroughSubject<Result<ImageInformation?, SelectImageCellError>, Never>()
+    
+    let dismissPub = PassthroughSubject<Any?, Never>()
+    
     let collectionTypesPub = PassthroughSubject<[CollectionTypeObject], Never>()
     
     
@@ -467,47 +470,56 @@ public extension CJPhotoCollectionViewController {
                 return self.selectedPhotoPub.send(.failure(.invalidLocalIndentifier))
             }
             
-            imageManager.requestImageDataAndOrientation(for: asset, options: .none) { data, type, orientation, _ in
+            // dismiss
+            dismissPub.send(nil)
+            
+            Task {
                 
-                guard let imageData = data, let uiImage = UIImage(data: imageData) else {
-                    // TODO: 데이터를 가져울 수 없는 사진
-                    return self.selectedPhotoPub.send(.failure(.imageDataNotAvailable))
-                }
+                await Task.yield()
                 
-                guard let suffixData = type else {
-                    // TODO: 확장자 정보를 얻을 수 없음
-                    return self.selectedPhotoPub.send(.failure(.imageSuffixDataNotAvailable))
-                }
-                
-                let splited = suffixData.split(separator: ".")
-                
-                let lastIndex = splited.endIndex-1
-                
-                let ext = String(splited[lastIndex])
-                
-                if let validSuffix = SpotValidSuffix(rawValue: ext) {
+                imageManager.requestImageDataAndOrientation(for: asset, options: .none) { data, type, orientation, _ in
                     
-                    let imageInfo = ImageInformation(
-                        data: imageData,
-                        ext: ext
-                    )
-                    
-                    self.selectedPhotoPub.send(.success(imageInfo))
-                    
-                } else {
-                    
-                    guard let uiImage = UIImage(data: imageData), let pngData = uiImage.pngData() else {
-                        
-                        return self.selectedPhotoPub.send(.failure(.invalidSuffix(originalExt: ext)))
-                        
+                    guard let imageData = data, let uiImage = UIImage(data: imageData) else {
+                        // TODO: 데이터를 가져울 수 없는 사진
+                        return self.selectedPhotoPub.send(.failure(.imageDataNotAvailable))
                     }
                     
-                    let imageInfo = ImageInformation(
-                        data: pngData,
-                        ext: "png"
-                    )
+                    guard let suffixData = type else {
+                        // TODO: 확장자 정보를 얻을 수 없음
+                        return self.selectedPhotoPub.send(.failure(.imageSuffixDataNotAvailable))
+                    }
                     
-                    self.selectedPhotoPub.send(.success(imageInfo))
+                    let splited = suffixData.split(separator: ".")
+                    
+                    let lastIndex = splited.endIndex-1
+                    
+                    let ext = String(splited[lastIndex])
+                    
+                    if let validSuffix = SpotValidSuffix(rawValue: ext) {
+                        
+                        let imageInfo = ImageInformation(
+                            data: imageData,
+                            ext: ext
+                        )
+                        
+                        self.selectedPhotoPub.send(.success(imageInfo))
+                        
+                    } else {
+                        
+                        guard let uiImage = UIImage(data: imageData), let pngData = uiImage.pngData() else {
+                            
+                            return self.selectedPhotoPub.send(.failure(.invalidSuffix(originalExt: ext)))
+                            
+                        }
+                        
+                        let imageInfo = ImageInformation(
+                            data: pngData,
+                            ext: "png"
+                        )
+                        
+                        self.selectedPhotoPub.send(.success(imageInfo))
+                        
+                    }
                     
                 }
                 

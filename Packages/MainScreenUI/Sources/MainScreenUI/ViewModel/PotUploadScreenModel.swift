@@ -14,7 +14,9 @@ import CJMapkit
 // 추후 추가 가능
 public enum PotUploadDestination {
     
-    case insertText
+    case uploadScreen
+    case hashTagScreen
+    case finalScreen
     
 }
 
@@ -24,9 +26,11 @@ public class PotUploadScreenModel: NavigationController<PotUploadDestination> {
     @Published var selectedCategoryId: Int64?
     
     // 이미지
+    @Published var showSelectPhotoView = false
+    
     @Published private(set) var authorizationStatus = PHPhotoLibrary.authorizationStatus(for: .readWrite)
     
-    @Published var imageInfo: ImageInformation?
+    @Published private(set) var imageInfo: ImageInformation?
     
     @Published var imageIsSelected: Bool = false
     
@@ -39,10 +43,6 @@ public class PotUploadScreenModel: NavigationController<PotUploadDestination> {
     
     // 팟 텍스트
     @Published var potText: String = ""
-    
-    
-    
-    
     
     // 데이터를 받을 수 없는 사진의 경우 Alert표시
     @Published var showAlert = false
@@ -69,8 +69,6 @@ public class PotUploadScreenModel: NavigationController<PotUploadDestination> {
     func photoInformationUpdated(imageInfo: ImageInformation) {
         
         self.imageInfo = imageInfo
-        
-        addToStack(destination: .insertText)
         
     }
     

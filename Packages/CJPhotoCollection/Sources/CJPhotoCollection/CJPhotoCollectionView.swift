@@ -11,6 +11,8 @@ public class Coordinator {
     
     var collectionListSub: AnyCancellable?
     
+    var dismissSub: AnyCancellable?
+    
     deinit {
         
         selectedPhotoSub?.cancel()
@@ -25,12 +27,14 @@ public struct CJPhotoCollectionView: UIViewControllerRepresentable {
     // publisher가 퍼블리쉬시 호출되는 클로저 타입입니다.
     public var selectedPhotoCompletion: (ImageInformation?) -> ()
     public var collectionTypesCompletion: ([CollectionTypeObject]) -> ()
+    public var dismissCompletion: () -> ()
     
-    public init(collectionType: Binding<CollectionTypeObject>, selectedPhotoCompletion: @escaping (ImageInformation?) -> (), collectionTypesCompletion: @escaping ([CollectionTypeObject]) -> ()) {
+    public init(collectionType: Binding<CollectionTypeObject>, selectedPhotoCompletion: @escaping (ImageInformation?) -> (), collectionTypesCompletion: @escaping ([CollectionTypeObject]) -> (), dismissCompletion: @escaping () -> ()) {
         
         self._collectionType = collectionType
         self.selectedPhotoCompletion = selectedPhotoCompletion
         self.collectionTypesCompletion = collectionTypesCompletion
+        self.dismissCompletion = dismissCompletion
     }
     
     public typealias UIViewControllerType = CJPhotoCollectionViewController
@@ -81,6 +85,13 @@ public struct CJPhotoCollectionView: UIViewControllerRepresentable {
             }
             
         }
+        
+        coordi.dismissSub = collectionViewController.dismissPub.sink(receiveValue: { _ in
+            
+            dismissCompletion()
+            
+        })
+        
         
         return collectionViewController
         

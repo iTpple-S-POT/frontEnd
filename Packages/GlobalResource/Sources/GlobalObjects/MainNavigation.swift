@@ -23,5 +23,6 @@ public enum MainNavDestination {
     case loginScreen
     case mainScreen
     case preferenceScreen
+    case dataLoadingScreen
     
 }

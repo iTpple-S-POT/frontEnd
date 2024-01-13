@@ -19,18 +19,23 @@ struct PotUploadScreen: View {
         
         NavigationStack(path: $screenModel.navigationStack) {
             
+            // 카테고리 선택(Root)
             SelectCategoryScreenComponent()
             
-            //                .navigationDestination(for: PotUploadDestination.self) { type in
-            //
-            //                    switch type {
-            //
-            //                    case .insertText:
-            //                        InsetTextScreenComponent(screenModel: screenModel)
-            //
-            //                    }
-            //
-            //                }
+                .navigationDestination(for: PotUploadDestination.self) { type in
+                    
+                    switch type {
+                        
+                    case .uploadScreen:
+                        UploadScreenComponent()
+                            .navigationBarBackButtonHidden()
+                    case .hashTagScreen:
+                        Text("해쉬테그 스크린")
+                    case .finalScreen:
+                        Text("업로드 직전 스크린")
+                    }
+                    
+                }
             
         }
         .environmentObject(screenModel)

@@ -30,9 +30,7 @@ let package = Package(
                 .product(name: "CJPhotoCollection", package: "CJPhotoCollection"),
             ],
             resources: [
-                .process("Resources/TitlePart"),
-                .process("Resources/Tags"),
-                .process("Resources/Tab"),
+                .process("Resources"),
             ]
         ),
         .testTarget(

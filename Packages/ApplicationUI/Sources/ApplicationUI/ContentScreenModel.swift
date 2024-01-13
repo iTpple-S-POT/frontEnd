@@ -21,9 +21,6 @@ class ContentScreenModel: ObservableObject {
     let kAccessTokenKey = "spotAccessToken"
     let kRefreshTokenKey = "spotRefreshToken"
     
-    // pot
-    let kPotCategory = "spotPotCategory"
-    
 }
 
 
@@ -44,19 +41,6 @@ extension ContentScreenModel {
     
 }
 
-
-// MARK: - 팟 카테고리
-extension ContentScreenModel {
-    
-    // 서버에서 카테고리를 가져옴
-    func getCategoryFromServer() async throws -> [CategoryObject] {
-        
-        try await APIRequestGlobalObject.shared.getCategoryFromServer()
-    }
-    
-}
-
-
 // MARK: - Alert
 extension ContentScreenModel {
     
@@ -75,12 +59,6 @@ extension ContentScreenModel {
         self.showAlert = true
         
     }
-    
-}
-
-enum LocalDataError: Error {
-    
-    case dataNotFoundInLocal(name: String)
     
 }
 
@@ -116,26 +94,6 @@ extension ContentScreenModel {
         }
         
         throw LocalDataError.dataNotFoundInLocal(name: "Token")
-    }
-    
-    // 로컬에 카테고리 저장
-    func saveCategoryToLocal(objects: [CategoryObject]) throws {
-        
-        let econded = try JSONEncoder().encode(objects)
-        
-        UserDefaults.standard.set(econded, forKey: self.kPotCategory)
-        
-    }
-    
-    // 로컬 카테고리 존재 확인
-    func checkCategoriesExistsInUserDefaults() throws -> [CategoryObject] {
-        
-        if let data = UserDefaults.standard.data(forKey: self.kPotCategory), let decoded = try? JSONDecoder().decode([CategoryObject].self, from: data) {
-            
-            return decoded
-        }
-        
-        throw LocalDataError.dataNotFoundInLocal(name: "Categories")
     }
     
 }

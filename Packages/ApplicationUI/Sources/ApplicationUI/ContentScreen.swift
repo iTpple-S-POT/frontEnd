@@ -43,6 +43,29 @@ public struct ContentScreen: View {
                                 
                             }
                             .navigationBarBackButtonHidden()
+                    case .dataLoadingScreen:
+                        Text("데이터 로딩 스크린")
+                            .task {
+                                
+                                do {
+                                    
+                                    try await globalStateObject.intialDataTask()
+                                    
+                                    try? await Task.sleep(for: .seconds(0.5))
+                                    
+                                    Task { @MainActor in
+                                        
+                                        mainNavigation.addToStack(destination: .mainScreen)
+                                    }
+                                    
+                                } catch {
+                                    
+                                    print("데이터 로딩 에러")
+                                    
+                                }
+                                
+                            }
+                            .navigationBarBackButtonHidden()
                     case .mainScreen:
                         MainScreen()
                             .navigationBarBackButtonHidden()
@@ -61,16 +84,9 @@ public struct ContentScreen: View {
                 
                 print("--토큰 성공--")
                 
-                // 데이터
-                try await intialDataTask()
-                
-                print("--데이터 성공--")
-                
-                try? await Task.sleep(for: .seconds(1))
-                
                 Task { @MainActor in
                     
-                    mainNavigation.addToStack(destination: .mainScreen)
+                    mainNavigation.addToStack(destination: .dataLoadingScreen)
                 }
                 
             } catch {
@@ -157,42 +173,6 @@ extension ContentScreen {
             
         }
         
-    }
-    
-    func intialDataTask() async throws {
-        
-        do {
-            
-            var categories: [CategoryObject]!
-            
-            if let localData = try? screenModel.checkCategoriesExistsInUserDefaults() {
-                
-                print("카테고리를 로컬에서 가져옴")
-                
-                categories = localData
-                
-            } else {
-                
-                let serverData = try await APIRequestGlobalObject.shared.getCategoryFromServer()
-                
-                print("카테고리: 서버에서 가져오기 성공")
-                
-                categories = serverData
-            }
-            
-            globalStateObject.setCategories(categories: categories)
-            
-        } catch {
-            
-            if let netError = error as? SpotNetworkError {
-                
-                throw InitialTaskError.networkFailure
-                
-            }
-            
-            throw InitialTaskError.dataTaskFailed
-            
-        }
     }
     
 }

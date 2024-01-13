@@ -10,9 +10,10 @@ import Photos
 import CJPhotoCollection
 import DefaultExtensions
 
-struct SelectPhotoScreenComponent: View {
+struct SelectPhotoView: View {
     
-    @ObservedObject var screenModel: PotUploadScreenModel
+    @Environment(\.dismiss) var dismiss
+    @EnvironmentObject var screenModel: PotUploadScreenModel
     
     var body: some View {
         VStack(spacing: 0) {
@@ -52,7 +53,10 @@ struct SelectPhotoScreenComponent: View {
                     
                     // 이미지 데이터 획득 성공
                     if let imageInfo = $0 {
+                        
                         screenModel.photoInformationUpdated(imageInfo: imageInfo)
+                        
+                        print("사진 선택 성공")
                         
                     } else {
                         
@@ -64,6 +68,10 @@ struct SelectPhotoScreenComponent: View {
                 } collectionTypesCompletion: {
                     
                     screenModel.collectionTypeList = $0
+                    
+                } dismissCompletion: {
+                    
+                    dismiss()
                     
                 }
 
@@ -90,5 +98,6 @@ struct SelectPhotoScreenComponent: View {
 }
 
 #Preview {
-    SelectPhotoScreenComponent(screenModel: PotUploadScreenModel())
+    SelectPhotoView()
+        .environmentObject(PotUploadScreenModel())
 }

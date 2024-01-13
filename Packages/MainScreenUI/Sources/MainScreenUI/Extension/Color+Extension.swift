@@ -13,4 +13,6 @@ extension ShapeStyle where Self == Color {
     
     static var btn_red_nt: Color { Color(hex: "FF533F") }
     
+    static var midium_gray: Color { Color(hex: "C7C7C7") }
+    
 }
