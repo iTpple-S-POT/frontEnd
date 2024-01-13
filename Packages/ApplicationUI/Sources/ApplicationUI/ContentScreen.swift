@@ -85,7 +85,7 @@ public struct ContentScreen: View {
                     
                     screenModel.showSeverError()
                     
-                case .tokenCacheTaskFailed:
+                case .tokenCacheTaskFailed, .refreshFailed:
                     
                     try? await Task.sleep(for: .seconds(1))
                     
@@ -112,6 +112,7 @@ public struct ContentScreen: View {
 enum InitialTaskError: Error {
     
     case networkFailure
+    case refreshFailed
     case tokenCacheTaskFailed
     case dataTaskFailed
     
@@ -146,6 +147,10 @@ extension ContentScreen {
                 
                 print("네트워크 통신 실패 \(netError)")
                 
+                if case .notFoundError( _ ) = netError {
+                    
+                    throw InitialTaskError.refreshFailed
+                }
             }
             
             throw InitialTaskError.networkFailure
