@@ -54,7 +54,9 @@ let package = Package(
                 .product(name: "DefaultExtensions", package: "DefaultExtensions"),
                 .product(name: "Alamofire", package: "Alamofire"),
             ],
-            resources: [ ]
+            resources: [
+                .process("Resources/PotModels.xcdatamodeld")
+            ]
         ),
         
         //test

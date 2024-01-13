@@ -18,6 +18,8 @@ public struct ContentScreen: View {
     
     @StateObject private var screenModel = ContentScreenModel()
     
+    @StateObject private var globalStateObject = GlobalStateObject()
+    
     
     public init() { }
     
@@ -50,71 +52,142 @@ public struct ContentScreen: View {
                 }
             
         }
-        .onAppear {
+        .task {
             
-            // 토큰
-            initialTokenTask()
+            do {
+                
+                // 토큰
+                try await initialTokenTask()
+                
+                print("--토큰 성공--")
+                
+                // 데이터
+                try await intialDataTask()
+                
+                print("--데이터 성공--")
+                
+                try? await Task.sleep(for: .seconds(1))
+                
+                Task { @MainActor in
+                    
+                    mainNavigation.addToStack(destination: .mainScreen)
+                }
+                
+            } catch {
+                
+                guard let initialError = error as? InitialTaskError else {
+                    
+                    fatalError()
+                }
+                
+                switch initialError {
+                case .networkFailure:
+                    
+                    screenModel.showSeverError()
+                    
+                case .tokenCacheTaskFailed:
+                    
+                    try? await Task.sleep(for: .seconds(1))
+                    
+                    Task { @MainActor in
+                        
+                        mainNavigation.addToStack(destination: .loginScreen)
+                    }
+                case .dataTaskFailed:
+                    
+                    screenModel.showDataError()
+                }
+                
+            }
             
         }
+        .alert(isPresented: $screenModel.showAlert, content: {
+            Alert(title: Text(screenModel.alertTitle), message: Text(screenModel.alertMessage), dismissButton: .default(Text("닫기")))
+        })
         .environmentObject(mainNavigation)
+        .environmentObject(globalStateObject)
     }
+}
+
+enum InitialTaskError: Error {
+    
+    case networkFailure
+    case tokenCacheTaskFailed
+    case dataTaskFailed
+    
 }
 
 extension ContentScreen {
     
-    
-    func initialTokenTask() {
+    func initialTokenTask() async throws {
         
-        Task {
+        do {
             
-            do {
+            // 테스트를 위한 토큰 삭제
+            // APIRequestGlobalObject.shared.deleteTokenInLocal()
+            
+            try screenModel.checkTokenExistsInUserDefaults()
                 
-                // 테스트를 위한 토큰 삭제
-                // APIRequestGlobalObject.shared.deleteTokenInLocal()
+            // 토큰 리프래쉬
+            try await screenModel.refreshSpotToken()
+        }
+        
+        catch {
+            
+            if let tokenError = error as? SpotTokenError {
                 
-                try APIRequestGlobalObject.shared.checkTokenExistsInUserDefaults()
-                    
-                // 토큰 리프래쉬
-                try await screenModel.refreshSpotToken()
+                print("로컬에 저장된 토큰이 없음, \(tokenError)")
                 
-                // 리프래쉬 성공후 이동
-                try await Task.sleep(for: .seconds(1))
-                
-                DispatchQueue.main.async {
-                    
-                    mainNavigation.addToStack(destination: .mainScreen)
-                    
-                }
+                throw InitialTaskError.tokenCacheTaskFailed
                 
             }
-            catch {
+            
+            if let netError = error as? SpotNetworkError {
                 
-                if let netError = error as? SpotNetworkError {
-                    
-                    print("토큰 리프래쉬 실패 \(netError)")
-                    
-                }
-                else if let tokenError = error as? SpotTokenError {
-                    
-                    print("로컬에 저장된 토큰이 없음, \(tokenError)")
-                    
-                } else {
-                    
-                    return
-                }
-                
-                try await Task.sleep(for: .seconds(1))
-                
-                DispatchQueue.main.async {
-                    
-                    mainNavigation.addToStack(destination: .loginScreen)
-                    
-                }
+                print("네트워크 통신 실패 \(netError)")
                 
             }
+            
+            throw InitialTaskError.networkFailure
             
         }
         
+    }
+    
+    func intialDataTask() async throws {
+        
+        do {
+            
+            var categories: [CategoryObject]!
+            
+            if let localData = try? screenModel.checkCategoriesExistsInUserDefaults() {
+                
+                print("카테고리를 로컬에서 가져옴")
+                
+                categories = localData
+                
+            } else {
+                
+                let serverData = try await APIRequestGlobalObject.shared.getCategoryFromServer()
+                
+                print("카테고리: 서버에서 가져오기 성공")
+                
+                categories = serverData
+            }
+            
+            globalStateObject.setCategories(categories: categories)
+            
+        } catch {
+            
+            if let netError = error as? SpotNetworkError {
+                
+                throw InitialTaskError.networkFailure
+                
+            }
+            
+            throw InitialTaskError.dataTaskFailed
+            
+        }
     }
     
 }

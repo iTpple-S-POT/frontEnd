@@ -46,24 +46,6 @@ public struct MainScreen: View {
             .zIndex(1)
             
         }
-        .onAppear {
-            
-            Task {
-                
-                do {
-                    
-                    try await APIRequestGlobalObject.shared.getCategory()
-                    
-                } catch {
-                    
-                    if let netError = error as? SpotNetworkError {
-                        
-                        print("카테고리를 불러올 수 없습니다. \(netError)")
-                        
-                    }
-                }
-            }
-        }
     }
 }
 

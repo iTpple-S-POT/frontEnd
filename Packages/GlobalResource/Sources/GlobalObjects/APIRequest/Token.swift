@@ -14,54 +14,6 @@ public enum SpotTokenError: Error {
     
 }
 
-
-// MARK: - 로컬에 저장된 토큰 체크
-extension APIRequestGlobalObject {
-    
-    // 토큰 저장
-    public func setToken(accessToken: String, refreshToken: String, isSaveInUserDefaults: Bool = false) {
-        
-        self.spotAccessToken = accessToken
-        self.spotRefreshToken = refreshToken
-        
-        if isSaveInUserDefaults {
-            
-            UserDefaults.standard.set(accessToken, forKey: self.kAccessTokenKey)
-            UserDefaults.standard.set(refreshToken, forKey: self.kRefreshTokenKey)
-            
-        }
-        
-    }
-    
-    // 토큰 삭제
-    public func deleteTokenInLocal() {
-        
-        UserDefaults.standard.removeObject(forKey: self.kAccessTokenKey)
-        UserDefaults.standard.removeObject(forKey: self.kRefreshTokenKey)
-        
-        self.spotAccessToken = nil
-        self.spotRefreshToken = nil
-    
-    }
-    
-    // 로컬 토큰 존재확인
-    public func checkTokenExistsInUserDefaults() throws {
-        
-        if let accessToken = UserDefaults.standard.string(forKey: self.kAccessTokenKey), let refreshToken = UserDefaults.standard.string(forKey: self.kRefreshTokenKey) {
-            
-            // 로컬에 저장된 토큰을 저장
-            setToken(accessToken: accessToken, refreshToken: refreshToken)
-            
-            return
-            
-        }
-        
-        throw SpotTokenError.tokenDoentExistInLocal
-        
-    }
-    
-}
-
 public extension APIRequestGlobalObject {
     
     enum SocialLogInType {
@@ -125,5 +77,11 @@ public extension APIRequestGlobalObject {
             
             throw SpotNetworkError.unownedError(function: #function)
         }
+    }
+    
+    func setSpotToken(accessToken: String, refreshToken: String) {
+        
+        self.spotAccessToken = accessToken
+        self.spotRefreshToken = refreshToken
     }
 }

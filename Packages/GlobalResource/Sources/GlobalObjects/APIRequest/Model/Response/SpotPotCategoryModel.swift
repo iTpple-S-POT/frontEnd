@@ -14,14 +14,14 @@ struct PotCategoryModel: Decodable {
 }
 
 struct CategoryModel: Decodable {
-    var id: Int
+    var id: Int64
     var name: String
     var description: String
 }
 
-public struct CategoryObject: Decodable {
+public struct CategoryObject: Codable {
     
-    var id: Int
+    var id: Int64
     var name: String
     var description: String
     

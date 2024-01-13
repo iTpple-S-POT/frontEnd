@@ -28,6 +28,10 @@ public struct LoginScreen: View {
     
     let serverErrorMessage = "서버가 불안정합니다."
     
+    // TODO: 삭제얘정
+    let kAccessTokenKey = "spotAccessToken"
+    let kRefreshTokenKey = "spotRefreshToken"
+    
     public init() { }
     
     var kakaoButtonImage: Image {
@@ -81,7 +85,10 @@ public struct LoginScreen: View {
                             switch result {
                             case .success(let tokens):
                                 
-                                APIRequestGlobalObject.shared.setToken(accessToken: tokens.accessToken, refreshToken: tokens.refreshToken, isSaveInUserDefaults: true)
+                                // TODO: 코어데이터 패키자로 수정
+                                saveTokenToLocal(accessToken: tokens.accessToken, refreshToken: tokens.refreshToken)
+                                
+                                APIRequestGlobalObject.shared.setSpotToken(accessToken: tokens.accessToken, refreshToken: tokens.refreshToken)
                                 
                                 // TODO: 선호도 입력 여뷰를 확인한 후 메인스크린으로 이동 구현
                                 // 토큰 발급 성공으로 인한 이동, 최초 입력 여부 확인 예정
@@ -115,6 +122,15 @@ public struct LoginScreen: View {
         }
 
     }
+    
+    // TODO: 삭제 예정
+    func saveTokenToLocal(accessToken: String, refreshToken: String) {
+        
+        UserDefaults.standard.set(accessToken, forKey: self.kAccessTokenKey)
+        UserDefaults.standard.set(refreshToken, forKey: self.kRefreshTokenKey)
+        
+    }
+    
 }
 
 #Preview {

@@ -22,13 +22,6 @@ public class APIRequestGlobalObject {
     let jsonEncoder = JSONEncoder()
     let jsonDecoder = JSONDecoder()
     
-    // tokens
-    let kAccessTokenKey = "spotAccessToken"
-    let kRefreshTokenKey = "spotRefreshToken"
-    
-    // pot
-    let kPotCategory = "spotPotCategory"
-    
 }
 
 // MARK: - Request

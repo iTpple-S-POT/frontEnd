@@ -40,6 +40,8 @@ public class PotUploadScreenModel: NavigationController<PotUploadDestination> {
     @Published private(set) var alertTitle = ""
     @Published private(set) var alertMessage = ""
     
+    var dismiss: (() -> Void)?
+    
     func checkAuthorizationStatus() {
         
         // notDetermined상태인 경우만 권한요청을 보냄

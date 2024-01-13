@@ -11,22 +11,8 @@ import Alamofire
 // MARK: - API: 팟업로드및 조회
 public extension APIRequestGlobalObject {
     
-    func getCategory() async throws {
-        
-        // 로컬에서 가져오기
-        if let data = UserDefaults.standard.data(forKey: kPotCategory), let categories = try? JSONDecoder().decode([CategoryObject].self, from: data) {
-            
-            self.potCategories = categories
-            
-            return
-        }
-        
-        // 서버 요청
-        self.potCategories = try await getCategoryFromServer()
-    }
-    
     // 카테고리 탐색
-    private func getCategoryFromServer() async throws -> [CategoryObject] {
+    func getCategoryFromServer() async throws -> [CategoryObject] {
         
         let url = try SpotAPI.getPotCategory.getApiUrl()
         
