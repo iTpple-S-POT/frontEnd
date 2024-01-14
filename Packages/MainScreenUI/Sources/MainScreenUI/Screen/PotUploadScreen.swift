@@ -30,9 +30,11 @@ struct PotUploadScreen: View {
                         UploadScreenComponent()
                             .navigationBarBackButtonHidden()
                     case .hashTagScreen:
-                        Text("해쉬테그 스크린")
+                        HashTagScreenComponent()
+                            .navigationBarBackButtonHidden()
                     case .finalScreen:
                         Text("업로드 직전 스크린")
+                            .navigationBarBackButtonHidden()
                     }
                     
                 }

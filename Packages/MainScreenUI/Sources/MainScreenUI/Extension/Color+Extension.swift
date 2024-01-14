@@ -15,4 +15,6 @@ extension ShapeStyle where Self == Color {
     
     static var midium_gray: Color { Color(hex: "C7C7C7") }
     
+    static var regular_gray: Color { Color(hex: "878787") }
+    
 }

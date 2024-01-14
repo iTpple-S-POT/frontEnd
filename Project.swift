@@ -19,6 +19,7 @@ let project = Project(name: "\(appName)",
                       packages: [
                             .local(path: "\(packagePath)/ApplicationUI"),
                             .local(path: "\(packagePath)/LoginUI"),
+                            .local(path: "\(packagePath)/MainScreenUI"),
                       ],
                       settings: Settings.settings(configurations: makeConfiguration()),
                       targets: [
@@ -37,6 +38,7 @@ let project = Project(name: "\(appName)",
                               dependencies: [
                                 .package(product: "ApplicationUI"),
                                 .package(product: "LoginUI"),
+                                .package(product: "MainScreenUI"),
                               ],
                               settings: baseSettings()
                           )

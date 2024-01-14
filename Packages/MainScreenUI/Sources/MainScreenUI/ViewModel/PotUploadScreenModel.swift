@@ -41,6 +41,12 @@ public class PotUploadScreenModel: NavigationController<PotUploadDestination> {
         .likedPhtoto
     ]
     
+    // 해쉬 테그
+    typealias HashTag = String
+    
+    @Published var temporalHashTagString = ""
+    @Published private(set) var potHashTags: [HashTag] = []
+    
     // 팟 텍스트
     @Published var potText: String = ""
     
@@ -48,6 +54,7 @@ public class PotUploadScreenModel: NavigationController<PotUploadDestination> {
     @Published var showAlert = false
     @Published private(set) var alertTitle = ""
     @Published private(set) var alertMessage = ""
+    
     
     var dismiss: DismissAction?
     
@@ -134,6 +141,55 @@ extension PotUploadScreenModel {
             alertMessage = "업로드 과정에서 문제가 발생했습니다."
         }
         
+    }
+    
+    func showDuplicateHashTag() {
+        
+        showAlert = true
+        alertTitle = "해쉬테그 중복"
+        alertMessage = "이미 추가된 해쉬태그 입니다"
+    }
+    
+}
+
+
+// MARK: - HashTag
+extension PotUploadScreenModel {
+    
+    func submitHashTag() {
+        
+        if !temporalHashTagString.isEmpty {
+                
+            let hashTagStr = temporalHashTagString
+            
+            if !checkTagAlreadyExists(element: hashTagStr) {
+                
+                // 해쉬테그 삽입
+                insertHashTag(element: hashTagStr)
+                
+                // 문자열 초기화
+                temporalHashTagString = ""
+            } else {
+                
+                showDuplicateHashTag()
+                
+            }
+        }
+    }
+    
+    func checkTagAlreadyExists(element: HashTag) -> Bool {
+        
+        potHashTags.contains(element)
+    }
+    
+    func removeHashTag(index: Int) {
+        
+        potHashTags.remove(at: index)
+    }
+    
+    func insertHashTag(element: HashTag) {
+        
+        potHashTags.append(element)
     }
     
 }

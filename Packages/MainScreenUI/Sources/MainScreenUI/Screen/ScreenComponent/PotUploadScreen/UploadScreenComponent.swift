@@ -100,23 +100,65 @@ struct UploadScreenComponent: View {
                 .padding(.top, 40)
             
             // 해시테그
-            HStack {
+            if !screenModelWithNav.potHashTags.isEmpty {
                 
-                Text("#해시 태그")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundStyle(.midium_gray)
+                ScrollViewReader { proxy in
+                    
+                    ScrollView(.horizontal) {
+                        
+                        LazyHStack {
+                            
+                            ForEach(Array(screenModelWithNav.potHashTags.enumerated()), id: \.element) { index, tag in
+                                
+                                HashTagBox(name: tag) {
+                                    screenModelWithNav.removeHashTag(index: index)
+                                }
+                                .id(tag)
+                                
+                            }
+                        }
+                        .scrollIndicators(.hidden)
+                        .padding(.leading, 21)
+                        
+                    }
+                    .onChange(of: screenModelWithNav.potHashTags, perform: { strs in
+                        
+                        let lastStr = strs.last;
+                        
+                        withAnimation(.linear) {
+                            proxy.scrollTo(lastStr)
+                        }
+                        
+                    })
+                    
+                }
+                .frame(height: 56)
                 
-                Spacer()
+            } else {
+                
+                HStack {
+                    
+                    Text("#해시 태그")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(.midium_gray)
+
+                    
+                    Spacer()
+                    
+                }
+                .frame(height: 56)
+                .padding(.horizontal, 21)
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    screenModelWithNav.addToStack(destination: .hashTagScreen)
+                }
                 
             }
-            .frame(height: 56)
-            .padding(.horizontal, 21)
             
             Rectangle()
                 .fill(.btn_light_grey)
                 .frame(height: 1)
                 .padding(.top, 10)
-            
             
             // 텍스트
             TextField("", text: $screenModelWithNav.potText, axis: .vertical)
@@ -160,42 +202,6 @@ struct UploadScreenComponent: View {
             
         }
     }
-}
-
-extension View {
-    func placeholder<Content: View>(
-        when shouldShow: Bool,
-        alignment: Alignment = .leading,
-        @ViewBuilder placeholder: () -> Content) -> some View {
-
-        ZStack(alignment: alignment) {
-            placeholder().opacity(shouldShow ? 1 : 0)
-            self
-        }
-    }
-}
-
-struct TappableTextFieldStyle: TextFieldStyle {
-    
-    @FocusState private var textFieldFocused: Bool
-    
-    var verPadding: CGFloat
-    
-    var horPadding: CGFloat
-    
-    init(verPadding: CGFloat, horPadding: CGFloat) {
-        self.verPadding = verPadding
-        self.horPadding = horPadding
-    }
-    
-    func _body(configuration: TextField<Self._Label>) -> some View {
-        configuration
-            .padding(.vertical, verPadding)
-            .padding(.horizontal, horPadding)
-            .focused($textFieldFocused)
-            .onTapGesture { textFieldFocused = true }
-    }
-    
 }
 
 #Preview {

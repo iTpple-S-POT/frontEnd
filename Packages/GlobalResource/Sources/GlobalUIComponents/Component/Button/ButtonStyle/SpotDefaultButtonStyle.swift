@@ -46,6 +46,9 @@ public struct SpotDefaultButtonStyle<ButtonShape: Shape>: ButtonStyle {
 
 /// 양옆이 원처럼 둥근 Rounded Rectangle입니다.
 public struct PerfectRoundedRectangle: Shape {
+    
+    public init() { }
+    
     public func path(in rect: CGRect) -> Path {
         var path = Path()
         let middleTopPoint = CGPoint(x: rect.midX, y: rect.minY)
