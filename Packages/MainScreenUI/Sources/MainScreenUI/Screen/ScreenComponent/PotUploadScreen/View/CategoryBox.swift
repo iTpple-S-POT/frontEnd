@@ -20,9 +20,6 @@ struct CategoryBox: View {
         
         HStack(spacing: 0) {
             
-            Circle()
-                .fill(.white)
-                .frame(width: 80, height: 80)
             
             ZStack(alignment: .leading) {
                 
@@ -38,9 +35,15 @@ struct CategoryBox: View {
                 }
                 
             }
-            .padding(.leading, 16)
             
+            Spacer(minLength: 0)
+            
+            TagCases[object.id].getIllust()
+                .resizable()
+                .scaledToFit()
         }
+        .padding(.leading, 24)
+        .padding(.trailing, 16)
         .padding(10)
         .background{
             
@@ -59,6 +62,7 @@ struct CategoryBox: View {
             }
         }
         .frame(height: 100)
+        .contentShape(RoundedRectangle(cornerRadius: 10))
         .onTapGesture {
             selected = object.id
         }

@@ -49,6 +49,8 @@ public class GlobalStateObject: ObservableObject {
         
         try saveCategoryToLocal(objects: categories!)
         
+        print("카테고리 로컬에 저장 성공")
+        
         setCategories(categories: categories)
     }
 }

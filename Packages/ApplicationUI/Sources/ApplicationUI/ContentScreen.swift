@@ -55,6 +55,7 @@ public struct ContentScreen: View {
                                     
                                     Task { @MainActor in
                                         
+                                        print("메인화면으로 이동")
                                         mainNavigation.addToStack(destination: .mainScreen)
                                     }
                                     

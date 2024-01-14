@@ -9,10 +9,10 @@ import SwiftUI
 
 class SelectMapTagViewModel: ObservableObject {
     
-    @Published private(set) var selectedTag: TagCases?
-    @Published private(set) var selectedTagDict: [TagCases:Bool] = [
+    @Published private(set) var selectedTag: TagCases = .all
+    @Published private(set) var selectedTagDict: [TagCases: Bool] = [
         .all : true,
-        .event : false,
+        .hot : false,
         .life : false,
         .question : false,
         .information : false,
@@ -21,6 +21,8 @@ class SelectMapTagViewModel: ObservableObject {
     
     // 현재활성화 되어있는 테그의 수를 추적합니다.
     private var activeTagCount: Int = 1
+    
+    func checkSelected(_ tag: TagCases) -> Bool { selectedTagDict[tag]! }
     
     func selectTag(tag: TagCases) {
         
@@ -69,57 +71,126 @@ class SelectMapTagViewModel: ObservableObject {
         
     }
     
-    func clearSelectedTag() {
-        selectedTag = nil
-    }
-    
 }
 
-extension SelectMapTagViewModel {
+/// 카테고리 정보와 혼용됩니다.
+public enum TagCases: Identifiable, CaseIterable {
+    case all
+    case hot
+    case life
+    case question
+    case information
+    case party
     
-    enum TagCases: String, Identifiable, CaseIterable {
-        case all = "all"
-        case event = "event"
-        case life = "life"
-        case question = "question"
-        case information = "information"
-        case party = "party"
+    public var id: Int { self.hashValue }
+    
+    public enum IconType { case idle, point }
+    
+    public func getIcon(type: IconType) -> Image {
         
-        var id: String { self.rawValue }
-        
-        func getIconImage() -> Image {
-            
-            if self == .all {
-                preconditionFailure("all태그는 이미지가 없습니다.")
-            }
-            
-            let imageName = self.rawValue + "_tag"
-            
-            return Image.makeImageFromBundle(bundle: Bundle.module, name: imageName, ext: .png)
+        if self == .all {
+            preconditionFailure("all태그는 이미지가 없습니다.")
         }
         
-        func getTextString() -> String {
-            
-            var textStr = ""
-            
-            switch self {
-            case .all:
-                textStr = "모두 보기"
-            case .event:
-                textStr = "사건/사고"
-            case .life:
-                textStr = "일상"
-            case .question:
-                textStr = "질문"
-            case .information:
-                textStr = "정보"
-            case .party:
-                textStr = "모임"
-            }
-            
-            return textStr
+        var imageName = ""
+        
+        switch self {
+        case .hot:
+            imageName = "hot"
+        case .life:
+            imageName = "life"
+        case .question:
+            imageName = "question"
+        case .information:
+            imageName = "information"
+        case .party:
+            imageName = "party"
+        default:
+            preconditionFailure("처리되지 못한 테그")
         }
+        
+        imageName += "_\(type == .idle ? "idle" : "point")"
+        
+        return Image.makeImageFromBundle(bundle: Bundle.module, name: imageName, ext: .png)
     }
-
     
+    public func getKorString() -> String {
+        
+        var textStr = ""
+        
+        switch self {
+        case .all:
+            textStr = "전체"
+        case .hot:
+            textStr = "인기"
+        case .life:
+            textStr = "일상"
+        case .question:
+            textStr = "질문"
+        case .information:
+            textStr = "정보"
+        case .party:
+            textStr = "모임"
+        }
+        
+        return textStr
+    }
+    
+    public func getPointColor() -> Color {
+        
+        switch self {
+        case .all:
+            return .tag_black
+        case .hot:
+            return .tag_red
+        case .life:
+            return .tag_yellow
+        case .question:
+            return .tag_green
+        case .information:
+            return .tag_purple
+        case .party:
+            return .tag_blue
+        }
+        
+    }
+    
+    public func getIllust() -> Image {
+        
+        var imageName = ""
+        
+        switch self {
+        case .life:
+            imageName = "life"
+        case .question:
+            imageName = "question"
+        case .information:
+            imageName = "information"
+        case .party:
+            imageName = "party"
+        default:
+            preconditionFailure("처리되지 못한 테그")
+        }
+        
+        imageName += "_illust"
+        
+        return Image.makeImageFromBundle(bundle: Bundle.module, name: imageName, ext: .png)
+    }
+    
+    static subscript (_ id: Int64) -> TagCases {
+        
+        switch id {
+        case 1:
+            return .life
+        case 2:
+            return .information
+        case 3:
+            return .question
+        case 4:
+            return .party
+        default:
+            preconditionFailure("처리되지 못한 테그")
+        }
+        
+    }
 }

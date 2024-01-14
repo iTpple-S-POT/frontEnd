@@ -15,6 +15,7 @@ struct TopMostScreenComponent: View {
         ZStack {
             
             Color.mainScreenRed
+                .ignoresSafeArea(.container)
             
             HStack(spacing: 0) {
                 Image.makeImageFromBundle(bundle: Bundle.module,name: ImageName.main_screen_title, ext: .png)

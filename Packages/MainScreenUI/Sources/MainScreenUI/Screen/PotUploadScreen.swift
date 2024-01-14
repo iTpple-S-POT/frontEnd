@@ -8,12 +8,16 @@
 import SwiftUI
 import Photos
 import CJPhotoCollection
+import Combine
 
 struct PotUploadScreen: View {
     
     @Environment(\.dismiss) var dismiss
     @StateObject private var screenModel = PotUploadScreenModel()
     
+    var uploadCompletion: (Bool) -> ()
+    
+    @State var uploadSub: AnyCancellable?
     
     var body: some View {
         
@@ -33,7 +37,7 @@ struct PotUploadScreen: View {
                         HashTagScreenComponent()
                             .navigationBarBackButtonHidden()
                     case .finalScreen:
-                        Text("업로드 직전 스크린")
+                        FinalPotScreenComponent()
                             .navigationBarBackButtonHidden()
                     }
                     
@@ -41,12 +45,24 @@ struct PotUploadScreen: View {
             
         }
         .environmentObject(screenModel)
-        .onAppear { screenModel.dismiss = dismiss }
+        .onAppear {
+            screenModel.dismiss = dismiss
+                
+            // TODO: 추후 수정
+            self.uploadSub = screenModel.potUploadPublisher.sink {
+                
+                uploadCompletion($0)
+                
+            }
+        }
+        
         
     }
     
 }
 
 #Preview {
-    PotUploadScreen()
+    PotUploadScreen { result in
+        
+    }
 }

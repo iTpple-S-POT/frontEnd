@@ -59,7 +59,7 @@ struct SelectCategoryScreenComponent: View {
                     
                     VStack(spacing: 16) {
                         
-                        ForEach(globalObject.categories ?? [], id: \.self) {
+                        ForEach(globalObject.categories ?? test, id: \.self) {
                             
                             CategoryBox(selected: $screenModelWithNav.selectedCategoryId, object: $0)
                             

@@ -100,10 +100,10 @@ struct HashTagScreenComponent: View {
                                
                             }
                         }
-                        .scrollIndicators(.hidden)
                         .padding(.leading, 21)
                         
                     }
+                    .scrollIndicators(.hidden)
                     .onChange(of: screenModelWithNav.potHashTags, perform: { strs in
                         
                         let lastStr = strs.last;

@@ -167,6 +167,8 @@ struct UploadScreenComponent: View {
                     Text(textFieldPHString)
                         .foregroundStyle(.midium_gray)
                 })
+                .autocorrectionDisabled()
+                .textInputAutocapitalization(.never)
                 .font(.system(size: 16, weight: .semibold))
                 .foregroundStyle(.black)
                 .padding(.horizontal, 21)
@@ -186,11 +188,12 @@ struct UploadScreenComponent: View {
             Spacer(minLength: 0)
             
             // 다음
-            SpotRoundedButton(text: "다음", color: .btn_red_nt) {
+            SpotRoundedButton(text: "다음", color: .btn_red_nt.opacity(screenModelWithNav.isReadyToUpload ? 1 : 0.3)) {
                 
-                //
+                screenModelWithNav.addToStack(destination: .finalScreen)
                 
             }
+            .disabled(!screenModelWithNav.isReadyToUpload)
             .padding(.horizontal, 21)
             .padding(.bottom, 24)
             

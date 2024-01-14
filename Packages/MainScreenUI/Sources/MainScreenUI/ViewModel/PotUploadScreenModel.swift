@@ -10,6 +10,7 @@ import Photos
 import CJPhotoCollection
 import GlobalObjects
 import CJMapkit
+import Combine
 
 // 추후 추가 가능
 public enum PotUploadDestination {
@@ -55,6 +56,7 @@ public class PotUploadScreenModel: NavigationController<PotUploadDestination> {
     @Published private(set) var alertTitle = ""
     @Published private(set) var alertMessage = ""
     
+    let potUploadPublisher = PassthroughSubject<Bool, Never>()
     
     var dismiss: DismissAction?
     
@@ -82,7 +84,7 @@ public class PotUploadScreenModel: NavigationController<PotUploadDestination> {
 }
 
 // MARK: - 팟 업로드용 데이터
-extension PotUploadScreenModel {
+public extension PotUploadScreenModel {
     
     func uploadPot() async throws {
         
@@ -100,6 +102,12 @@ extension PotUploadScreenModel {
         }
                 
         try await APIRequestGlobalObject.shared.executePotUpload(imageInfo: imageInfo_unwrapped, uploadObject: object)
+    }
+    
+    /// 최종 화면으로 이동할 수 있는가?
+    var isReadyToUpload: Bool {
+        
+        imageInfo != nil && selectedCategoryId != nil
     }
     
 }

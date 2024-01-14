@@ -10,6 +10,8 @@ import GlobalFonts
 
 struct TabScreenComponent: View {
     
+    @ObservedObject var mainScreenModel: MainScreenModel
+    
     @State private var showPotUploadScreen = false
     
     var body: some View {
@@ -86,7 +88,19 @@ struct TabScreenComponent: View {
                 .shadow(color: .gray.opacity(0.3), radius: 2.0, y: -2)
         )
         .fullScreenCover(isPresented: $showPotUploadScreen, content: {
-            PotUploadScreen()
+            PotUploadScreen { result in
+                
+                // TODO: 추후 수정
+                if result {
+                    
+                    mainScreenModel.showPotUploadSuccess()
+                    
+                } else {
+                    
+                    mainScreenModel.showPotUploadFailed()
+                }
+                
+            }
         })
         
     }
@@ -97,7 +111,7 @@ struct TabScreenComponent: View {
         
         Spacer()
         
-        TabScreenComponent()
+        TabScreenComponent(mainScreenModel: MainScreenModel())
             .frame(height: 64)
         
     }
