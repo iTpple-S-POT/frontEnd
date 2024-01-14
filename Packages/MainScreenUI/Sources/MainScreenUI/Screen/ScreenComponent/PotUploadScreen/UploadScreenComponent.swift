@@ -19,6 +19,13 @@ struct UploadScreenComponent: View {
     
     let textFieldPHString = "당신의 이야기를 자유롭게 들려주세요"
     
+    var selectedUIImage: UIImage? {
+        
+        if let imageInfo = screenModelWithNav.imageInfo, let uiImage = UIImage(data: imageInfo.data) { return uiImage }
+            
+        return nil
+    }
+    
     var cameraView: some View {
         
         RoundedRectangle(cornerRadius: 10)
@@ -48,48 +55,42 @@ struct UploadScreenComponent: View {
             // 카메라 or 사진
             ZStack {
                 
-                if let imageInfo = screenModelWithNav.imageInfo, let uiImage = UIImage(data: imageInfo.data) {
+                cameraView
+                    .onTapGesture { screenModelWithNav.showSelectPhotoView = true }
+                    .zIndex(0)
+                
+                if let uiImage = selectedUIImage {
                     
                     Image(uiImage: uiImage)
                         .resizable()
                         .scaledToFill()
-                        .allowsHitTesting(false)
                         .zIndex(1)
-                    
-                    VStack(spacing: 0) {
-                        
-                        Spacer()
-                        
-                        HStack(spacing: 0) {
-                            
-                            Spacer()
-                            
-                            Button {
-                                
-                                screenModelWithNav.showSelectPhotoView = true
-                                
-                            } label: {
-                                
-                                Image.makeImageFromBundle(bundle: .module, name: "NotePencil", ext: .png)
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 28, height: 28)
-                                    .padding(12)
-                                
-                            }
-                        }
-                    }
-                    .frame(height: 158)
-                    .zIndex(2)
-                } else {
-                    
-                    cameraView
-                        .onTapGesture { screenModelWithNav.showSelectPhotoView = true }
                     
                 }
             }
             .frame(height: 158)
             .clipShape(RoundedRectangle(cornerRadius: 10))
+            .contentShape(RoundedRectangle(cornerRadius: 10)) // !! contentShape를 clippedShape뒤로
+            .overlay(content: {
+                
+                if selectedUIImage != nil {
+                    
+                    VStack {
+                        Spacer()
+                        
+                        HStack {
+                            Spacer()
+                            
+                            Image.makeImageFromBundle(bundle: .module, name: "NotePencil", ext: .png)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 28, height: 28)
+                                .padding(10)
+                                .onTapGesture { screenModelWithNav.showSelectPhotoView = true }
+                        }
+                    }
+                }
+            })
             .padding(.top, 40)
             .padding(.horizontal, 21)
             

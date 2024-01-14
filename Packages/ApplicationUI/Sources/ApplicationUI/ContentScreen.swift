@@ -151,7 +151,7 @@ extension ContentScreen {
         
         catch {
             
-            if let tokenError = error as? SpotTokenError {
+            if let tokenError = error as? LocalDataError {
                 
                 print("로컬에 저장된 토큰이 없음, \(tokenError)")
                 
