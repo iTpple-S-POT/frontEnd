@@ -32,8 +32,8 @@ public struct ContentScreen: View {
                 SplashScreen()
                 
             }
-            
                 .navigationDestination(for: MainNavigation.DestinationType.self) { nav in
+                    
                     switch nav {
                     case .loginScreen:
                         LoginScreen()
@@ -51,13 +51,9 @@ public struct ContentScreen: View {
                                     
                                     try await globalStateObject.intialDataTask()
                                     
-                                    try? await Task.sleep(for: .seconds(0.5))
+                                    mainNavigation.delayedNavigation(work: .add, destination: .mainScreen)
                                     
-                                    Task { @MainActor in
-                                        
-                                        print("메인화면으로 이동")
-                                        mainNavigation.addToStack(destination: .mainScreen)
-                                    }
+                                    print("네비게이션 이동")
                                     
                                 } catch {
                                     
@@ -85,10 +81,7 @@ public struct ContentScreen: View {
                 
                 print("--토큰 성공--")
                 
-                Task { @MainActor in
-                    
-                    mainNavigation.addToStack(destination: .dataLoadingScreen)
-                }
+                mainNavigation.delayedNavigation(work: .add, destination: .dataLoadingScreen)
                 
             } catch {
                 
@@ -104,12 +97,8 @@ public struct ContentScreen: View {
                     
                 case .tokenCacheTaskFailed, .refreshFailed:
                     
-                    try? await Task.sleep(for: .seconds(1))
+                    mainNavigation.delayedNavigation(work: .add, destination: .loginScreen)
                     
-                    Task { @MainActor in
-                        
-                        mainNavigation.addToStack(destination: .loginScreen)
-                    }
                 case .dataTaskFailed:
                     
                     screenModel.showDataError()

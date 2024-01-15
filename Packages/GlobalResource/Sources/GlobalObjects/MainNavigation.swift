@@ -7,7 +7,6 @@
 
 import Foundation
 
-
 public final class MainNavigation: NavigationController<MainNavDestination> {
     
     public override init() {
