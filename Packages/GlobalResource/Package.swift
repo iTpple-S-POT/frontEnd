@@ -26,6 +26,7 @@ let package = Package(
     ],
     dependencies: [
         .package(path: "../DefaultExtensions"),
+        .package(path: "../Persistence"),
         .package(url: "https://github.com/Alamofire/Alamofire.git", exact: .init(5, 7, 1)),
     ],
     targets: [
@@ -53,9 +54,10 @@ let package = Package(
             dependencies: [
                 .product(name: "DefaultExtensions", package: "DefaultExtensions"),
                 .product(name: "Alamofire", package: "Alamofire"),
+                .product(name: "Persistence", package: "Persistence"),
             ],
             resources: [
-                .process("Resources/PotModels.xcdatamodeld")
+                .process("Resources")
             ]
         ),
         

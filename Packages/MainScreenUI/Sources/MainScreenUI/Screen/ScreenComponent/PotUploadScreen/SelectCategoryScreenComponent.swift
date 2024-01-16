@@ -11,8 +11,10 @@ import GlobalUIComponents
 
 struct SelectCategoryScreenComponent: View {
     
+    @FetchRequest(sortDescriptors: [SortDescriptor(\.id, order: .forward)])
+    private var categories: FetchedResults<SpotCategory>
+    
     @EnvironmentObject var screenModelWithNav: PotUploadScreenModel
-    @EnvironmentObject var globalObject: GlobalStateObject
     
     let test = [
         CategoryObject(id: 1, name: "테스트1", description: "지금의 동네는 어떤가요? 지금 이 순간의 소소한 일상을 공유해 주세요"),
@@ -59,9 +61,11 @@ struct SelectCategoryScreenComponent: View {
                     
                     VStack(spacing: 16) {
                         
-                        ForEach(globalObject.categories ?? test, id: \.self) {
+                        ForEach(categories, id: \.self) {
                             
-                            CategoryBox(selected: $screenModelWithNav.selectedCategoryId, object: $0)
+                            let object = CategoryObject(id: $0.id, name: $0.name ?? "", description: $0.content ?? "")
+                            
+                            CategoryBox(selected: $screenModelWithNav.selectedCategoryId, object: object)
                             
                         }
                         

@@ -49,11 +49,9 @@ public struct ContentScreen: View {
                                 
                                 do {
                                     
-                                    try await globalStateObject.intialDataTask()
+                                    try await SpotStorage.default.loadCategories()
                                     
                                     mainNavigation.delayedNavigation(work: .add, destination: .mainScreen)
-                                    
-                                    print("네비게이션 이동")
                                     
                                 } catch {
                                     
@@ -112,6 +110,7 @@ public struct ContentScreen: View {
         })
         .environmentObject(mainNavigation)
         .environmentObject(globalStateObject)
+        .environment(\.managedObjectContext, SpotStorage.default.mainStorageManager.context)
     }
 }
 

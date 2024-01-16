@@ -85,6 +85,7 @@ struct UploadScreenComponent: View {
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 28, height: 28)
+                                .shadow(color: .black, radius: 5)
                                 .padding(10)
                                 .onTapGesture { screenModelWithNav.showSelectPhotoView = true }
                         }
