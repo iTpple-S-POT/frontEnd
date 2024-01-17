@@ -18,8 +18,6 @@ public struct ContentScreen: View {
     
     @StateObject private var screenModel = ContentScreenModel()
     
-    @StateObject private var globalStateObject = GlobalStateObject()
-    
     
     public init() { }
     
@@ -43,25 +41,8 @@ public struct ContentScreen: View {
                                 
                             }
                             .navigationBarBackButtonHidden()
-                    case .dataLoadingScreen:
-                        // TODO: 수정 예정
-                        Text("데이터 로딩 스크린")
-                            .task {
-                                
-                                do {
-                                    
-                                    try await SpotStorage.default.loadCategories()
-                                    
-                                    mainNavigation.delayedNavigation(work: .add, destination: .mainScreen)
-                                    
-                                } catch {
-                                    
-                                    print("데이터 로딩 에러")
-                                    
-                                }
-                                
-                            }
-                            .navigationBarBackButtonHidden()
+                    case .congrateScreen:
+                        Text("")
                     case .mainScreen:
                         MainScreen()
                             .navigationBarBackButtonHidden()
@@ -73,14 +54,23 @@ public struct ContentScreen: View {
         }
         .task {
             
+            // 테스트
+            mainNavigation.delayedNavigation(work: .add, destination: .loginScreen)
+            
+            return
+            
             do {
                 
                 // 토큰
-                try await initialTokenTask()
+                try await screenModel.initialTokenTask()
                 
                 print("--토큰 성공--")
                 
-                mainNavigation.delayedNavigation(work: .add, destination: .dataLoadingScreen)
+                try await screenModel.initialDataTask()
+                
+                print("--데이터 확보 성공--")
+                
+                mainNavigation.delayedNavigation(work: .add, destination: .mainScreen)
                 
             } catch {
                 
@@ -106,66 +96,12 @@ public struct ContentScreen: View {
             }
             
         }
-        .alert(isPresented: $screenModel.showAlert, content: {
-            Alert(title: Text(screenModel.alertTitle), message: Text(screenModel.alertMessage), dismissButton: .default(Text("닫기")))
-        })
         .environmentObject(mainNavigation)
-        .environmentObject(globalStateObject)
+        .environmentObject(screenModel)
         .environment(\.managedObjectContext, SpotStorage.default.mainStorageManager.context)
     }
 }
 
-enum InitialTaskError: Error {
-    
-    case networkFailure
-    case refreshFailed
-    case tokenCacheTaskFailed
-    case dataTaskFailed
-    
-}
-
-extension ContentScreen {
-    
-    func initialTokenTask() async throws {
-        
-        do {
-            
-            // 테스트를 위한 토큰 삭제
-            // APIRequestGlobalObject.shared.deleteTokenInLocal()
-            
-            try screenModel.checkTokenExistsInUserDefaults()
-                
-            // 토큰 리프래쉬
-            try await screenModel.refreshSpotToken()
-        }
-        
-        catch {
-            
-            if let tokenError = error as? LocalDataError {
-                
-                print("로컬에 저장된 토큰이 없음, \(tokenError)")
-                
-                throw InitialTaskError.tokenCacheTaskFailed
-                
-            }
-            
-            if let netError = error as? SpotNetworkError {
-                
-                print("네트워크 통신 실패 \(netError)")
-                
-                if case .notFoundError( _ ) = netError {
-                    
-                    throw InitialTaskError.refreshFailed
-                }
-            }
-            
-            throw InitialTaskError.networkFailure
-            
-        }
-        
-    }
-    
-}
 
 #Preview {
     ContentScreen()

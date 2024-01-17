@@ -1,6 +1,6 @@
 //
 //  File.swift
-//  
+//
 //
 //  Created by 최준영 on 2023/11/18.
 //
@@ -12,119 +12,110 @@ import GlobalFonts
 import GlobalObjects
 import UserInformationUI
 import Alamofire
+import AuthenticationServices
 
 public struct LoginScreen: View {
     
     @EnvironmentObject private var mainNavigation: MainNavigation
+    @EnvironmentObject private var contentScreenModel: ContentScreenModel
     
-    @State private var isKakaoLoginCompleted = false
-    
-    // Alert
-    @State private var showingAlert = false
-    @State private var alertMessage = ""
-    
-    let serverErrorMessage = "서버가 불안정합니다."
-    
-    // TODO: 삭제얘정
-    let kAccessTokenKey = "spotAccessToken"
-    let kRefreshTokenKey = "spotRefreshToken"
+    @ObservedObject private var screenModel = LoginScreenModel()
     
     public init() { }
     
-    var kakaoButtonImage: Image {
-        let path = Bundle.module.provideFilePath(name: "kakao_button_image", ext: "png")
-        return Image(uiImage: UIImage(named: path)!)
-    }
-    
     public var body: some View {
-        NavigationView {
-            VStack {
-                
-                Spacer()
-                
-                // 메인 텍스트
-                HStack {
-                    VStack(alignment: .leading) {
-                        Text("동네,")
-                            .font(.suite(type: .SUITE_Regular, size: 50))
-                        (
-                            Text("일상을 ")
-                                .font(.suite(type: .SUITE_Regular, size: 50))
-                            +
-                            Text("공유하다")
-                                .font(.suite(type: .SUITE_SemiBold, size: 50))
-                        )
-                    }
-                    Spacer()
+        
+        VStack(spacing: 16) {
+            
+            // 메인 텍스트
+            HStack {
+                VStack(alignment: .leading) {
+                    Text("동네,")
+                    (
+                        Text("일상을 ")
+                        +
+                        Text("공유하다")
+                            .fontWeight(.semibold)
+                    )
                 }
-                .padding(.horizontal, 12)
-                .padding(.top, 48)
-                .padding(.bottom, 36)
-                
-                
-                // 스플래쉬 이미지
-                // TODO: 완성된 이미지 삽입
-                ZStack {
-                    Rectangle()
-                        .fill(.gray)
-                    Text("일러스트 들어갈예정")
-                        .font(.system(size: 30))
-                }
-                
                 Spacer()
+            }
+            .font(.system(size: 40))
+            .padding(.top, 64)
+            
+            // 스플래쉬 이미지
+            // TODO: 완성된 이미지 삽입
+            Image.makeImageFromBundle(bundle: .module, name: "login_illust", ext: .png)
+                .resizable()
+                .scaledToFit()
+                .layoutPriority(1)
+            
+            // 로그인 버튼들
+            VStack(spacing: 16) {
                 
-                kakaoButtonImage
-                    .resizable()
-                    .scaledToFit()
-                    .onTapGesture {
-                        KakaoLoginManager.shared.executeLogin { result in
-                            
-                            switch result {
-                            case .success(let tokens):
-                                
-                                // TODO: 코어데이터 패키자로 수정
-                                saveTokenToLocal(accessToken: tokens.accessToken, refreshToken: tokens.refreshToken)
-                                
-                                APIRequestGlobalObject.shared.setSpotToken(accessToken: tokens.accessToken, refreshToken: tokens.refreshToken)
-                                
-                                // TODO: 선호도 입력 여뷰를 확인한 후 메인스크린으로 이동 구현
-                                // 토큰 발급 성공으로 인한 이동, 최초 입력 여부 확인 예정
-                                Task { @MainActor in
-                                    
-                                    mainNavigation.addToStack(destination: .dataLoadingScreen)
-                                    
-                                }
-                                
-                            case .failure(let error):
-                                
-                                print("로그인 실패, \(error)")
-                                
-                                showingAlert = true
-                                alertMessage = serverErrorMessage
-                                
-                            }
-                            
-                        }
-                    }
-                    .padding(.horizontal, 12)
-                    .padding(.bottom, 27)
-                    .padding(.top, 48)
+                AppleLoginButton(completion: handleLoginTask)
+                
+                KakaoLoginButton(completion: handleLoginTask)
                 
             }
+            .padding(.bottom, 27)
+            
         }
-        .alert("Server Error", isPresented: $showingAlert) {
-            Button("확인") { }
-        } message: {
-            Text(alertMessage)
-        }
-
+        .padding(.horizontal, 21)
+        .alert(isPresented: $contentScreenModel.showAlert, content: {
+            Alert(title: Text(contentScreenModel.alertTitle), message: Text(contentScreenModel.alertMessage), dismissButton: .default(Text("닫기")))
+        })
+        
     }
     
-    // TODO: 삭제 예정
-    func saveTokenToLocal(accessToken: String, refreshToken: String) {
+}
+
+extension LoginScreen {
+    
+    func handleLoginTask(tokens: TokenObject?) {
         
-        UserDefaults.standard.set(accessToken, forKey: self.kAccessTokenKey)
-        UserDefaults.standard.set(refreshToken, forKey: self.kRefreshTokenKey)
+        guard let serverTokens = tokens else {
+            
+            contentScreenModel.presentAlert(title: "로그인 에러", message: "잠시후 다시 시도해 주세요.")
+            return
+        }
+        
+        APIRequestGlobalObject.shared.setSpotToken(accessToken: serverTokens.accessToken, refreshToken: serverTokens.refreshToken)
+        
+        GlobalStateObject.shared.saveTokenToLocal(accessToken: serverTokens.accessToken, refreshToken: serverTokens.refreshToken)
+        
+        Task {
+            do {
+                try await contentScreenModel.initialDataTask()
+                
+                print("--데이터 확보 성공--")
+                
+                mainNavigation.delayedNavigation(work: .add, destination: .mainScreen)
+                
+            } catch {
+                
+                guard let initialError = error as? InitialTaskError else {
+                    
+                    fatalError()
+                }
+                
+                switch initialError {
+                case .networkFailure:
+                    
+                    contentScreenModel.showSeverError()
+                    
+                case .tokenCacheTaskFailed, .refreshFailed:
+                    
+                    mainNavigation.delayedNavigation(work: .add, destination: .loginScreen)
+                    
+                case .dataTaskFailed:
+                    
+                    contentScreenModel.showDataError()
+                }
+                
+            }
+            
+        }
         
     }
     

@@ -31,7 +31,7 @@ let package = Package(
                 .product(name: "KakaoSDK", package: "kakao-ios-sdk"),
             ],
             resources: [
-                .process("Resources/kakao_button_image.png")
+                .process("Resources")
             ]
         ),
         .testTarget(
