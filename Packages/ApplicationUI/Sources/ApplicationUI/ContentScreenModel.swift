@@ -32,6 +32,8 @@ extension ContentScreenModel {
         
         let newTokens = try await APIRequestGlobalObject.shared.refreshTokens()
         
+        print("newToken(Access):", newTokens.accessToken, terminator: "\n")
+        
         // 새로운 토큰을 로컬에 저장
         saveTokenToLocal(accessToken: newTokens.accessToken, refreshToken: newTokens.refreshToken)
         

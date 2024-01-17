@@ -18,6 +18,10 @@ public final class SpotStorageManager: LocalPersistenceManager {
         container.viewContext.mergePolicy = NSMergePolicy.mergeByPropertyStoreTrump
     }
     
+    convenience public required init(configuration: PersistenceConfiguration) {
+        self.init(configuration: configuration, bundleForModelId: .module)
+    }
+    
 }
 
 public struct SpotStorage {
@@ -26,7 +30,7 @@ public struct SpotStorage {
     
     private init() { }
     
-    public var mainStorageManager = SpotStorageManager(configuration: PersistenceConfiguration(modelName: "SpotModel"), bundleForModelId: .module)
+    public var mainStorageManager = SpotStorageManager(configuration: PersistenceConfiguration(modelName: "SpotModel"))
     
 }
 

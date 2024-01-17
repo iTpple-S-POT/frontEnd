@@ -1,7 +1,7 @@
 import ProjectDescription
 import Foundation
 
-private let bundleId: String = "com.spot"
+private let bundleId: String = "com.itpple.spot"
 private let version: String = "0.0.1"
 private let bundleVersion: String = "1"
 private let iOSTargetVersion: String = "16.0"
