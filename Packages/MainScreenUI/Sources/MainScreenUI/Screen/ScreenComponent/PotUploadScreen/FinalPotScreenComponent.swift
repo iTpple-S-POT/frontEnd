@@ -11,6 +11,9 @@ import GlobalUIComponents
 
 struct FinalPotScreenComponent: View {
     
+    @FetchRequest(sortDescriptors: [])
+    private var userInfo: FetchedResults<SpotUser>
+    
     @EnvironmentObject var screenModelWithNav: PotUploadScreenModel
     
     var tagObject: TagCases { TagCases[screenModelWithNav.selectedCategoryId ?? 1] }
@@ -85,12 +88,23 @@ struct FinalPotScreenComponent: View {
                     // 유저 정보
                     HStack(spacing: 12) {
                         // TODO: 유저 프로필
-                        Circle()
-                            .fill(.white)
-                            .frame(width: 40)
+                        
+                        if let imageUrl = userInfo.first?.profileImageUrl, let url = URL(string: imageUrl), let data = try? Data(contentsOf: url), let uiImage = UIImage(data: data) {
+                            Image(uiImage: uiImage)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 40)
+                            
+                        } else {
+                           Image(systemName: "person.crop.circle")
+                                .resizable()
+                                .scaledToFit()
+                                .foregroundStyle(.white)
+                                .frame(width: 40)
+                        }
                         
                         // TODO: 유저 닉네임
-                        Text("닉네임")
+                        Text(userInfo.first?.nickName ?? "비지정 닉네임")
                             .font(.system(size: 20, weight: .semibold))
                             .foregroundStyle(.white)
                         
