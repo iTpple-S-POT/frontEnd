@@ -62,9 +62,6 @@ public struct LoginScreen: View {
             
         }
         .padding(.horizontal, 21)
-        .alert(isPresented: $contentScreenModel.showAlert, content: {
-            Alert(title: Text(contentScreenModel.alertTitle), message: Text(contentScreenModel.alertMessage), dismissButton: .default(Text("닫기")))
-        })
         
     }
     
@@ -80,15 +77,26 @@ extension LoginScreen {
             return
         }
         
+        print(serverTokens)
+        
         APIRequestGlobalObject.shared.setSpotToken(accessToken: serverTokens.accessToken, refreshToken: serverTokens.refreshToken)
         
-        GlobalStateObject.shared.saveTokenToLocal(accessToken: serverTokens.accessToken, refreshToken: serverTokens.refreshToken)
+        UserDefaultsManager.saveTokenToLocal(accessToken: serverTokens.accessToken, refreshToken: serverTokens.refreshToken)
         
         Task {
             do {
                 try await contentScreenModel.initialDataTask()
                 
                 print("--데이터 확보 성공--")
+                
+                let isInitial = try await contentScreenModel.checkIsUserInitialSignUp()
+                
+                if isInitial {
+                    
+                    mainNavigation.delayedNavigation(work: .add, destination: .preferenceScreen)
+                    
+                    return
+                }
                 
                 mainNavigation.delayedNavigation(work: .add, destination: .mainScreen)
                 
@@ -112,13 +120,9 @@ extension LoginScreen {
                     
                     contentScreenModel.showDataError()
                 }
-                
             }
-            
         }
-        
     }
-    
 }
 
 #Preview {

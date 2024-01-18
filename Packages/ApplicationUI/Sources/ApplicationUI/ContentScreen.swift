@@ -41,8 +41,6 @@ public struct ContentScreen: View {
                                 
                             }
                             .navigationBarBackButtonHidden()
-                    case .congrateScreen:
-                        Text("")
                     case .mainScreen:
                         MainScreen()
                             .navigationBarBackButtonHidden()
@@ -54,11 +52,6 @@ public struct ContentScreen: View {
         }
         .task {
             
-            // 테스트
-            mainNavigation.delayedNavigation(work: .add, destination: .loginScreen)
-            
-            return
-            
             do {
                 
                 // 토큰
@@ -69,6 +62,19 @@ public struct ContentScreen: View {
                 try await screenModel.initialDataTask()
                 
                 print("--데이터 확보 성공--")
+                
+                let isInitial = try await screenModel.checkIsUserInitialSignUp()
+                
+                if isInitial {
+                    
+                    print("--유저 선호 미입력 유저--")
+                    
+                    mainNavigation.delayedNavigation(work: .add, destination: .preferenceScreen)
+                    
+                    return
+                }
+                
+                print("--유저 선호를 입력한 유저--")
                 
                 mainNavigation.delayedNavigation(work: .add, destination: .mainScreen)
                 
@@ -96,12 +102,12 @@ public struct ContentScreen: View {
             }
             
         }
+        .modifier(AlertProvider(showAlert: $screenModel.showAlert, title: screenModel.alertTitle, message: screenModel.alertMessage))
         .environmentObject(mainNavigation)
         .environmentObject(screenModel)
         .environment(\.managedObjectContext, SpotStorage.default.mainStorageManager.context)
     }
 }
-
 
 #Preview {
     ContentScreen()

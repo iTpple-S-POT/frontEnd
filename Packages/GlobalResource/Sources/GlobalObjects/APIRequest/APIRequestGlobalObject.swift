@@ -24,34 +24,5 @@ public class APIRequestGlobalObject {
     
 }
 
-// MARK: - Request
-public extension APIRequestGlobalObject {
-    
-    internal func getURLRequest(url: URL, method: HTTPMethod, isAuth: Bool = true) throws -> URLRequest {
-        
-        var request = try URLRequest(url: url, method: method)
-        
-        request.headers = [
-            "Content-Type" : "application/json",
-        ]
-        
-        if isAuth {
-            
-            request.setValue("Bearer \(spotAccessToken!)", forHTTPHeaderField: "Authorization")
-            
-        }
-        
-        return request
-    }
-    
-}
-
-// MARK: - Errors
-enum SpotApiRequestError: Error {
-    
-    case apiUrlError(discription: String)
-    
-}
-
 
 

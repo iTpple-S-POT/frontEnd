@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Alamofire
 
 // MARK: - API공통
 
@@ -24,16 +25,41 @@ public enum SpotNetworkError: Error {
     
 }
 
+
+// MARK: - API cases
 public extension APIRequestGlobalObject {
     
-    enum SpotAPI: CaseIterable {
+    enum LoginType {
         
-        case getSpotTokenFromKakao
-        case getSpotTokenFromApple
+        case kakao, apple
+        
+        func getKorName() -> String {
+            switch self {
+            case .kakao:
+                return "KAKAO"
+            case .apple:
+                return "APPLE"
+            }
+        }
+        
+    }
+    
+    enum SpotAPI {
+        
+        // Authentication
+        case getSpotTokenFrom(service: LoginType)
         case refreshSpotToken
+        
+        // Data
         case getPotCategory
+        
+        // Pot
         case postPot
         case preSignedUrl
+        
+        // User
+        case userInfo
+        case userNickNameCheck
         
         static let baseUrl = "http://13.209.233.160"
         
@@ -42,10 +68,8 @@ public extension APIRequestGlobalObject {
             var additinalUrl = ""
             
             switch self {
-            case .getSpotTokenFromKakao:
-                additinalUrl = "/api/v1/auth/login/KAKAO"
-            case .getSpotTokenFromApple:
-                additinalUrl = "/api/v1/auth/login/APPLE"
+            case .getSpotTokenFrom(let service):
+                additinalUrl = "/api/v1/auth/login/\(service.getKorName())"
             case .refreshSpotToken:
                 additinalUrl = "/api/v1/auth/refresh"
             case .getPotCategory:
@@ -54,6 +78,10 @@ public extension APIRequestGlobalObject {
                 additinalUrl = "/api/v1/pot"
             case .preSignedUrl:
                 additinalUrl = "/api/v1/pot/image/pre-signed-url"
+            case .userInfo:
+                additinalUrl = "/api/v1/user"
+            case .userNickNameCheck:
+                additinalUrl = "/api/v1/user/nickname/check"
             @unknown default:
                 throw SpotApiRequestError.apiUrlError(discription: "주소가 지정되지 않은 API가 있습니다.")
             }
@@ -103,3 +131,33 @@ extension APIRequestGlobalObject {
     }
     
 }
+
+// MARK: - Request
+public extension APIRequestGlobalObject {
+    
+    internal func getURLRequest(url: URL, method: HTTPMethod, isAuth: Bool = true) throws -> URLRequest {
+        
+        var request = try URLRequest(url: url, method: method)
+        
+        request.headers = [
+            "Content-Type" : "application/json",
+        ]
+        
+        if isAuth {
+            
+            request.setValue("Bearer \(spotAccessToken!)", forHTTPHeaderField: "Authorization")
+            
+        }
+        
+        return request
+    }
+    
+}
+
+// MARK: - Errors
+enum SpotApiRequestError: Error {
+    
+    case apiUrlError(discription: String)
+    
+}
+

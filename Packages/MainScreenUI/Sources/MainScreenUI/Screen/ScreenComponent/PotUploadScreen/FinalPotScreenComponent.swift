@@ -12,7 +12,6 @@ import GlobalUIComponents
 struct FinalPotScreenComponent: View {
     
     @EnvironmentObject var screenModelWithNav: PotUploadScreenModel
-    @EnvironmentObject var globalObject: GlobalStateObject
     
     var tagObject: TagCases { TagCases[screenModelWithNav.selectedCategoryId ?? 1] }
     
@@ -194,5 +193,4 @@ extension FinalPotScreenComponent {
 #Preview {
     FinalPotScreenComponent()
         .environmentObject(PotUploadScreenModel())
-        .environmentObject(GlobalStateObject())
 }

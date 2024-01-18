@@ -96,5 +96,4 @@ struct SelectCategoryScreenComponent: View {
 #Preview {
     SelectCategoryScreenComponent()
         .environmentObject(PotUploadScreenModel())
-        .environmentObject(GlobalStateObject())
 }

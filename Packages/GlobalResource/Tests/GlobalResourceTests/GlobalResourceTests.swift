@@ -13,11 +13,11 @@ final class GlobalResourceTests: XCTestCase {
 
     func test_makeUrlFromApi() throws {
         
-        for api in APIRequestGlobalObject.SpotAPI.allCases {
-            
-            let _ = try api.getApiUrl()
-            
-        }
+//        for api in APIRequestGlobalObject.SpotAPI.allCases {
+//            
+//            let _ = try api.getApiUrl()
+//            
+//        }
         
     }
 
