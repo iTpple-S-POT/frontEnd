@@ -6,67 +6,168 @@
 //
 
 import SwiftUI
+import GlobalObjects
+
+/// Setting화면을 의미하는 타입입니다.
+enum SettingPhase: Hashable {
+    case inputUserNickName
+    case selectUserSex
+    case selectUserMBTI
+    case selectUserBirthDay
+    case selectUserInterests
+}
+
+struct SettingScreenObject {
+
+    var screenComponent: AnyView
+    
+    var phase: SettingPhase
+    
+    var nextBtnValidation: () -> Void
+    
+    init(view: AnyView, phase: SettingPhase, nextBtnValidation: @escaping () -> Void) {
+        self.screenComponent = view
+        self.nextBtnValidation = nextBtnValidation
+        self.phase = phase
+    }
+    
+}
+
+extension SettingScreenObject: Equatable {
+    
+    static func == (lhs: SettingScreenObject, rhs: SettingScreenObject) -> Bool {
+        lhs.phase == rhs.phase
+    }
+}
 
 
 class ConfigurationScreenModel: ObservableObject {
     
+    // Alert뷰
+    @Published var showAlert = false
+    var alertTitle = ""
+    var alertContent = ""
+    
+    // 세팅 스크린 상태
     @Published private(set) var screenState: InitialScreenState = .initial
-    
     @Published var settingPhaseIndex: Int = 0
-    @Published private(set) var settingPhases: [SettingPhase] = []
     
-    var settingPhaseCount: Int { settingPhases.count }
+    // '다음' 버튼 유효성
+    @Published private(set) var canMoveOnToNext = false
+    
+    // 닉네임 입력
+    @Published var nickNameInputString = ""
+    
+    // Interests
+    @Published private(set) var userInterestMatrix: [[UserInterestType]] = []
+    @Published var userInterestTypes: [UserInterestType:Bool] = [:]
+    
+    // Gender
+    @Published var userGenderState: UserGenderCase = .notDetermined
+    let genderCaseList: [UserGenderCase] = [ .male, .female ]
+    
+    // Birth day
+    @Published var userBirthDay: Date = .now
+    
+    // MBTI
+    @Published var userMBTI = UserMbti()
+    
+
+    var settingPhaseCount: Int { settingScreenObjects.count }
+    
     var getCurrentSettingPhase: SettingPhase {
-        guard settingPhaseIndex >= 0 else { fatalError("setting단계가 아닌데 호출되었습니다.") }
-        return settingPhases[settingPhaseIndex]
+        guard settingPhaseIndex >= 0 else { fatalError("getCurrentSettingPhase 잘못된 호출") }
+        return settingScreenObjects[settingPhaseIndex].phase
     }
     
     // 세팅 프로세스와 매칭되는 뷰
-    let viewForProgressPhase: [SettingPhase : AnyView] = [
-        .inputUserNickName : AnyView(InputUserNickNameScreenComponent()),
-        .selectUserSex : AnyView(SelectGenderScreenComponent()),
-        .selectUserMBTI : AnyView(SelectMbtiScreenComponent()),
-        .selectUserBirthDay : AnyView(SelectBirthDayScreenComponent()),
-        .selectUserInterests : AnyView(SelectInterestsScreenComponent())
+    lazy var settingScreenObjects: [SettingScreenObject] = [
+        SettingScreenObject(view: AnyView(InputUserNickNameScreenComponent()), phase: .inputUserNickName) {
+            
+            if self.nickNameInputString.isEmpty {
+                
+                self.canMoveOnToNext = true
+                
+                return
+            }
+            
+            if !self.isNickNameValid {
+                
+                self.showAlertWith(title: "닉네임 생성 불가", content: "잘못된 닉네임 형식 입니다.")
+                
+                return
+            }
+            
+            Task {
+                
+                do {
+                    
+                    let validationResult = try await APIRequestGlobalObject.shared.checkIsNickNameAvailable(nickName: self.nickNameInputString)
+                    
+                    await MainActor.run {
+                        
+                        if validationResult.isSuccess {
+                            
+                            self.nextSetting()
+                            
+                        } else {
+                            
+                            self.showAlertWith(title: "닉네임 생성 불가", content: validationResult.reason)
+                        }
+                    }
+                } catch {
+                    print(error, error.localizedDescription)
+                    
+                    await MainActor.run {
+                        self.showAlertWith(title: "오류", content: error.localizedDescription)
+                    }
+                }
+            }
+            
+        },
+        SettingScreenObject(view: AnyView(SelectBirthDayScreenComponent()), phase: .selectUserBirthDay) {
+            
+            self.canMoveOnToNext = true
+        },
+        SettingScreenObject(view: AnyView(SelectGenderScreenComponent()), phase: .selectUserSex) {
+            
+            self.canMoveOnToNext = true
+        },
+        SettingScreenObject(view: AnyView(SelectMbtiScreenComponent()), phase: .selectUserMBTI) {
+            
+            self.canMoveOnToNext = true
+        },
+        SettingScreenObject(view: AnyView(SelectInterestsScreenComponent()), phase: .selectUserInterests) {
+            
+            self.canMoveOnToNext = true
+        },
     ]
     
     init() {
-        // 유저가 입력해야 하는 프로필 정보를 나타내는 리스트
-        settingPhases = getUserSettingList()
+        // 선호도 메트릭스 생성
+        self.userInterestMatrix = make2DArray()
+        
+        UserInterestType.allCases.forEach { type in
+            userInterestTypes[type] = false
+        }
     }
     
-    /// 유저가 세팅해야할 유저정보를 반환하는 함수
-    func getUserSettingList() -> [SettingPhase] {
-        var result: [SettingPhase] = []
+    func dontMoveOnToNext() {
         
-        //TODO: 요구사항에 맞춰 동적으로 조절
-        result.append(.inputUserNickName)
-        result.append(.selectUserSex)
-        result.append(.selectUserMBTI)
-        result.append(.selectUserBirthDay)
-        result.append(.selectUserInterests)
-        
-        return result
+        canMoveOnToNext = false
     }
+    
 }
 
 /// Setting Screen전환에 사용됩니다.
 extension ConfigurationScreenModel {
     
-    /// Setting화면을 의미하는 타입입니다.
-    enum SettingPhase {
-        case inputUserNickName
-        case selectUserSex
-        case selectUserMBTI
-        case selectUserBirthDay
-        case selectUserInterests
-    }
-    
     /// settingPhaseIndex값을 증가시킨다. 더이상 증가할 수 없으면 false를 반환한다.
     func increateSettingPhaseIndex() -> Bool {
-        if settingPhaseIndex+1 < settingPhaseCount {
-            
-            settingPhaseIndex += 1
+        
+        settingPhaseIndex += 1
+        
+        if settingPhaseIndex < settingPhaseCount {
             
             return true
         }
@@ -94,5 +195,48 @@ extension ConfigurationScreenModel {
     /// ScreenState를 설정합니다.
     func changeState(to: InitialScreenState) {
         self.screenState = to
+    }
+}
+
+extension ConfigurationScreenModel {
+    
+    func showAlertWith(title: String, content: String) {
+        
+        self.alertTitle = title
+        self.alertContent = content
+        self.showAlert = true
+    }
+}
+
+
+
+// MARK: - 데이타 트렌스퍼
+extension ConfigurationScreenModel {
+    
+    func sendUserInfoToServer() async throws{
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        
+        let birthDayString = dateFormatter.string(from: userBirthDay)
+        
+        let filteredInterests = userInterestTypes.filter { (_, value) in value }
+        
+        let korInterests = filteredInterests.keys.map { $0.rawValue }
+        
+        let object = UserInfoObject(id: -1,
+                                   loginType: nil,
+                                   role: nil,
+                                   profileImageUrl: nil,
+                                   name: nil,
+                                   nickname: nickNameInputString,
+                                   phoneNumber: nil,
+                                   birthDay: birthDayString,
+                                   gender: userGenderState.getSendForm(),
+                                   mbti: userMBTI.getMBTIString(),
+                                   interests: korInterests,
+                                   status: nil)
+        
+        try await APIRequestGlobalObject.shared.sendInitialUserInfomation(object: object)
     }
 }

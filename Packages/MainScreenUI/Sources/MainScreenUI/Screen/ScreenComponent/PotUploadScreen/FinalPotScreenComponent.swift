@@ -184,7 +184,6 @@ extension FinalPotScreenComponent {
                 if let prepareError = error as? PotUploadPrepareError {
                     
                     print("팟 업로드 준비중 실패, \(prepareError)")
-                
                     
                 }
                 

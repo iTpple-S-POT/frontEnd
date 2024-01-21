@@ -70,7 +70,15 @@ class AppleLoginManager: NSObject {
             
             do {
                 
-                let tokenObject = try await APIRequestGlobalObject.shared.sendAccessTokenToServer(accessToken: credential.user, refreshToken: "", type: .apple)
+                guard let tokenData = credential.identityToken, let token = String(data: tokenData, encoding: .utf8) else {
+                    fatalError()
+                }
+                
+                print("애플로그인 \n", token)
+                
+                print("~-----------")
+                
+                let tokenObject = try await APIRequestGlobalObject.shared.sendAccessTokenToServer(accessToken: token, refreshToken: "", type: .apple)
                 
                 completion?(tokenObject)
                 

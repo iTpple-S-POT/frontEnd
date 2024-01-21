@@ -38,7 +38,7 @@ struct UserInfoRequestModel: Encodable {
 
 
 // MARK: - Object
-public struct UserInfObject {
+public struct UserInfoObject {
     
     let id: Int64
     let loginType: String?
@@ -51,9 +51,9 @@ public struct UserInfObject {
     let gender: String?
     let mbti: String?
     let interests: [String]
-    let status: String
+    let status: String?
     
-    public init(id: Int64, loginType: String?, role: String?, profileImageUrl: String?, name: String?, nickname: String?, phoneNumber: String?, birthDay: String?, gender: String?, mbti: String?, interests: [String], status: String) {
+    public init(id: Int64, loginType: String?, role: String?, profileImageUrl: String?, name: String?, nickname: String?, phoneNumber: String?, birthDay: String?, gender: String?, mbti: String?, interests: [String], status: String?) {
         self.id = id
         self.loginType = loginType
         self.role = role

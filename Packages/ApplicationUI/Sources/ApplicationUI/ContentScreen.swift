@@ -11,6 +11,7 @@ import LoginUI
 import Alamofire
 import GlobalObjects
 import MainScreenUI
+import UserInformationUI
 
 public struct ContentScreen: View {
     
@@ -44,8 +45,12 @@ public struct ContentScreen: View {
                     case .mainScreen:
                         MainScreen()
                             .navigationBarBackButtonHidden()
+                    case .welcomeScreen:
+                        WelcomeScreen()
+                            .navigationBarBackButtonHidden()
                     case .preferenceScreen:
-                        Text("PerferenceScreen")
+                        UserInformationConfigurationScreen()
+                            .navigationBarBackButtonHidden()
                     }
                 }
             

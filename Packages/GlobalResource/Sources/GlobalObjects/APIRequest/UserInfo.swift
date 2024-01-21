@@ -10,7 +10,7 @@ import SwiftUI
 public extension APIRequestGlobalObject {
     
     // 유저 정보 수신
-    func getUserInfo() async throws -> UserInfObject {
+    func getUserInfo() async throws -> UserInfoObject {
         
         let url = try SpotAPI.userInfo.getApiUrl()
         
@@ -25,7 +25,7 @@ public extension APIRequestGlobalObject {
             // status code 정상
             let decoded = try jsonDecoder.decode(UserInfoResponseModel.self, from: data)
             
-            return UserInfObject(id: decoded.id, loginType: decoded.loginType, role: decoded.role, profileImageUrl: decoded.profileImageUrl, name: decoded.name, nickname: decoded.nickname, phoneNumber: decoded.phoneNumber, birthDay: decoded.birthDay, gender: decoded.gender, mbti: decoded.mbti, interests: decoded.interests, status: decoded.status)
+            return UserInfoObject(id: decoded.id, loginType: decoded.loginType, role: decoded.role, profileImageUrl: decoded.profileImageUrl, name: decoded.name, nickname: decoded.nickname, phoneNumber: decoded.phoneNumber, birthDay: decoded.birthDay, gender: decoded.gender, mbti: decoded.mbti, interests: decoded.interests, status: decoded.status)
             
         } else {
             
@@ -35,7 +35,7 @@ public extension APIRequestGlobalObject {
     
     
     // 최초 유저 정보전송
-    func sendInitialUserInfomation(object: UserInfObject) async throws {
+    func sendInitialUserInfomation(object: UserInfoObject) async throws {
         
         let modelObject = UserInfoRequestModel(nickname: object.nickname, phoneNumber: object.phoneNumber, birthDay: object.birthDay!, gender: object.gender, mbti: object.mbti, interests: object.interests)
         
@@ -60,4 +60,56 @@ public extension APIRequestGlobalObject {
         
     }
     
+}
+
+
+// MARK: - User Information
+public extension APIRequestGlobalObject {
+    
+    func checkIsNickNameAvailable(nickName: String) async throws -> (isSuccess: Bool, reason: String) {
+        
+        let functionName = #function
+        
+        let url = try SpotAPI.userNickNameCheck.getApiUrl()
+        
+        let queries: [String: String] = [
+            "nickname" : nickName,
+        ]
+        
+        var components = URLComponents(url: url, resolvingAgainstBaseURL: true)!
+        
+        components.queryItems = queries.map({ URLQueryItem(name: $0, value: $1) })
+        
+        let urlWithQuery = components.url!
+        
+        let request = try getURLRequest(url: urlWithQuery, method: .get, isAuth: false)
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        if let httpResponse = response as? HTTPURLResponse {
+            
+            switch httpResponse.statusCode {
+            case (200..<300):
+                return (true, "")
+            case 401:
+                throw SpotNetworkError.authorizationError(function: functionName)
+            case 404:
+                throw SpotNetworkError.notFoundError(description: functionName)
+            case 400..<500:
+                throw SpotNetworkError.clientError(function: functionName)
+            case 500..<600:
+                guard let error = try? jsonDecoder.decode(SpotErrorMessageModel.self, from: data) else {
+                    
+                    throw SpotNetworkError.serverError(function: functionName)
+                }
+                print("!!")
+                return (false, error.message)
+            default:
+                throw SpotNetworkError.unProcessedStatusCode(function: functionName)
+            }
+        } else {
+            
+            throw SpotNetworkError.unownedError(function: functionName)
+        }
+    }
 }

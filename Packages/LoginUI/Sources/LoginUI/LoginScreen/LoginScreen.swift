@@ -93,7 +93,7 @@ extension LoginScreen {
                 
                 if isInitial {
                     
-                    mainNavigation.delayedNavigation(work: .add, destination: .preferenceScreen)
+                    mainNavigation.delayedNavigation(work: .add, destination: .welcomeScreen)
                     
                     return
                 }
@@ -112,13 +112,11 @@ extension LoginScreen {
                     
                     contentScreenModel.showSeverError()
                     
-                case .tokenCacheTaskFailed, .refreshFailed:
-                    
-                    mainNavigation.delayedNavigation(work: .add, destination: .loginScreen)
-                    
                 case .dataTaskFailed:
                     
                     contentScreenModel.showDataError()
+                default:
+                    contentScreenModel.presentAlert(title: "에러", message: "알수 없는 에러")
                 }
             }
         }

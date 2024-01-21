@@ -37,7 +37,7 @@ extension SpotStorageManager {
         }
     }
     
-    func insertUserInfoToMainStorage(userInfo: UserInfObject, immediateSave: Bool = false) throws {
+    func insertUserInfoToMainStorage(userInfo: UserInfoObject, immediateSave: Bool = false) throws {
         
         let context = context
         
@@ -56,7 +56,7 @@ extension SpotStorageManager {
     }
     
     /// 로컬에 존재하는 경우에만 업데이트
-    func updateUserInfo(newUserInfo: UserInfObject) throws {
+    func updateUserInfo(newUserInfo: UserInfoObject) throws {
         
         let oldUserInfo: [SpotUser] = try fetchObjectsFromMainStorage()
         
