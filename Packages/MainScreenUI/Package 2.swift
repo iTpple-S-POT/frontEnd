@@ -33,7 +33,6 @@ let package = Package(
                 .process("Resources/TitlePart"),
                 .process("Resources/Tags"),
                 .process("Resources/Tab"),
-                .process("Resources/DetailPart"),
             ]
         ),
         .testTarget(

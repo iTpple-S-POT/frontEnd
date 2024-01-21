@@ -2,7 +2,6 @@ import SwiftUI
 import UIKit
 import MapKit
 
-
 // MARK: - Coordinator
 internal class MkMapViewCoordinator: NSObject, MKMapViewDelegate, CLLocationManagerDelegate {
     
@@ -41,6 +40,13 @@ internal class MkMapViewCoordinator: NSObject, MKMapViewDelegate, CLLocationMana
     func updateCenter(location: CLLocation) {
         mapView?.region.center = location.coordinate
     }
+    
+    func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
+            if let annotation = view.annotation as? PotAnnotation {
+                // 선택된 어노테이션 정보를 전달하며 notification을 post합니다.
+                NotificationCenter.default.post(name: Notification.Name("annotationDidSelect"), object: annotation)
+            }
+        }
 }
 
 // MARK: - UIViewRepresentable
@@ -73,7 +79,7 @@ internal struct MapkitView: UIViewRepresentable {
         
         return mapView
     }
-    
+    //
     func makeCoordinator() -> MkMapViewCoordinator {
         MkMapViewCoordinator()
     }

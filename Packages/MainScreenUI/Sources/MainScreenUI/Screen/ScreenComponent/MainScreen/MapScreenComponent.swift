@@ -1,15 +1,13 @@
-//
-//  MapScreenComponent.swift
-//
-//
-//  Created by 최준영 on 2023/12/24.
-//
-
 import SwiftUI
 import CJMapkit
 import CoreLocation
 
+//extension Notification.Name {
+//    static let annotationDidSelect = Notification.Name("annotationDidSelect")
+//}
+
 struct MapScreenComponent: View {
+    @State private var selectedAnnotation: PotAnnotation?
     
     var annotationDummies: [PotAnnotation] {
         
@@ -29,9 +27,23 @@ struct MapScreenComponent: View {
     
     var body: some View {
         CJMapkitView(userLocation: CLLocation(latitude: 37.550756, longitude: 126.9254901), annotations: annotationDummies)
+                    .onReceive(NotificationCenter.default.publisher(for: .annotationDidSelect)) { notification in
+                        // 주석 선택 핸들러
+                        if let annotation = notification.object as? PotAnnotation {
+                            selectedAnnotation = annotation
+                        }
+                    }
+                    .sheet(item: $selectedAnnotation) { annotation in
+                        PotDetailScreen(annotation: annotation)
+                    }
     }
+}
+
+extension Notification.Name {
+    static let annotationDidSelect = Notification.Name("annotationDidSelect")
 }
 
 #Preview {
     MapScreenComponent()
 }
+

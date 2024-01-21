@@ -8,17 +8,28 @@
 import CoreLocation
 import UIKit
 
-public class PotAnnotation: NSObject, AnnotationClassType {
-    
+//public class PotAnnotation: NSObject, AnnotationClassType {
+//    
+//    public var type: PotAnnotationType
+//    
+//    public var coordinate: CLLocationCoordinate2D
+//    
+//    public init(type: PotAnnotationType, coordinate: CLLocationCoordinate2D) {
+//        self.coordinate = coordinate
+//        self.type = type
+//    }
+//    
+//}
+
+public class PotAnnotation: NSObject, Identifiable, AnnotationClassType {
+    public var id = UUID() // 고유 식별자를 위한 UUID 추가
     public var type: PotAnnotationType
-    
     public var coordinate: CLLocationCoordinate2D
     
     public init(type: PotAnnotationType, coordinate: CLLocationCoordinate2D) {
         self.coordinate = coordinate
         self.type = type
     }
-    
 }
 
 public enum PotAnnotationType: String, CaseIterable {
