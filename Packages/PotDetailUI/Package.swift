@@ -30,6 +30,8 @@ let package = Package(
                 .product(name: "CJPhotoCollection", package: "CJPhotoCollection"),
             ],
             resources: [
+                .process("Resources/Story"),
+                .process("Resources/Pretendard"),
             ]
         ),
         .testTarget(

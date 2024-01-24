@@ -17,6 +17,7 @@ let package = Package(
         .package(path: "../DefaultExtensions"),
         .package(path: "../CJMapkit"),
         .package(path: "../CJPhotoCollection"),
+        .package(path: "../PotDetailUI"),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -28,6 +29,7 @@ let package = Package(
                 .product(name: "DefaultExtensions", package: "DefaultExtensions"),
                 .product(name: "CJMapkit", package: "CJMapkit"),
                 .product(name: "CJPhotoCollection", package: "CJPhotoCollection"),
+                .product(name: "PotDetailUI", package: "PotDetailUI"),
             ],
             resources: [
                 .process("Resources/TitlePart"),
