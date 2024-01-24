@@ -6,9 +6,14 @@
 //
 
 import SwiftUI
+import DefaultExtensions
 
-struct StoryScreen: View {
+public struct StoryScreen: View {
+    @Environment(\.presentationMode) var presentationMode
     
+    public init() {
+        
+    }
     public var body: some View {
         ZStack {
             
@@ -18,7 +23,9 @@ struct StoryScreen: View {
             
             VStack() {
                 HStack() {
-                    Button(action: {}) {
+                    Button(action: {
+                        presentationMode.wrappedValue.dismiss()
+                    }) {
                         Image(systemName: "xmark")
                             .resizable()
                             .frame(width: 20, height: 20)

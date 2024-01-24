@@ -8,6 +8,9 @@
 import SwiftUI
 
 struct LikeCommentShare: View {
+    
+    @State private var isPresentingCommentScreen = false
+    
     var body: some View {
         VStack(spacing: 16) {
             Button(action: {}) {
@@ -24,7 +27,9 @@ struct LikeCommentShare: View {
                 }
             }
             
-            Button(action: {}) {
+            Button(action: {
+                self.isPresentingCommentScreen = true
+            }) {
                 VStack {
                     Image(systemName: "ellipsis.message.fill")
                         .resizable()
@@ -36,6 +41,9 @@ struct LikeCommentShare: View {
                         .font(.custom("Pretendard-SemiBold", size: 12))
                         .foregroundColor(.white)
                 }
+            }
+            .sheet(isPresented: $isPresentingCommentScreen) {
+                CommentScreen()
             }
             
             Button(action: {}) {
