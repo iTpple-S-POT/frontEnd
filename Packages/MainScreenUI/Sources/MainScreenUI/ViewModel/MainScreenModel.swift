@@ -1,11 +1,12 @@
 //
-//  File.swift
-//  
+//  MainScreenModel.swift
+//
 //
 //  Created by 최준영 on 1/24/24.
 //
 
 import SwiftUI
+import GlobalObjects
 
 class MainScreenModel: ObservableObject {
     

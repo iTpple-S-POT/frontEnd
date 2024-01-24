@@ -25,7 +25,7 @@ struct MapScreenComponent: View {
     
     var body: some View {
         ZStack {
-            MapkitViewRepresentable(isLastestCenterAndMapEqual: $screenModel.isLastestCenterAndMapEqual, latestCenter: screenModel.lastestCenter, pots: potsFromLocal.map { $0 as Pot }) { mapCenter in
+            MapkitViewRepresentable(isLastestCenterAndMapEqual: $screenModel.isLastestCenterAndMapEqual, selectedCategory: $mainScreenModel.selectedTag, latestCenter: screenModel.lastestCenter) { mapCenter in
                 
                 screenModel.currentCenterPositionOfMap = mapCenter
             }

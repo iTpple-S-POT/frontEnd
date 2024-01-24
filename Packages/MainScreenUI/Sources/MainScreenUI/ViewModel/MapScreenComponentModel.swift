@@ -60,8 +60,10 @@ class MapScreenComponentModel: ObservableObject {
                     
                     self.moveMapToCurrentLocation()
                     
-                    print("최초 3박자 일치")
+                    print("실시간 위치, 지도 중심, 가장최근위치 일치")
                     
+                    // 팟 조회
+                    self.initialPotTask(location: coordinate)
                 }
                 
             }
@@ -103,6 +105,39 @@ class MapScreenComponentModel: ObservableObject {
         
         // 맵의 init, updateUIView순서대로 호출
         self.isLastestCenterAndMapEqual = true
+        
+    }
+    
+    func initialPotTask(location: CLLocationCoordinate2D) {
+        
+        let functionName = #function
+        
+        Task {
+            
+            do {
+                
+                // 로컬데이터 업로드(자동 필터링)
+                try await SpotStorage.default.filteringLocalPots()
+                print("팟 필터링 성공", functionName)
+                
+                // 서버 요청한 데이터 메모리에 올림
+                let potsFromServer = try await APIRequestGlobalObject.shared.getPots(latitude: location.latitude, longitude: location.longitude, diameter: 300)
+                
+                print("팟 가져오기 성공", functionName)
+                
+                // id가 같은 경우 삽입이 발생히지 않음
+                try await SpotStorage.default.insertPots(objects: potsFromServer)
+                
+                print("서버에서 가져온 팟을 삽입 성공", functionName)
+                
+            } catch {
+                
+                print("초기 팟 처리 실패", functionName)
+                
+                print(error.localizedDescription)
+            }
+            
+        }
         
     }
 }

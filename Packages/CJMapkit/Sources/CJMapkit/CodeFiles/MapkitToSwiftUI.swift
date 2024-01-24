@@ -2,6 +2,7 @@ import SwiftUI
 import UIKit
 import MapKit
 import Combine
+import CoreData
 import GlobalObjects
 
 public enum MapViewState {
@@ -35,6 +36,7 @@ public class MkMapViewCoordinator: NSObject {
     override init() {
         super.init()
         registerAnnotation()
+        setContextPublihser()
     }
     
     // Annotation
@@ -107,6 +109,143 @@ extension MkMapViewCoordinator: MKMapViewDelegate {
 }
 
 
+// MARK: - Annotation
+extension MkMapViewCoordinator {
+    
+    func setContextPublihser() {
+        
+        let name = Notification.Name.NSManagedObjectContextObjectsDidChange
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(contextChangeCallback(_:)), name: name, object: nil)
+        
+    }
+    
+    @objc
+    func contextChangeCallback(_ notification: Notification) {
+        
+        // 삽입된 오브젝트
+        if let insertedObjects = notification.userInfo?[NSInsertedObjectsKey] as? Set<Pot> {
+            addAnnotation(insertedObjects)
+        }
+        
+        // 수정된 오브젝트
+        if let updatedObjects = notification.userInfo?[NSUpdatedObjectsKey] as? Set<Pot> {
+            updateAnnotation(updatedObjects)
+        }
+        
+        // 삭제된 오브젝트
+        if let deletedObjects = notification.userInfo?[NSDeletedObjectsKey] as? Set<Pot> {
+            deleteAnnotation(deletedObjects)
+        }
+        
+    }
+    
+    func addAnnotation(_ pots: Set<Pot>) {
+        
+        let potAnnotations = pots.map { pot in
+            
+            let object = makePotObjectFrom(pot: pot)
+            
+            return PotAnnotation(isActive: pot.isActive, potObject: object, temporalImageData: pot.imageData)
+            
+        }
+        
+        mapView.addAnnotations(potAnnotations)
+        print("어노테이션 삽입 완료")
+    }
+    
+    func updateAnnotation(_ pots: Set<Pot>) {
+        
+        mapView.annotations.forEach { potAnnotation in
+            
+            if let prev = potAnnotation as? PotAnnotation {
+                
+                pots.forEach { updatedObject in
+                    
+                    if prev.potObject.id == updatedObject.id {
+                        
+                        prev.isActive = updatedObject.isActive
+                        
+                        prev.potObject = makePotObjectFrom(pot: updatedObject)
+                        
+                        prev.temporalImageData = updatedObject.imageData
+                        
+                    }
+                    
+                }
+                
+            }
+            
+        }
+        print("어노테이션 업데이트 완료")
+    }
+    
+    func deleteAnnotation(_ pots: Set<Pot>) {
+        
+        var willRemoveList: [PotAnnotation] = []
+        
+        mapView.annotations.forEach { potAnnotation in
+            
+            if let target = potAnnotation as? PotAnnotation {
+                
+                pots.forEach { deletedAnnotation in
+                    
+                    if target.potObject.id == deletedAnnotation.id {
+                        
+                        willRemoveList.append(target)
+                        
+                    }
+                }
+            }
+        }
+        
+        mapView.removeAnnotations(willRemoveList)
+        print("어노테이션 삭제완료")
+    }
+    
+    func makePotObjectFrom(pot: Pot) -> PotObject {
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "YYYY-MM-dd"
+        
+        var dateString = ""
+        
+        if let expDate = pot.expirationDate {
+            var dateString = dateFormatter.string(from: expDate)
+        }
+        
+        return PotObject(id: pot.id, userId: pot.userId, categoryId: pot.categoryId, content: pot.content ?? "", imageKey: pot.imageKey ?? "", expirationDate: dateString, latitude: pot.latitude, longitude: pot.longitude)
+    }
+    
+    func filteringAnnotations(category: TagCases) {
+        
+        print("어노테이션 필터링: \(category)")
+        
+        let categoryNumber = category.id
+        
+        switch category {
+        case .all:
+            mapView.annotations.forEach {
+                if let potAnot = $0 as? PotAnnotation {
+                    potAnot.isHiiden = false
+                }
+            }
+        case .hot:
+            // TODO: 인기순 처리
+            return
+        case .life, .question, .information, .party:
+            mapView.annotations.forEach { anot in
+                if let potAnot = anot as? PotAnnotation, potAnot.potObject.categoryId != categoryNumber {
+                    
+                    potAnot.isHiiden = true
+                    
+                }
+            }
+        }
+    }
+}
+
+
 // MARK: - UIViewRepresentable
 public struct MapkitViewRepresentable: UIViewRepresentable {
     
@@ -114,16 +253,16 @@ public struct MapkitViewRepresentable: UIViewRepresentable {
     
     @Binding var isLastestCenterAndMapEqual: Bool
     
-    var latestCenter: CLLocationCoordinate2D
+    @Binding var selectedCategory: TagCases
     
-    var pots: [Pot]
+    var latestCenter: CLLocationCoordinate2D
     
     var mapCenterReciever: (CLLocationCoordinate2D) -> Void
     
-    public init(isLastestCenterAndMapEqual: Binding<Bool>, latestCenter: CLLocationCoordinate2D, pots: [Pot], mapCenterReciever: @escaping (CLLocationCoordinate2D) -> Void) {
+    public init(isLastestCenterAndMapEqual: Binding<Bool>, selectedCategory: Binding<TagCases>, latestCenter: CLLocationCoordinate2D, mapCenterReciever: @escaping (CLLocationCoordinate2D) -> Void) {
         self._isLastestCenterAndMapEqual = isLastestCenterAndMapEqual
+        self._selectedCategory = selectedCategory
         self.latestCenter = latestCenter
-        self.pots = pots
         self.mapCenterReciever = mapCenterReciever
     }
     
@@ -156,7 +295,6 @@ public struct MapkitViewRepresentable: UIViewRepresentable {
             mapCenterReciever(coordinate)
             
         }
-
         
         let center = CJLocationManager.getUserLocationFromLocal()
 
@@ -165,39 +303,7 @@ public struct MapkitViewRepresentable: UIViewRepresentable {
         // TODO: 상의하기
         mapView.isZoomEnabled = true
         
-        // Add annotations
-        
-        let annotations: [PotAnnotation] = pots.map { pot in
-            
-            var dateString = ""
-            
-            if let expDate = pot.expirationDate {
-                
-                let dateFormatter = DateFormatter()
-                dateFormatter.dateFormat = "YYYY-MM-dd"
-                
-                dateString = dateFormatter.string(from: expDate)
-                
-            }
-            
-            let object = PotObject(
-                id: pot.id,
-                userId: pot.userId,
-                categoryId: pot.categoryId,
-                content: pot.content ?? "",
-                imageKey: pot.imageKey!,
-                expirationDate: dateString,
-                latitude: pot.latitude,
-                longitude: pot.longitude
-            )
-               
-            return PotAnnotation(isActive: pot.isActive, potObject: object, temporalImageData: pot.imageData)
-            
-        }
-        
-        mapView.addAnnotations(annotations)
-        
-        print("초기 설정 완")
+        print("MapView 초기 설정 완")
         return mapView
     }
     
@@ -216,5 +322,8 @@ public struct MapkitViewRepresentable: UIViewRepresentable {
             coordi.setUserMapEqual(location: latestCenter)
             
         }
+        
+        // 필터링
+        context.coordinator.filteringAnnotations(category: self.selectedCategory)
     }
 }

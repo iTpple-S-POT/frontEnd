@@ -8,6 +8,7 @@
 import SwiftUI
 import GlobalUIComponents
 import GlobalFonts
+import GlobalObjects
 
 struct SelectMapTagScreenComponent: View {
        

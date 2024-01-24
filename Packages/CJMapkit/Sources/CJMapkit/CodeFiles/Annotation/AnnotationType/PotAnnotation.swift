@@ -16,6 +16,8 @@ public class PotAnnotation: NSObject, AnnotationClassType {
     
     var isActive: Bool
     
+    var isHiiden: Bool = false
+    
     var potObject: PotObject
     
     var temporalImageData: Data?

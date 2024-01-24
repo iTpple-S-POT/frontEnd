@@ -91,18 +91,18 @@ struct TabScreenComponent: View {
             PotUploadScreen { result in
                 
                 // TODO: 추후 수정
-                if result {
-                    
-                    mainScreenModel.showPotUploadSuccess()
-                    
-                } else {
-                    
-                    mainScreenModel.showPotUploadFailed()
+                DispatchQueue.main.async {
+                    if result {
+                        
+                        mainScreenModel.showPotUploadSuccess()
+                        
+                    } else {
+                        
+                        mainScreenModel.showPotUploadFailed()
+                    }
                 }
-                
             }
-        })
-        
+        })   
     }
 }
 

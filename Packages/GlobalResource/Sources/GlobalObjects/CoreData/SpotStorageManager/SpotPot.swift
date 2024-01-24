@@ -9,41 +9,62 @@ import Foundation
 
 public extension SpotStorage {
     
-    func getPotsFromLocal() throws {
+    func filteringLocalPots() async throws {
         
         let context = self.mainStorageManager.context
         
-        let request = Pot.fetchRequest()
-        
-        if let objects = try? context.fetch(request) {
-                
-            print(objects.count)
+        try context.performAndWait {
             
+            let request = Pot.fetchRequest()
+            
+            request.predicate = NSPredicate(format: "expirationDate < %@", Date() as NSDate)
+            
+            let willDeletedPots = try context.fetch(request)
+            
+            willDeletedPots.forEach {
+                context.delete($0)
+            }
+            
+            try context.save()
         }
         
     }
     
-    func insertPot(object: PotObject) async throws {
+    func insertPots(objects: [PotObject]) async throws {
         
         let context = self.mainStorageManager.context
         
-        let newPotObject = Pot(context: context)
-        
-        newPotObject.id = object.id
-        newPotObject.userId = object.userId
-        newPotObject.categoryId = object.categoryId
-        newPotObject.content = object.content
-        newPotObject.isActive = true
-        
-        // 만기날짜를 Date로 다시변경
-        let expirationDateString = object.expirationDate
-        
-        newPotObject.expirationDate = DateFormatter().date(from: expirationDateString)
-        newPotObject.latitude = object.latitude
-        newPotObject.longitude = object.longitude
-        newPotObject.imageKey = object.imageKey
+        try context.performAndWait {
+            objects.forEach { object in
+                
+                let newPotObject = Pot(context: context)
+                
+                newPotObject.id = object.id
+                newPotObject.userId = object.userId
+                newPotObject.categoryId = object.categoryId
+                newPotObject.content = object.content
+                newPotObject.isActive = true
+                
+                // 만기날짜를 Date로 다시변경
+                let expirationDateString = object.expirationDate
+                
+                newPotObject.expirationDate = DateFormatter().date(from: expirationDateString)
+                newPotObject.latitude = object.latitude
+                newPotObject.longitude = object.longitude
+                newPotObject.imageKey = object.imageKey
+                
+            }
+            
+            try context.save()
+        }
         
     }
+    
+}
+
+
+// MARK: - 더미 팟
+public extension SpotStorage {
     
     func makeDummyPot(object: SpotPotUploadObject) {
         
@@ -110,5 +131,4 @@ public extension SpotStorage {
         
         context.delete(dummyObject)
     }
-    
 }

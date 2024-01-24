@@ -60,22 +60,29 @@ class PotAnnotationView: MKAnnotationView {
     override init(annotation: MKAnnotation?, reuseIdentifier: String?) {
         super.init(annotation: annotation, reuseIdentifier: reuseIdentifier)
         
-        guard let data = annotation as? PotAnnotation else {
+        guard let annotation = annotation as? PotAnnotation else {
             preconditionFailure("타입변환 불가")
         }
         
-        setUp(data: data)
+        self.annotation = annotation
+        
+        setUp()
     }
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented!")
     }
     
-    func setUp(data: PotAnnotation) {
+    func setUp() {
+        
+        guard let annotation = self.annotation as? PotAnnotation else {
+            
+            fatalError("잘못된 Annotation할당")
+        }
         
         // 이미지 처리
         // 일시적 이미지(팟 업로드 전)
-        if !data.isActive, let imageData = data.temporalImageData {
+        if !annotation.isActive, let imageData = annotation.temporalImageData {
             
             layer3.image = UIImage(data: imageData)
         }
@@ -86,7 +93,7 @@ class PotAnnotationView: MKAnnotationView {
         layer1.color = .white
         
         let layer2 = PotShapeView()
-        layer2.color = PotAnnotationType(rawValue: Int(data.potObject.categoryId))!.getAnnotationColor()
+        layer2.color = PotAnnotationType(rawValue: Int(annotation.potObject.categoryId))!.getAnnotationColor()
         
         // 이미지 세팅
         
@@ -117,7 +124,7 @@ class PotAnnotationView: MKAnnotationView {
             layer3.centerYAnchor.constraint(equalTo: self.centerYAnchor),
         ])
         
-        if !data.isActive {
+        if !annotation.isActive {
             
             self.addSubview(loadingLayer)
             
@@ -148,6 +155,8 @@ class PotAnnotationView: MKAnnotationView {
         self.bounds.origin.y = sqrt(2.0) * height/2
         
         layer3.layer.cornerRadius = layer3.frame.width / 2
+        
+        setUp()
     }
     
 }
