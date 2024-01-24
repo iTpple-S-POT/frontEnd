@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  LoginScreen.swift
 //
 //
 //  Created by 최준영 on 2023/11/18.
@@ -73,11 +73,13 @@ extension LoginScreen {
         
         guard let serverTokens = tokens else {
             
-            contentScreenModel.presentAlert(title: "로그인 에러", message: "잠시후 다시 시도해 주세요.")
+            DispatchQueue.main.async {
+                contentScreenModel.presentAlert(title: "로그인 에러", message: "잠시후 다시 시도해 주세요.")
+            }
             return
         }
         
-        print(serverTokens)
+        print("서버토큰(access): \(serverTokens.accessToken)")
         
         APIRequestGlobalObject.shared.setSpotToken(accessToken: serverTokens.accessToken, refreshToken: serverTokens.refreshToken)
         

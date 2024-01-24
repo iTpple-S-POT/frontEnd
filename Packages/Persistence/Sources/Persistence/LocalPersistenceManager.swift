@@ -28,5 +28,5 @@ open class LocalPersistenceManager: PersistenceManager {
         }
         
     }
-    
+    	
 }

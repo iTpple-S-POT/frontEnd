@@ -91,7 +91,7 @@ extension KakaoLoginManager {
                             
                         }
                         
-                        completion(.failure(.unownedError(function: functionName)))
+                        completion(.failure(.unknownError(function: functionName)))
                         
                     }
                 }

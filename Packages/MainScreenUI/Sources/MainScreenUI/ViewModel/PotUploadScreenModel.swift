@@ -12,6 +12,7 @@ import GlobalObjects
 import CJMapkit
 import Combine
 
+
 // 추후 추가 가능
 public enum PotUploadDestination {
     
@@ -86,22 +87,82 @@ public class PotUploadScreenModel: NavigationController<PotUploadDestination> {
 // MARK: - 팟 업로드용 데이터
 public extension PotUploadScreenModel {
     
-    func uploadPot() async throws {
+    func uploadPot() {
         
-        guard let location = CJLocationManager.shared.currentUserLocation else {
-            
-            throw PotUploadPrepareError.cantGetUserLocation(function: #function)
-        }
+        let categoryId = self.selectedCategoryId!
         
-        // TODO: 카테고리 업데이트
-        let object = SpotPotUploadObject(category: 1, text: potText, latitude: location.latitude, longitude: location.longitude)
+        let content = self.potText
         
-        guard let imageInfo_unwrapped = imageInfo else {
-            
-            throw PotUploadPrepareError.imageInfoDoesntExist(function: #function)
-        }
+        let imageInfo = self.imageInfo
+         
+        Task.detached {
+            do {
                 
-        try await APIRequestGlobalObject.shared.executePotUpload(imageInfo: imageInfo_unwrapped, uploadObject: object)
+                guard let location = CJLocationManager.shared.currentUserLocation else {
+                    
+                    throw PotUploadPrepareError.cantGetUserLocation(function: #function)
+                }
+                
+                let object = SpotPotUploadObject(category: categoryId, text: content, latitude: location.latitude, longitude: location.longitude)
+                
+                guard let imageInfo_unwrapped = imageInfo else {
+                    
+                    throw PotUploadPrepareError.imageInfoDoesntExist(function: #function)
+                }
+                
+                // dummy생성
+                await MainActor.run { SpotStorage.default.makeDummyPot(object: object) }
+                
+                print("낙관적 팟 생성완료")
+                
+                let uploadedPotObject = try await APIRequestGlobalObject.shared.executePotUpload(imageInfo: imageInfo_unwrapped, uploadObject: object)
+                
+                // dummy업데이트
+                await MainActor.run {
+                    
+                    do {
+                        
+                        // TODO: 이미지 데이터 획득하기
+                        
+                        try SpotStorage.default.updateDummyPot(object: uploadedPotObject)
+                        
+                        print("낙관적 팟 업데이트 성공")
+                    }
+                    catch {
+                        
+                        print("낙관적 팟 업데이트 실패")
+                        
+                        self.potUploadPublisher.send(false)
+                        
+                        // dummy제거
+                        do {
+                            try SpotStorage.default.deleteDummyPot()
+                        } catch {
+                            print("낙관적 팟 제거 실패: \(error.localizedDescription)")
+                        }
+                    }
+                    
+                }
+                
+            } catch {
+                
+                print(error, error.localizedDescription)
+                
+                // Alert표시를 위한 퍼블리쉬
+                self.potUploadPublisher.send(false)
+                
+                await MainActor.run {
+                    
+                    // dummy제거
+                    do {
+                        try SpotStorage.default.deleteDummyPot()
+                    } catch {
+                        print("낙관적 팟 제거 실패: \(error.localizedDescription)")
+                    }
+                }
+                
+            }
+        }
     }
     
     /// 최종 화면으로 이동할 수 있는가?

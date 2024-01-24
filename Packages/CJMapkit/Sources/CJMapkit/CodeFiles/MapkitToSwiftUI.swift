@@ -2,6 +2,7 @@ import SwiftUI
 import UIKit
 import MapKit
 import Combine
+import GlobalObjects
 
 public enum MapViewState {
     
@@ -70,7 +71,11 @@ extension MkMapViewCoordinator: MKMapViewDelegate {
         
         switch someAnnotation.identifier {
         case NSStringFromClass(PotAnnotation.self):
-            return PotAnnotationView(annotation: annotation, reuseIdentifier: NSStringFromClass(PotAnnotationView.self))
+            let annotationView = PotAnnotationView(annotation: annotation, reuseIdentifier: NSStringFromClass(PotAnnotationView.self))
+            
+            annotationView.frame.size = CGSize(width: 54, height: 54)
+            
+            return annotationView
         default:
             return nil
         }
@@ -111,12 +116,15 @@ public struct MapkitViewRepresentable: UIViewRepresentable {
     
     var latestCenter: CLLocationCoordinate2D
     
-    var annotations: [AnnotationClassType]
+    var pots: [Pot]
     
-    public init(isLastestCenterAndMapEqual: Binding<Bool>, latestCenter: CLLocationCoordinate2D, annotations: [AnnotationClassType]) {
+    var mapCenterReciever: (CLLocationCoordinate2D) -> Void
+    
+    public init(isLastestCenterAndMapEqual: Binding<Bool>, latestCenter: CLLocationCoordinate2D, pots: [Pot], mapCenterReciever: @escaping (CLLocationCoordinate2D) -> Void) {
         self._isLastestCenterAndMapEqual = isLastestCenterAndMapEqual
         self.latestCenter = latestCenter
-        self.annotations = annotations
+        self.pots = pots
+        self.mapCenterReciever = mapCenterReciever
     }
     
     public func makeUIView(context: Context) -> MKMapView {
@@ -144,6 +152,9 @@ public struct MapkitViewRepresentable: UIViewRepresentable {
             
             print("유저가 맵을 움직임")
             
+            // 새로운 지도의 중심
+            mapCenterReciever(coordinate)
+            
         }
 
         
@@ -155,7 +166,36 @@ public struct MapkitViewRepresentable: UIViewRepresentable {
         mapView.isZoomEnabled = true
         
         // Add annotations
-        mapView.addAnnotations(self.annotations)
+        
+        let annotations: [PotAnnotation] = pots.map { pot in
+            
+            var dateString = ""
+            
+            if let expDate = pot.expirationDate {
+                
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateFormat = "YYYY-MM-dd"
+                
+                dateString = dateFormatter.string(from: expDate)
+                
+            }
+            
+            let object = PotObject(
+                id: pot.id,
+                userId: pot.userId,
+                categoryId: pot.categoryId,
+                content: pot.content ?? "",
+                imageKey: pot.imageKey!,
+                expirationDate: dateString,
+                latitude: pot.latitude,
+                longitude: pot.longitude
+            )
+               
+            return PotAnnotation(isActive: pot.isActive, potObject: object, temporalImageData: pot.imageData)
+            
+        }
+        
+        mapView.addAnnotations(annotations)
         
         print("초기 설정 완")
         return mapView
@@ -176,6 +216,5 @@ public struct MapkitViewRepresentable: UIViewRepresentable {
             coordi.setUserMapEqual(location: latestCenter)
             
         }
-        
     }
 }

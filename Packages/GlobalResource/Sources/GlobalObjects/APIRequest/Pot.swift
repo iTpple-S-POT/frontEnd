@@ -31,11 +31,11 @@ public extension APIRequestGlobalObject {
             
         }
         
-        throw SpotNetworkError.unownedError(function: #function)
+        throw SpotNetworkError.unknownError(function: #function)
     }
     
     // 팟 업로드
-    func executePotUpload(imageInfo: ImageInformation, uploadObject: SpotPotUploadObject) async throws {
+    func executePotUpload(imageInfo: ImageInformation, uploadObject: SpotPotUploadObject) async throws -> PotObject {
         
         let s3Object = try await getPreSignedUrl(imageInfo: imageInfo)
         
@@ -44,8 +44,14 @@ public extension APIRequestGlobalObject {
         }
         
         try await uploadImageToS3(url: preUrl, imageData: imageInfo.data)
-        try await uploadPotData(fileKey: s3Object.fileKey, uploadObject: uploadObject)
         
+        print("S3 업로드 성공")
+        
+        let uploadedObject = try await uploadPotData(fileKey: s3Object.fileKey, uploadObject: uploadObject)
+        
+        print("팟 업로드 성공")
+        
+        return uploadedObject
     }
     
     
@@ -74,7 +80,7 @@ public extension APIRequestGlobalObject {
                 return PreSignedUrlObject(preSignedUrl: decoded.preSignedUrl, fileKey: decoded.fileKey)
             } else {
                 
-                throw SpotNetworkError.unownedError(function: #function)
+                throw SpotNetworkError.unknownError(function: #function)
             }
             
         }
@@ -91,17 +97,15 @@ public extension APIRequestGlobalObject {
             
             try defaultCheckStatusCode(response: httpResponse, functionName: #function, data: data)
             
-            print("S3 업로드 성공")
-            
         } else {
             
-            throw SpotNetworkError.unownedError(function: #function)
+            throw SpotNetworkError.unknownError(function: #function)
         }
         
     }
     
     // 팟업로드
-    private func uploadPotData(fileKey: String, uploadObject: SpotPotUploadObject) async throws {
+    private func uploadPotData(fileKey: String, uploadObject: SpotPotUploadObject) async throws -> PotObject {
         
         let object = SpotPotUploadRequestModel(
             categoryId: uploadObject.category,
@@ -123,11 +127,83 @@ public extension APIRequestGlobalObject {
             
             try defaultCheckStatusCode(response: httpResponse, functionName: #function, data: data)
             
+            let decoded = try jsonDecoder.decode(SpotPotUploadResponseModel.self, from: data)
+            
+            let object = PotObject(
+                id: decoded.id,
+                userId: decoded.userID,
+                categoryId: decoded.categoryID,
+                content: decoded.content ?? "",
+                imageKey: decoded.imageKey,
+                expirationDate: decoded.expiredAt,
+                latitude: decoded.location.lat,
+                longitude: decoded.location.lon
+            )
+            
             print("팟 업로드 성공")
+            
+            return object
             
         } else {
             
-            throw SpotNetworkError.unownedError(function: #function)
+            throw SpotNetworkError.unknownError(function: #function)
+        }
+    }
+    
+    // 팟 불러오기
+    func getPots(latitude lat: Double, longitude lon: Double, diameter: Double, categoryId: Int64? = nil) async throws -> [PotObject] {
+        let searchType = "CIRCLE"
+        
+        let url = try SpotAPI.getPots.getApiUrl()
+        
+        var components = URLComponents(url: url, resolvingAgainstBaseURL: true)!
+        
+        var queries: [String: String] = [:]
+        
+        queries["type"] = searchType
+        
+        // 따로 id가 없는 경우 전체 불러오기
+        if let id = categoryId {
+            queries["categoryId"] = String(id)
+        }
+        
+        queries["diameterInMeters"] = String(diameter)
+        queries["lat"] = String(lat)
+        queries["lon"] = String(lon)
+        
+        components.queryItems = queries.map({ URLQueryItem(name: $0, value: $1) })
+        
+        let urlWithQuery = components.url!
+        
+        print("팟 fetch url: \(urlWithQuery)")
+        
+        let request = try getURLRequest(url: urlWithQuery, method: .get)
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        if let httpResponse = response as? HTTPURLResponse {
+            
+            try defaultCheckStatusCode(response: httpResponse, functionName: #function, data: data)
+            
+            let decoded: [PotsResponseModel] = try jsonDecoder.decode([PotsResponseModel].self, from: data)
+            
+            let potObjects = decoded.map { model in
+                return PotObject(
+                    id: model.id,
+                    userId: model.userID,
+                    categoryId: model.categoryID.first!,
+                    content: model.content,
+                    imageKey: model.imageKey,
+                    expirationDate: model.expiredAt,
+                    latitude: Double(model.location.lat),
+                    longitude: Double(model.location.lon)
+                )
+            }
+            
+            return potObjects
+        } else {
+            
+            throw SpotNetworkError.unknownError(function: #function)
         }
     }
 }

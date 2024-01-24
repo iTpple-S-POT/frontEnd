@@ -11,7 +11,7 @@ import GlobalFonts
 
 struct SelectMapTagScreenComponent: View {
        
-    @StateObject private var viewModel = SelectMapTagViewModel()
+    @EnvironmentObject var mainScreenModel: MainScreenModel
     
     var body: some View {
         ScrollViewReader { proxy in
@@ -22,9 +22,9 @@ struct SelectMapTagScreenComponent: View {
                     
                     ForEach(TagCases.allCases) { tag in
                         
-                        TagBox(selectedTag: viewModel.selectedTag, tag: tag, isSelected: viewModel.checkSelected(tag), action: {
+                        TagBox(selectedTag: mainScreenModel.selectedTag, tag: tag, isSelected: mainScreenModel.checkSelected(tag), action: {
                             
-                            viewModel.selectTag(tag: tag)
+                            mainScreenModel.selectTag(tag: tag)
                             
                         })
                         .id(tag)
@@ -35,7 +35,7 @@ struct SelectMapTagScreenComponent: View {
                 .padding(.leading, 21)
             }
             .scrollIndicators(.hidden)
-            .onChange(of: viewModel.selectedTag) { tag in
+            .onChange(of: mainScreenModel.selectedTag) { tag in
                 withAnimation(.easeInOut(duration: 0.5)) {
                     proxy.scrollTo(tag, anchor: .center)
                 }
@@ -47,4 +47,5 @@ struct SelectMapTagScreenComponent: View {
 #Preview {
     SelectMapTagScreenComponent()
         .frame(height: 64)
+        .environmentObject(MainScreenModel())
 }

@@ -20,7 +20,7 @@ public enum SpotNetworkError: Error {
     case dataResponseError(function: String)
     case notFoundError(description: String)
     case unProcessedStatusCode(function: String)
-    case unownedError(function: String)
+    case unknownError(function: String)
     case authorizationError(function: String)
     
 }
@@ -54,6 +54,7 @@ public extension APIRequestGlobalObject {
         case getPotCategory
         
         // Pot
+        case getPots
         case postPot
         case preSignedUrl
         
@@ -74,7 +75,7 @@ public extension APIRequestGlobalObject {
                 additinalUrl = "/api/v1/auth/refresh"
             case .getPotCategory:
                 additinalUrl = "/api/v1/pot/category"
-            case .postPot:
+            case .getPots, .postPot:
                 additinalUrl = "/api/v1/pot"
             case .preSignedUrl:
                 additinalUrl = "/api/v1/pot/image/pre-signed-url"

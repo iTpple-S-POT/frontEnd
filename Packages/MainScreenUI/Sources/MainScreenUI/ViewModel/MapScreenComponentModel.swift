@@ -9,6 +9,7 @@ import SwiftUI
 import CoreLocation
 import Combine
 import CJMapkit
+import GlobalObjects
 
 enum SpotLocationError: Error {
     
@@ -21,11 +22,16 @@ class MapScreenComponentModel: ObservableObject {
     @Published var isLastestCenterAndMapEqual: Bool = false
     @Published var isUserAndLatestCenterEqual: Bool = false
     
+    @Published var annotations: [AnnotationClassType] = []
+    
     // 마지막으로 전달한 맵의 중앙점
     var lastestCenter = CLLocationCoordinate2D()
     
     // 유저의 가장최근 위치
     private var userPosition: CLLocationCoordinate2D!
+    
+    // 현재 지도의 중심
+    var currentCenterPositionOfMap: CLLocationCoordinate2D!
     
     let locationManager = CJLocationManager.shared
     

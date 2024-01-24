@@ -18,24 +18,24 @@ struct TopMostScreenComponent: View {
                 .ignoresSafeArea(.container)
             
             HStack(spacing: 0) {
-                Image.makeImageFromBundle(bundle: Bundle.module,name: ImageName.main_screen_title, ext: .png)
+                Image.makeImageFromBundle(bundle: Bundle.module,name: "spot_logo_image", ext: .png)
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 120)
+                    .frame(height: 56)
                 
                 Spacer(minLength: 0)
                 
                 Button {
                     
                 } label: {
-                    Image.makeImageFromBundle(bundle: Bundle.module, name: ImageName.search, ext: .png)
+                    Image.makeImageFromBundle(bundle: Bundle.module, name: "main_bell", ext: .png)
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 32, height: 32)
+                        .frame(width: 32)
                 }
                 
             }
-            .padding(.horizontal, 16)
+            .padding(.horizontal, 21)
             
         }
     }

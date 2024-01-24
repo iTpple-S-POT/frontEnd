@@ -54,7 +54,7 @@ class AppleLoginManager: NSObject {
         // 디바이스 로그인된 애플아이디에 대한 요청
         let appIdRequest = ASAuthorizationAppleIDProvider().createRequest()
         
-        appIdRequest.requestedScopes = []
+        appIdRequest.requestedScopes = [.email, .fullName]
         
         let controller = ASAuthorizationController(authorizationRequests: [appIdRequest])
         
@@ -76,7 +76,7 @@ class AppleLoginManager: NSObject {
                 
                 print("애플로그인 \n", token)
                 
-                print("~-----------")
+                print("-----------")
                 
                 let tokenObject = try await APIRequestGlobalObject.shared.sendAccessTokenToServer(accessToken: token, refreshToken: "", type: .apple)
                 

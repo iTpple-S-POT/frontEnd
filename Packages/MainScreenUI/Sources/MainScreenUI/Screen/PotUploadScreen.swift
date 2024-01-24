@@ -48,12 +48,7 @@ struct PotUploadScreen: View {
         .onAppear {
             screenModel.dismiss = dismiss
                 
-            // TODO: 추후 수정
-            self.uploadSub = screenModel.potUploadPublisher.sink {
-                
-                uploadCompletion($0)
-                
-            }
+            self.uploadSub = screenModel.potUploadPublisher.sink { uploadCompletion($0) }
         }
         
         

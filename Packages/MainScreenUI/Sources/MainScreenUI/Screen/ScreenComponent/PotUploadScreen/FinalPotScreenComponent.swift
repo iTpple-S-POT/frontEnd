@@ -87,8 +87,7 @@ struct FinalPotScreenComponent: View {
                     
                     // 유저 정보
                     HStack(spacing: 12) {
-                        // TODO: 유저 프로필
-                        
+
                         if let imageUrl = userInfo.first?.profileImageUrl, let url = URL(string: imageUrl), let data = try? Data(contentsOf: url), let uiImage = UIImage(data: data) {
                             Image(uiImage: uiImage)
                                 .resizable()
@@ -157,50 +156,13 @@ struct FinalPotScreenComponent: View {
                     screenModelWithNav.dismiss?()
                     
                     // 팟 업로드
-                    uploadPot()
+                    screenModelWithNav.uploadPot()
                 }
                 .padding(.horizontal, 21)
                 .padding(.vertical, 24)
             }
         }
     }
-}
-
-extension FinalPotScreenComponent {
-    
-    func uploadPot() {
-        
-        Task {
-            
-            do {
-                
-                // 팟업로드 시작
-                try await screenModelWithNav.uploadPot()
-                
-                screenModelWithNav.potUploadPublisher.send(true)
-                
-            } catch {
-                
-                if let prepareError = error as? PotUploadPrepareError {
-                    
-                    print("팟 업로드 준비중 실패, \(prepareError)")
-                    
-                }
-                
-                if let netError = error as? SpotNetworkError {
-                    
-                    print("팟 업로드 실패, \(netError)")
-                    
-                }
-                
-                screenModelWithNav.potUploadPublisher.send(false)
-                
-            }
-            
-        }
-        
-    }
-    
 }
 
 #Preview {

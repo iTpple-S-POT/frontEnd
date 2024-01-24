@@ -1,27 +1,14 @@
 //
-//  SelectMapTagViewModel.swift
+//  MapTag.swift
 //
 //
-//  Created by 최준영 on 2023/12/24.
+//  Created by 최준영 on 1/24/24.
 //
 
 import SwiftUI
 
-class SelectMapTagViewModel: ObservableObject {
-    
-    @Published private(set) var selectedTag: TagCases = .all
-    @Published private(set) var selectedTagDict: [TagCases: Bool] = [
-        .all : true,
-        .hot : false,
-        .life : false,
-        .question : false,
-        .information : false,
-        .party : false
-    ]
-    
-    // 현재활성화 되어있는 테그의 수를 추적합니다.
-    private var activeTagCount: Int = 1
-    
+extension MainScreenModel {
+
     func checkSelected(_ tag: TagCases) -> Bool { selectedTagDict[tag]! }
     
     func selectTag(tag: TagCases) {
@@ -70,7 +57,7 @@ class SelectMapTagViewModel: ObservableObject {
         }
         
     }
-    
+
 }
 
 /// 카테고리 정보와 혼용됩니다.

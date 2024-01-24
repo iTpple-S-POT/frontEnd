@@ -29,7 +29,7 @@ public extension APIRequestGlobalObject {
             
         } else {
             
-            throw SpotNetworkError.unownedError(function: #function)
+            throw SpotNetworkError.unknownError(function: #function)
         }
     }
     
@@ -55,7 +55,7 @@ public extension APIRequestGlobalObject {
             
         } else {
             
-            throw SpotNetworkError.unownedError(function: #function)
+            throw SpotNetworkError.unknownError(function: #function)
         }
         
     }
@@ -109,7 +109,7 @@ public extension APIRequestGlobalObject {
             }
         } else {
             
-            throw SpotNetworkError.unownedError(function: functionName)
+            throw SpotNetworkError.unknownError(function: functionName)
         }
     }
 }
