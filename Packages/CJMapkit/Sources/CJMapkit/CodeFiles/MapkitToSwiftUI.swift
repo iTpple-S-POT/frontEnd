@@ -29,9 +29,13 @@ public class MkMapViewCoordinator: NSObject {
     
     var state: MapViewState = .notDetermined
     
-    var mapCenterSubscriber: AnyCancellable!
+    var mapCenterChangedAfterCoordinationSubscriber: AnyCancellable!
     
-    let mapCenterPublisher = PassthroughSubject<CLLocationCoordinate2D, Never>()
+    var mapCenterChangedSubscriber: AnyCancellable!
+    
+    let mapCenterChangedAfterCoordinationPublisher = PassthroughSubject<CLLocationCoordinate2D, Never>()
+    
+    let mapCenterChangedPublisher = PassthroughSubject<CLLocationCoordinate2D, Never>()
     
     override init() {
         super.init()
@@ -85,6 +89,9 @@ extension MkMapViewCoordinator: MKMapViewDelegate {
     
     public func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
         
+        // 맵중심 변동 Publisher
+        mapCenterChangedPublisher.send(mapView.centerCoordinate)
+        
         switch state {
         case .movingToEqual:
             // 3박자 조정중 맵이 움직이는 경우
@@ -99,7 +106,7 @@ extension MkMapViewCoordinator: MKMapViewDelegate {
             state = .userMapNotEqual
             
             // 맵 스크린 컴포넌트 모델의 현재 위치를 업데이트
-            mapCenterPublisher.send(movedCoordinate)
+            mapCenterChangedAfterCoordinationPublisher.send(movedCoordinate)
         default:
             return
         }
@@ -146,15 +153,25 @@ extension MkMapViewCoordinator {
             
             let object = makePotObjectFrom(pot: pot)
             
-            return PotAnnotation(isActive: pot.isActive, potObject: object, temporalImageData: pot.imageData)
-            
+            return PotAnnotation(
+                coordinate: CLLocationCoordinate2D(latitude: pot.latitude, longitude: pot.longitude),
+                isActive: pot.isActive,
+                potObject: object,
+                temporalImageData: pot.imageData
+                )
         }
         
-        mapView.addAnnotations(potAnnotations)
+        DispatchQueue.main.async {
+            
+            self.mapView.addAnnotations(potAnnotations)
+        }
+        
         print("어노테이션 삽입 완료")
     }
     
     func updateAnnotation(_ pots: Set<Pot>) {
+        
+        var willDeleteAnnotation: [PotAnnotation] = []
         
         mapView.annotations.forEach { potAnnotation in
             
@@ -164,11 +181,7 @@ extension MkMapViewCoordinator {
                     
                     if prev.potObject.id == updatedObject.id {
                         
-                        prev.isActive = updatedObject.isActive
-                        
-                        prev.potObject = makePotObjectFrom(pot: updatedObject)
-                        
-                        prev.temporalImageData = updatedObject.imageData
+                        willDeleteAnnotation.append(prev)
                         
                     }
                     
@@ -177,7 +190,25 @@ extension MkMapViewCoordinator {
             }
             
         }
-        print("어노테이션 업데이트 완료")
+        
+        DispatchQueue.main.async {
+            self.mapView.removeAnnotations(willDeleteAnnotation)
+        }
+        
+        let updatedObjects = pots.map {
+            PotAnnotation(
+                coordinate: CLLocationCoordinate2D(latitude: $0.latitude, longitude: $0.longitude),
+                isActive: $0.isActive,
+                potObject: makePotObjectFrom(pot: $0),
+                temporalImageData: $0.imageData
+            )
+        }
+        
+        DispatchQueue.main.async {
+            self.mapView.addAnnotations(updatedObjects)
+        }
+        
+//        print("어노테이션 업데이트 완료")
     }
     
     func deleteAnnotation(_ pots: Set<Pot>) {
@@ -198,9 +229,11 @@ extension MkMapViewCoordinator {
                 }
             }
         }
-        
-        mapView.removeAnnotations(willRemoveList)
-        print("어노테이션 삭제완료")
+        DispatchQueue.main.async {
+            
+            self.mapView.removeAnnotations(willRemoveList)
+        }
+//        print("어노테이션 삭제완료")
     }
     
     func makePotObjectFrom(pot: Pot) -> PotObject {
@@ -219,7 +252,6 @@ extension MkMapViewCoordinator {
     
     func filteringAnnotations(category: TagCases) {
         
-        print("어노테이션 필터링: \(category)")
         
         let categoryNumber = category.id
         
@@ -242,6 +274,33 @@ extension MkMapViewCoordinator {
                 }
             }
         }
+    }
+    
+    func fetchPots() {
+        
+        do {
+            let context = SpotStorage.default.mainStorageManager.context
+            
+            let pots = try context.fetch(Pot.fetchRequest())
+            
+            let potAnnotations = pots.map { pot in
+                PotAnnotation(
+                    coordinate: CLLocationCoordinate2D(latitude: pot.latitude, longitude: pot.longitude),
+                    isActive: true,
+                    potObject: makePotObjectFrom(pot: pot),
+                    temporalImageData: pot.imageData
+                )
+            }
+            
+            mapView.addAnnotations(potAnnotations)
+            
+            print("로컬데이터 어노테이션화 성공")
+            
+        } catch {
+            
+            print("로컬데이터 어노테이션화 실패")
+        }
+        
     }
 }
 
@@ -278,23 +337,10 @@ public struct MapkitViewRepresentable: UIViewRepresentable {
         
         coordi.mapView = mapView
         
-        coordi.mapCenterSubscriber = coordi.mapCenterPublisher.sink { _ in
-            print("맵 센터 퍼블리셔 연결 종료")
-        } receiveValue: { coordinate in
-            
-            // 위치일치후 유저가 맵을 움직였을 때 한번만 호출됨
-            
-            // 메인에서 실행할 필요 없음
-            DispatchQueue.main.async {
-                self._isLastestCenterAndMapEqual.wrappedValue = false
-            }
-            
-            print("유저가 맵을 움직임")
-            
-            // 새로운 지도의 중심
-            mapCenterReciever(coordinate)
-            
-        }
+        // 최초로 로컬의 팟들을 어노테이션으로 변환
+        coordi.fetchPots()
+        
+        setSubscription(coordinator: coordi)
         
         let center = CJLocationManager.getUserLocationFromLocal()
 
@@ -325,5 +371,32 @@ public struct MapkitViewRepresentable: UIViewRepresentable {
         
         // 필터링
         context.coordinator.filteringAnnotations(category: self.selectedCategory)
+    }
+    
+    func setSubscription(coordinator: MkMapViewCoordinator) {
+        
+        coordinator.mapCenterChangedAfterCoordinationSubscriber = coordinator.mapCenterChangedAfterCoordinationPublisher.sink { _ in
+            print("맵 센터 퍼블리셔 연결 종료")
+        } receiveValue: { coordinate in
+            
+            // 위치일치후 유저가 맵을 움직였을 때 한번만 호출됨
+            
+            // 메인에서 실행할 필요 없음
+            DispatchQueue.main.async {
+                self._isLastestCenterAndMapEqual.wrappedValue = false
+            }
+            
+            print("위치 일치후 유저가 맵을 움직임")
+            
+        }
+        
+        coordinator.mapCenterChangedSubscriber = coordinator.mapCenterChangedPublisher.sink { coordinate in
+            
+            print("유저가 맵을 움직임")
+            
+            // 새로운 지도의 중심
+            mapCenterReciever(coordinate)
+            
+        }
     }
 }

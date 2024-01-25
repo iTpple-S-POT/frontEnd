@@ -111,37 +111,33 @@ public extension PotUploadScreenModel {
                 }
                 
                 // dummy생성
-                await MainActor.run { SpotStorage.default.makeDummyPot(object: object) }
+                await SpotStorage.default.makeDummyPot(object: object)
                 
                 print("낙관적 팟 생성완료")
                 
                 let uploadedPotObject = try await APIRequestGlobalObject.shared.executePotUpload(imageInfo: imageInfo_unwrapped, uploadObject: object)
                 
                 // dummy업데이트
-                await MainActor.run {
+                do {
                     
+                    // TODO: 이미지 데이터 획득하기
+                    
+                    try await SpotStorage.default.updateDummyPot(object: uploadedPotObject)
+                    
+                    print("낙관적 팟 업데이트 성공")
+                }
+                catch {
+                    
+                    print("낙관적 팟 업데이트 실패")
+                    
+                    self.potUploadPublisher.send(false)
+                    
+                    // dummy제거
                     do {
-                        
-                        // TODO: 이미지 데이터 획득하기
-                        
-                        try SpotStorage.default.updateDummyPot(object: uploadedPotObject)
-                        
-                        print("낙관적 팟 업데이트 성공")
+                        try await SpotStorage.default.deleteDummyPot()
+                    } catch {
+                        print("낙관적 팟 제거 실패: \(error.localizedDescription)")
                     }
-                    catch {
-                        
-                        print("낙관적 팟 업데이트 실패")
-                        
-                        self.potUploadPublisher.send(false)
-                        
-                        // dummy제거
-                        do {
-                            try SpotStorage.default.deleteDummyPot()
-                        } catch {
-                            print("낙관적 팟 제거 실패: \(error.localizedDescription)")
-                        }
-                    }
-                    
                 }
                 
             } catch {
@@ -151,14 +147,11 @@ public extension PotUploadScreenModel {
                 // Alert표시를 위한 퍼블리쉬
                 self.potUploadPublisher.send(false)
                 
-                await MainActor.run {
-                    
-                    // dummy제거
-                    do {
-                        try SpotStorage.default.deleteDummyPot()
-                    } catch {
-                        print("낙관적 팟 제거 실패: \(error.localizedDescription)")
-                    }
+                // dummy제거
+                do {
+                    try await SpotStorage.default.deleteDummyPot()
+                } catch {
+                    print("낙관적 팟 제거 실패: \(error.localizedDescription)")
                 }
                 
             }

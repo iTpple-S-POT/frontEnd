@@ -27,6 +27,8 @@ struct MapScreenComponent: View {
         ZStack {
             MapkitViewRepresentable(isLastestCenterAndMapEqual: $screenModel.isLastestCenterAndMapEqual, selectedCategory: $mainScreenModel.selectedTag, latestCenter: screenModel.lastestCenter) { mapCenter in
                 
+                print("지도 중심이 업데이트됨")
+                
                 screenModel.currentCenterPositionOfMap = mapCenter
             }
             
@@ -64,7 +66,7 @@ struct MapScreenComponent: View {
                 
                 Button {
                     
-                    
+                    screenModel.fetchPotsFromCurrentMapCenter()
                     
                 } label: {
                     

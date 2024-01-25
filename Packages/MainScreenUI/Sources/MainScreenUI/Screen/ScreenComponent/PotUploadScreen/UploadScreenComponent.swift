@@ -45,8 +45,6 @@ struct UploadScreenComponent: View {
             
             SpotNavigationBarView(title: "업로드") {
                 
-                print("AA")
-                
                 screenModelWithNav.popTopView()
                 
             }

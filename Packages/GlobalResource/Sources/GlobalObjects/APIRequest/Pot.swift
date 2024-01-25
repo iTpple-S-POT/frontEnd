@@ -47,6 +47,8 @@ public extension APIRequestGlobalObject {
         
         print("S3 업로드 성공")
         
+        print(s3Object.fileKey)
+        
         let uploadedObject = try await uploadPotData(fileKey: s3Object.fileKey, uploadObject: uploadObject)
         
         print("팟 업로드 성공")
@@ -188,11 +190,14 @@ public extension APIRequestGlobalObject {
             let decoded: [PotsResponseModel] = try jsonDecoder.decode([PotsResponseModel].self, from: data)
             
             let potObjects = decoded.map { model in
+                
+                print(model)
+                
                 return PotObject(
                     id: model.id,
-                    userId: model.userID,
-                    categoryId: model.categoryID.first!,
-                    content: model.content,
+                    userId: model.userId,
+                    categoryId: model.categoryId.first!,
+                    content: model.content ?? "",
                     imageKey: model.imageKey,
                     expirationDate: model.expiredAt,
                     latitude: Double(model.location.lat),

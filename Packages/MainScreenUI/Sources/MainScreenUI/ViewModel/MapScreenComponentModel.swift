@@ -56,14 +56,13 @@ class MapScreenComponentModel: ObservableObject {
                     
                     self.isFirstUpdate = false
                     
+                    // 현재 유저 위치
                     self.userPosition = coordinate
                     
                     self.moveMapToCurrentLocation()
                     
-                    print("실시간 위치, 지도 중심, 가장최근위치 일치")
-                    
                     // 팟 조회
-                    self.initialPotTask(location: coordinate)
+                    self.fetchPots(location: coordinate)
                 }
                 
             }
@@ -97,9 +96,11 @@ class MapScreenComponentModel: ObservableObject {
     
     public func moveMapToCurrentLocation() {
         
-        print("3박자 일치")
+        print("실시간 위치, 지도 중심, 가장최근위치 일치")
         
         self.lastestCenter = userPosition
+        
+        self.currentCenterPositionOfMap = userPosition
         
         self.isUserAndLatestCenterEqual = true
         
@@ -108,7 +109,13 @@ class MapScreenComponentModel: ObservableObject {
         
     }
     
-    func initialPotTask(location: CLLocationCoordinate2D) {
+    func fetchPotsFromCurrentMapCenter() {
+        
+        fetchPots(location: currentCenterPositionOfMap)
+        
+    }
+    
+    func fetchPots(location: CLLocationCoordinate2D) {
         
         let functionName = #function
         
@@ -123,7 +130,7 @@ class MapScreenComponentModel: ObservableObject {
                 // 서버 요청한 데이터 메모리에 올림
                 let potsFromServer = try await APIRequestGlobalObject.shared.getPots(latitude: location.latitude, longitude: location.longitude, diameter: 300)
                 
-                print("팟 가져오기 성공", functionName)
+                print("서버에서 팟 가져오기 성공 현위치 팟개수: \(potsFromServer.count)개", functionName)
                 
                 // id가 같은 경우 삽입이 발생히지 않음
                 try await SpotStorage.default.insertPots(objects: potsFromServer)

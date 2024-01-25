@@ -28,6 +28,8 @@ public extension UIColor {
         hexSanitized = hexSanitized.replacingOccurrences(of: "#", with: "")
 
         var rgb: UInt64 = 0
+        
+        Scanner(string: hex).scanHexInt64(&rgb)
 
         self.init(
             red: CGFloat((rgb & 0xFF0000) >> 16) / 255.0,

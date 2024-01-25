@@ -8,18 +8,14 @@
 import Foundation
 
 struct PotsResponseModel: Decodable {
-    let id, userID: Int64
-    let categoryID: [Int64]
-    let potType, content: String
+    let id, userId: Int64
+    let categoryId: [Int64]
+    let potType: String
+    let content: String?
     let location: Location
     let imageKey, expiredAt: String
-
-    enum CodingKeys: String, CodingKey {
-        case id
-        case userID = "userId"
-        case categoryID = "categoryId"
-        case potType, content, location, imageKey, expiredAt
-    }
+    let hashtagList: [String]
+    let viewCount: Int64
 }
 
 public struct PotObject {

@@ -22,7 +22,9 @@ public class PotAnnotation: NSObject, AnnotationClassType {
     
     var temporalImageData: Data?
     
-    public init(isActive: Bool, potObject: PotObject, temporalImageData: Data? = nil) {
+    public init(coordinate: CLLocationCoordinate2D, isActive: Bool, potObject: PotObject, temporalImageData: Data? = nil) {
+        
+        self.coordinate = coordinate
         
         self.isActive = isActive
         

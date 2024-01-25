@@ -255,7 +255,7 @@ class PotAnnotationViewTest: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         
-        setUp(potData: PotAnnotation(isActive: true, potObject: PotObject(id: 1, userId: 1, categoryId: 1, content: "", imageKey: "", expirationDate: "", latitude: 1, longitude: 1)))
+//        setUp(potData: PotAnnotation(isActive: true, potObject: PotObject(id: 1, userId: 1, categoryId: 1, content: "", imageKey: "", expirationDate: "", latitude: 1, longitude: 1)))
     }
     
     required init?(coder aDecoder: NSCoder) {
