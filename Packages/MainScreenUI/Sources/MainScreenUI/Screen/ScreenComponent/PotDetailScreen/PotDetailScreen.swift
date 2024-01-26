@@ -22,7 +22,7 @@ struct PotDetailScreen: View {
     var body: some View {
         NavigationView {
             ImageScreen()
-                .navigationBarTitle("주제", displayMode: .inline)
+                .navigationBarTitle("모임", displayMode: .inline)
                 .navigationBarItems(
                     leading: Button(action: {
                         // 백 버튼 액션

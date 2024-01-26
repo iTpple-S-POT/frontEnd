@@ -34,15 +34,15 @@ public struct SearchImageScreen: View {
                         ZStack(alignment: .topLeading) { // 상단 좌측 정렬
                             Image.makeImageFromBundle(bundle: .module, name: imageName, ext: .png)
                                 .resizable()
-                                .frame(width: images.count > 1 ? width : geometry.size.width, height: 256)
-                                .cornerRadius(10)
+                                .frame(width: images.count > 1 ? width : geometry.size.width,
+                                    height: (images.count > 1 ? width * (4/3) : geometry.size.width * (4/3)))
                             
                             // TODO: 폰트수정
                             VStack(alignment: .leading, spacing: 4) { // 텍스트들을 VStack에 넣고 leading 정렬
                                 Text("닉네임")
                                     .font(.suite(type: .SUITE_SemiBold, size: 16))
                                     .foregroundColor(.white)
-                                    .padding(.top, 202) // 상단 여백
+                                    .padding(.top, 222) // 상단 여백
                                     .padding(.leading, 16) // 왼쪽 여백
                                 
                                 Text("10분 전")

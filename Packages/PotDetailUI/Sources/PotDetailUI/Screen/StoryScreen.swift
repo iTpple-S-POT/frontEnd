@@ -36,7 +36,7 @@ public struct StoryScreen: View {
                             .resizable()
                             .frame(width: 20, height: 20)
                             .foregroundColor(.white)
-                            .padding()
+                            .padding(.leading, 21)
                     }
                     
                     Spacer()
@@ -51,12 +51,11 @@ public struct StoryScreen: View {
                             .frame(width: 20, height: 3)
                             .aspectRatio(contentMode: .fit)
                             .foregroundColor(.white)
-                            .padding()
+                            .padding(.trailing, 21)
                     }
                 }
+                .frame(height: 56)
                 
-                
-                Spacer()
                 
                 VStack {
                     HStack(spacing: 8) {
@@ -83,6 +82,7 @@ public struct StoryScreen: View {
                     }
                     Spacer()
                 }
+                .padding(.top, 4)
                 
                 VStack(alignment: .leading, spacing: 12) {
                     HStack(spacing: 12) {
@@ -94,9 +94,10 @@ public struct StoryScreen: View {
                             .foregroundColor(.white)
                             .font(.custom("Pretendard-SemiBold", size: 20))
                     }
+                    .padding(.leading, 10)
                     
                     Text("농구 같이 하실 분 모집 받아요! 양천구 서서울 호수공원에서 할 예정입니다.")
-                        .padding(.trailing)
+//                        .padding(.leading, 21)
                         .frame(width: 320)
                         .foregroundColor(.white)
                     
@@ -105,11 +106,12 @@ public struct StoryScreen: View {
                             .font(.custom("Pretendard-SemiBold", size: 16))
                             .foregroundColor(.white)
                             .underline()
+                            .padding(.leading, 10)
                     }
                     
                     HStack {
                         HashTag()
-                    }.frame(width:320)
+                    }.frame(width:393)
                 }
                 .padding(.trailing, 21)
                 .padding(.bottom, 92)
@@ -170,7 +172,7 @@ public struct StoryScreen: View {
                 .transition(.opacity)
                 .frame(width: 32)
                     .padding(.top, 150)
-                    .padding(.leading, 337)
+                    .padding(.leading, 360)
             }
             if isPresentingEmojiPicker {
                 Color.black.opacity(0.5)
@@ -183,7 +185,7 @@ public struct StoryScreen: View {
                         Button(action: {
                         }) {
                             Text("🙂")
-                                
+                                .font(.system(size: 48))
                         }
                         
                         Button(action: {
