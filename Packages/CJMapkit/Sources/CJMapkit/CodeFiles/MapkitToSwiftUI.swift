@@ -21,7 +21,6 @@ extension CLLocationCoordinate2D: Equatable {
     
 }
 
-
 // MARK: - Coordinator
 public class MkMapViewCoordinator: NSObject {
     
@@ -118,6 +117,13 @@ extension MkMapViewCoordinator: MKMapViewDelegate {
         
     }
     
+
+    func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
+            if let annotation = view.annotation as? PotAnnotation {
+                // 선택된 어노테이션 정보를 전달하며 notification을 post합니다.
+                NotificationCenter.default.post(name: Notification.Name("annotationDidSelect"), object: annotation)
+            }
+        }
 }
 
 
@@ -253,6 +259,10 @@ extension MkMapViewCoordinator {
         }
         
         return PotObject(id: pot.id, userId: pot.userId, categoryId: pot.categoryId, content: pot.content ?? "", imageKey: pot.imageKey ?? "", expirationDate: dateString, latitude: pot.latitude, longitude: pot.longitude)
+    }
+
+    func makeCoordinator() -> MkMapViewCoordinator {
+        MkMapViewCoordinator()
     }
     
     func filteringAnnotations(category: TagCases) {

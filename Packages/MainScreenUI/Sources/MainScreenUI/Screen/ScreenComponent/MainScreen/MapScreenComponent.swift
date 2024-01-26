@@ -1,17 +1,15 @@
-//
-//  MapScreenComponent.swift
-//
-//
-//  Created by 최준영 on 2023/12/24.
-//
-
 import SwiftUI
 import CJMapkit
 import DefaultExtensions
 import GlobalUIComponents
 import GlobalObjects
 
+//extension Notification.Name {
+//    static let annotationDidSelect = Notification.Name("annotationDidSelect")
+//}
+
 struct MapScreenComponent: View {
+    @State private var selectedAnnotation: PotAnnotation?
     
     @EnvironmentObject var mainScreenModel: MainScreenModel
     
@@ -24,6 +22,17 @@ struct MapScreenComponent: View {
     private var potsFromLocal: FetchedResults<Pot>
     
     var body: some View {
+      CJMapkitView(userLocation: CLLocation(latitude: 37.550756, longitude: 126.9254901), annotations: annotationDummies)
+                    .onReceive(NotificationCenter.default.publisher(for: .annotationDidSelect)) { notification in
+                        // 주석 선택 핸들러
+                        if let annotation = notification.object as? PotAnnotation {
+                            selectedAnnotation = annotation
+                        }
+                    }
+                    .sheet(item: $selectedAnnotation) { annotation in
+                        PotDetailScreen(annotation: annotation)
+                    }
+      
         ZStack {
             MapkitViewRepresentable(isLastestCenterAndMapEqual: $screenModel.isLastestCenterAndMapEqual, selectedCategory: $mainScreenModel.selectedTag, latestCenter: screenModel.lastestCenter) { mapCenter in
                 
@@ -151,7 +160,13 @@ extension FetchedResults: Equatable where Result == Pot {
 }
 
 
+extension Notification.Name {
+    static let annotationDidSelect = Notification.Name("annotationDidSelect")
+}
+
+
 #Preview {
     MapScreenComponent()
         .environmentObject(MainScreenModel())
 }
+
