@@ -1,14 +1,11 @@
 //
-//  NickNameInputViewModel.swift
-//
 //
 //  Created by 최준영 on 2023/11/23.
 //
 
 import SwiftUI
 
-class NickNameInputViewModel: ObservableObject {
-    @Published var nickNameInputString = ""
+extension ConfigurationScreenModel {
     
     var isStringEmpty: Bool { nickNameInputString.isEmpty }
     
@@ -35,4 +32,5 @@ class NickNameInputViewModel: ObservableObject {
         
         return regex.firstMatch(in: nickName, range: range) != nil
     }
+    
 }

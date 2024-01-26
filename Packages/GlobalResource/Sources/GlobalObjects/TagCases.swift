@@ -1,88 +1,35 @@
 //
-//  SelectMapTagViewModel.swift
+//  TagCases.swift
+//  
 //
-//
-//  Created by 최준영 on 2023/12/24.
+//  Created by 최준영 on 1/24/24.
 //
 
 import SwiftUI
+import DefaultExtensions
 
-class SelectMapTagViewModel: ObservableObject {
+// 테그 색
+extension ShapeStyle where Self == Color {
     
-    @Published private(set) var selectedTag: TagCases = .all
-    @Published private(set) var selectedTagDict: [TagCases: Bool] = [
-        .all : true,
-        .hot : false,
-        .life : false,
-        .question : false,
-        .information : false,
-        .party : false
-    ]
-    
-    // 현재활성화 되어있는 테그의 수를 추적합니다.
-    private var activeTagCount: Int = 1
-    
-    func checkSelected(_ tag: TagCases) -> Bool { selectedTagDict[tag]! }
-    
-    func selectTag(tag: TagCases) {
-        
-        selectedTag = tag
-        
-        switch tag {
-        case .all:
-            // 모든 버튼들을 inactive상태로 변경
-            selectedTagDict.keys.forEach { selectedTagDict[$0] = false }
-            
-            selectedTagDict[.all] = true
-            
-            activeTagCount = 1
-        default:
-            // all테그를 inactive상태로 지정
-            if selectedTagDict[.all]! {
-                selectedTagDict[.all] = false
-                activeTagCount -= 1
-            }
-            
-            if selectedTagDict[tag]! {
-                
-                activeTagCount -= 1
-                
-                selectedTagDict[tag] = false
-                
-                // 활성화 되어있는 테그가 없는 경우 '모두 보기'로 설정된다
-                if activeTagCount < 1 {
-                    
-                    selectedTagDict[.all] = true
-                    
-                    activeTagCount = 1
-                    
-                }
-                
-                
-            } else {
-                
-                activeTagCount += 1
-                
-                selectedTagDict[tag] = true
-                
-            }
-            
-        }
-        
-    }
+    static var tag_black: Color { Color.black }
+    static var tag_red: Color { Color(hex: "FF533F") }
+    static var tag_yellow: Color { Color(hex: "FFB800") }
+    static var tag_green: Color { Color(hex: "86CC40") }
+    static var tag_purple: Color { Color(hex: "D092ED") }
+    static var tag_blue: Color { Color(hex: "5EA7FF") }
     
 }
 
 /// 카테고리 정보와 혼용됩니다.
-public enum TagCases: Identifiable, CaseIterable {
-    case all
-    case hot
-    case life
-    case question
-    case information
-    case party
+public enum TagCases: Int, Identifiable, CaseIterable {
+    case all = 10
+    case hot = 11
+    case life = 1
+    case question = 2
+    case information = 3
+    case party = 4
     
-    public var id: Int { self.hashValue }
+    public var id: Int { self.rawValue }
     
     public enum IconType { case idle, point }
     
@@ -177,7 +124,7 @@ public enum TagCases: Identifiable, CaseIterable {
         return Image.makeImageFromBundle(bundle: Bundle.module, name: imageName, ext: .png)
     }
     
-    static subscript (_ id: Int64) -> TagCases {
+    public static subscript (_ id: Int64) -> TagCases {
         
         switch id {
         case 1:

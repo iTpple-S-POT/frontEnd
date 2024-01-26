@@ -13,7 +13,6 @@ import DefaultExtensions
 struct UploadScreenComponent: View {
     
     @EnvironmentObject var screenModelWithNav: PotUploadScreenModel
-    @EnvironmentObject var globalObject: GlobalStateObject
     
     @FocusState var focusState
     
@@ -45,8 +44,6 @@ struct UploadScreenComponent: View {
         VStack(spacing: 0) {
             
             SpotNavigationBarView(title: "업로드") {
-                
-                print("AA")
                 
                 screenModelWithNav.popTopView()
                 
@@ -211,5 +208,4 @@ struct UploadScreenComponent: View {
 #Preview {
     UploadScreenComponent()
         .environmentObject(PotUploadScreenModel())
-        .environmentObject(GlobalStateObject())
 }

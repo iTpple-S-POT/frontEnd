@@ -12,7 +12,6 @@ import GlobalUIComponents
 struct HashTagScreenComponent: View {
     
     @EnvironmentObject var screenModelWithNav: PotUploadScreenModel
-    @EnvironmentObject var globalObject: GlobalStateObject
     
     @FocusState var focusState
     
@@ -154,5 +153,4 @@ struct HashTagScreenComponent: View {
 #Preview {
     HashTagScreenComponent()
         .environmentObject(PotUploadScreenModel())
-        .environmentObject(GlobalStateObject())
 }

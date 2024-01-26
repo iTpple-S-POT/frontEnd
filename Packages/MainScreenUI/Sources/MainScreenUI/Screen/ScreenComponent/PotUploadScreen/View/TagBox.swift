@@ -7,6 +7,7 @@
 
 import SwiftUI
 import GlobalUIComponents
+import GlobalObjects
 
 struct TagBox: View {
     

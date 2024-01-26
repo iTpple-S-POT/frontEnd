@@ -8,18 +8,8 @@
 import SwiftUI
 
 
-class SelectInterestsViewModel: ObservableObject {
-    
-    @Published private(set) var userInterestMatrix: [[UserInterestType]] = []
-    @Published private(set) var userInterestTypes: [UserInterestType:Bool] = [:]
-    
-    init() {
-        self.userInterestMatrix = make2DArray()
-        
-        UserInterestType.allCases.forEach { type in
-            userInterestTypes[type] = false
-        }
-    }
+// MARK: - make2DArray를 정의한 Extension입니다.
+extension ConfigurationScreenModel {
     
     func isTypeExists(type: UserInterestType) -> Bool {
         guard let result = userInterestTypes[type] else {
@@ -35,12 +25,6 @@ class SelectInterestsViewModel: ObservableObject {
     func deSelectType(type: UserInterestType) {
         userInterestTypes[type]? = false
     }
-}
-
-
-
-// MARK: - make2DArray를 정의한 Extension입니다.
-extension SelectInterestsViewModel {
     
     func make2DArray() -> [[UserInterestType]] {
         // horizontal padding: 24, 요소당 간격 9
@@ -126,7 +110,7 @@ extension SelectInterestsViewModel {
 
 
 // MARK: - UserInterestType타입을 정의한 extension입니다.
-extension SelectInterestsViewModel {
+extension ConfigurationScreenModel {
     enum UserInterestType: String, CaseIterable, Identifiable {
         var id: Self { self }
         
@@ -146,7 +130,7 @@ extension SelectInterestsViewModel {
         type14 = "커리어",
         type15 = "식집자",
         type16 = "블로그",
-        type17 = "인스타 그램",
+        type17 = "미디어",
         type18 = "개발",
         type19 = "디자인",
         type20 = "기획",
@@ -159,7 +143,7 @@ extension SelectInterestsViewModel {
 
 
 // MARK: - 표시될 태그뷰들의 속성들 & 필요 매서드들을 저장한 extension입니다.
-extension SelectInterestsViewModel {
+extension ConfigurationScreenModel {
     
     private var screenWidth: CGFloat { UIScreen.main.bounds.width }
     private var screenHorizontalPadding: CGFloat { 12 }

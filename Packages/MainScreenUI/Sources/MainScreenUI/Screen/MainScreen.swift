@@ -55,32 +55,9 @@ public struct MainScreen: View {
             Alert(title: Text(screenModel.alertTitle), message: Text(screenModel.alertMessage), dismissButton: .default(Text("닫기")))
             
         }
+        .environmentObject(screenModel)
     }
 }
-
-class MainScreenModel: ObservableObject {
-    
-    // 데이터를 받을 수 없는 사진의 경우 Alert표시
-    @Published var showAlert = false
-    @Published private(set) var alertTitle = ""
-    @Published private(set) var alertMessage = ""
-    
-    func showPotUploadSuccess() {
-        
-        showAlert = true
-        alertTitle = "업로드 성공"
-        alertMessage = "팟이 성공적으로 업로드됨"
-    }
-    
-    func showPotUploadFailed() {
-        
-        showAlert = true
-        alertTitle = "업로드 실패"
-        alertMessage = "팟을 업로드하지 못했습니다."
-    }
-    
-}
-
 
 #Preview {
     MainScreen()

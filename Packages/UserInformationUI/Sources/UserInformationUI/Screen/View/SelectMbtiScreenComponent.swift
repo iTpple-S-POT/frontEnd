@@ -8,60 +8,9 @@
 import SwiftUI
 import GlobalUIComponents
 
-enum UserMbtiPartCase: String, CaseIterable {
-    case notDetermined
-    case E = "E",
-         I = "I",
-         S = "S",
-         N = "N",
-         T = "T",
-         F = "F",
-         J = "J",
-         P = "P"
-}
-
-struct UserMbti: Equatable {
-    var type1: UserMbtiPartCase = .notDetermined
-    var type2: UserMbtiPartCase = .notDetermined
-    var type3: UserMbtiPartCase = .notDetermined
-    var type4: UserMbtiPartCase = .notDetermined
-    
-    mutating func setState(mbti: UserMbtiPartCase) {
-        switch mbti {
-        case .notDetermined:
-            return
-        case .E, .I:
-            type1 = mbti
-        case .S, .N:
-            type2 = mbti
-        case .T, .F:
-            type3 = mbti
-        case .J, .P:
-            type4 = mbti
-        }
-    }
-    
-    func isStateMatch(mbti: UserMbtiPartCase) -> Bool {
-        switch mbti {
-        case .notDetermined:
-            return false
-        case .E, .I:
-            return type1 == mbti
-        case .S, .N:
-            return type2 == mbti
-        case .T, .F:
-            return type3 == mbti
-        case .J, .P:
-            return type4 == mbti
-        }
-    }
-}
-
 struct SelectMbtiScreenComponent: View {
     
-    let userNickName = "닉네임"
-    
-    @State private var userMbti = UserMbti()
+    @EnvironmentObject var screenModel: ConfigurationScreenModel
     
     /// notDetermined를 제외한 리스트 입니다.
     private var mbtiList: [UserMbtiPartCase] { UserMbtiPartCase.allCases.filter {  $0 != .notDetermined } }
@@ -75,7 +24,7 @@ struct SelectMbtiScreenComponent: View {
             HStack {
                 VStack(alignment: .leading, spacing: 3) {
                     (
-                        Text(userNickName)
+                        Text(screenModel.nickNameInputString)
                             .font(.suite(type: .SUITE_SemiBold, size: 28))
                     +
                         Text("님의")
@@ -91,15 +40,19 @@ struct SelectMbtiScreenComponent: View {
             // Select Mbti
             LazyVGrid(columns: columns, spacing: 16.5) {
                 ForEach(mbtiList, id: \.self) { element in
+                    
                     GeometryReader { geo in
                         
-                        let innerView = AnyView(Text(element.rawValue).font(.suite(type: .SUITE_Regular, size: 18)))
-                        
-                        SpotStateButton(innerView: innerView, idleColor: .spotLightGray, activeColor: .spotRed, frame: geo.size, radius: 20) {
-                            userMbti.setState(mbti: element)
+                        SpotStateButton(innerView: AnyView(Text(element.rawValue).font(.suite(type: .SUITE_Regular, size: 18))), idleColor: .spotLightGray, activeColor: .spotRed, frame: geo.size, radius: 20) {
+                            
+                            screenModel.userMBTI.setState(mbti: element)
+                            
                         } activation: {
-                            userMbti.isStateMatch(mbti: element)
+                            
+                            return screenModel.userMBTI.isStateMatch(mbti: element)
+                            
                         }
+                        
                     }
                     .frame(height: 56)
                 }
@@ -115,5 +68,6 @@ struct SelectMbtiScreenComponent: View {
 #Preview {
     PreviewForProcessView {
         SelectMbtiScreenComponent()
+            .environmentObject(ConfigurationScreenModel())
     }
 }

@@ -22,11 +22,9 @@ public extension APIRequestGlobalObject {
         
     }
     
-    func sendAccessTokenToServer(accessToken: String, refreshToken: String, type: SocialLogInType) async throws -> TokenObject {
+    func sendAccessTokenToServer(accessToken: String, refreshToken: String, type: LoginType) async throws -> TokenObject {
         
-        let logInApi: SpotAPI = type == .kakao ? .getSpotTokenFromKakao : .getSpotTokenFromApple
-        
-        let url = try logInApi.getApiUrl()
+        let url = try SpotAPI.getSpotTokenFrom(service: type).getApiUrl()
         
         var request = try getURLRequest(url: url, method: .post, isAuth: false)
         
@@ -48,7 +46,7 @@ public extension APIRequestGlobalObject {
             
         } else {
             
-            throw SpotNetworkError.unownedError(function: #function)
+            throw SpotNetworkError.unknownError(function: #function)
         }
     }
     
@@ -75,7 +73,7 @@ public extension APIRequestGlobalObject {
             
         } else {
             
-            throw SpotNetworkError.unownedError(function: #function)
+            throw SpotNetworkError.unknownError(function: #function)
         }
     }
     

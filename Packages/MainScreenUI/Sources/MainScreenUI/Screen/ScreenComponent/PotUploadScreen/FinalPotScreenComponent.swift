@@ -11,8 +11,10 @@ import GlobalUIComponents
 
 struct FinalPotScreenComponent: View {
     
+    @FetchRequest(sortDescriptors: [])
+    private var userInfo: FetchedResults<SpotUser>
+    
     @EnvironmentObject var screenModelWithNav: PotUploadScreenModel
-    @EnvironmentObject var globalObject: GlobalStateObject
     
     var tagObject: TagCases { TagCases[screenModelWithNav.selectedCategoryId ?? 1] }
     
@@ -85,13 +87,23 @@ struct FinalPotScreenComponent: View {
                     
                     // 유저 정보
                     HStack(spacing: 12) {
-                        // TODO: 유저 프로필
-                        Circle()
-                            .fill(.white)
-                            .frame(width: 40)
+
+                        if let imageUrl = userInfo.first?.profileImageUrl, let url = URL(string: imageUrl), let data = try? Data(contentsOf: url), let uiImage = UIImage(data: data) {
+                            Image(uiImage: uiImage)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 40)
+                            
+                        } else {
+                           Image(systemName: "person.crop.circle")
+                                .resizable()
+                                .scaledToFit()
+                                .foregroundStyle(.white)
+                                .frame(width: 40)
+                        }
                         
                         // TODO: 유저 닉네임
-                        Text("닉네임")
+                        Text(userInfo.first?.nickName ?? "비지정 닉네임")
                             .font(.system(size: 20, weight: .semibold))
                             .foregroundStyle(.white)
                         
@@ -144,7 +156,7 @@ struct FinalPotScreenComponent: View {
                     screenModelWithNav.dismiss?()
                     
                     // 팟 업로드
-                    uploadPot()
+                    screenModelWithNav.uploadPot()
                 }
                 .padding(.horizontal, 21)
                 .padding(.vertical, 24)
@@ -153,46 +165,7 @@ struct FinalPotScreenComponent: View {
     }
 }
 
-extension FinalPotScreenComponent {
-    
-    func uploadPot() {
-        
-        Task {
-            
-            do {
-                
-                // 팟업로드 시작
-                try await screenModelWithNav.uploadPot()
-                
-                screenModelWithNav.potUploadPublisher.send(true)
-                
-            } catch {
-                
-                if let prepareError = error as? PotUploadPrepareError {
-                    
-                    print("팟 업로드 준비중 실패, \(prepareError)")
-                
-                    
-                }
-                
-                if let netError = error as? SpotNetworkError {
-                    
-                    print("팟 업로드 실패, \(netError)")
-                    
-                }
-                
-                screenModelWithNav.potUploadPublisher.send(false)
-                
-            }
-            
-        }
-        
-    }
-    
-}
-
 #Preview {
     FinalPotScreenComponent()
         .environmentObject(PotUploadScreenModel())
-        .environmentObject(GlobalStateObject())
 }

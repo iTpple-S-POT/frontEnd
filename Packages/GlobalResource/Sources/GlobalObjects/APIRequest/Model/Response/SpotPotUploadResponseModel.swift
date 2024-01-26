@@ -9,8 +9,9 @@ import Foundation
 
 // MARK: - pot response
 struct SpotPotUploadResponseModel: Codable {
-    let id, userID, categoryID: Int
-    let type, content, imageKey: String
+    let id, userID, categoryID: Int64
+    let type, imageKey: String
+    let content: String?
     let location: Location
     let expiredAt, createdAt: String
 
@@ -21,3 +22,5 @@ struct SpotPotUploadResponseModel: Codable {
         case type, content, imageKey, location, expiredAt, createdAt
     }
 }
+
+
