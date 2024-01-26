@@ -77,7 +77,12 @@ extension MkMapViewCoordinator: MKMapViewDelegate {
         
         switch someAnnotation.identifier {
         case NSStringFromClass(PotAnnotation.self):
-            let annotationView = PotAnnotationView(annotation: annotation, reuseIdentifier: NSStringFromClass(PotAnnotationView.self))
+            
+            guard let potAnnotation = someAnnotation as? PotAnnotation else {
+                fatalError("어노테이션 타입 변환 실패")
+            }
+            
+            let annotationView = PotAnnotationView(annotation: potAnnotation, reuseIdentifier: NSStringFromClass(PotAnnotationView.self))
             
             annotationView.frame.size = CGSize(width: 54, height: 54)
             
@@ -157,7 +162,7 @@ extension MkMapViewCoordinator {
                 coordinate: CLLocationCoordinate2D(latitude: pot.latitude, longitude: pot.longitude),
                 isActive: pot.isActive,
                 potObject: object,
-                temporalImageData: pot.imageData
+                thumbNailIamge: pot.imageData
                 )
         }
         
@@ -173,15 +178,15 @@ extension MkMapViewCoordinator {
         
         var willDeleteAnnotation: [PotAnnotation] = []
         
-        mapView.annotations.forEach { potAnnotation in
+        mapView.annotations.forEach { someAnot in
             
-            if let prev = potAnnotation as? PotAnnotation {
+            if let prevPotAnot = someAnot as? PotAnnotation {
                 
                 pots.forEach { updatedObject in
                     
-                    if prev.potObject.id == updatedObject.id {
+                    if prevPotAnot.potObject.id == updatedObject.id {
                         
-                        willDeleteAnnotation.append(prev)
+                        willDeleteAnnotation.append(prevPotAnot)
                         
                     }
                     
@@ -200,7 +205,7 @@ extension MkMapViewCoordinator {
                 coordinate: CLLocationCoordinate2D(latitude: $0.latitude, longitude: $0.longitude),
                 isActive: $0.isActive,
                 potObject: makePotObjectFrom(pot: $0),
-                temporalImageData: $0.imageData
+                thumbNailIamge: $0.imageData
             )
         }
         
@@ -288,7 +293,7 @@ extension MkMapViewCoordinator {
                     coordinate: CLLocationCoordinate2D(latitude: pot.latitude, longitude: pot.longitude),
                     isActive: true,
                     potObject: makePotObjectFrom(pot: pot),
-                    temporalImageData: pot.imageData
+                    thumbNailIamge: pot.imageData
                 )
             }
             

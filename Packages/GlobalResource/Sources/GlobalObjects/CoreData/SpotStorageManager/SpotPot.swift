@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import CoreData
 
 public extension SpotStorage {
     
@@ -36,42 +37,58 @@ public extension SpotStorage {
         
     }
     
-    func insertPots(objects: [PotObject]) async throws {
+    @MainActor
+    func insertServerPots(objects: [PotObject]) async throws {
         
-        try await MainActor.run {
+        let context = self.mainStorageManager.context
+        
+        let prevObjects = try mainStorageManager.context.fetch(Pot.fetchRequest())
+        
+        objects.forEach { object in
             
-            let context = self.mainStorageManager.context
+            var isAlreadyExists = false
             
-            let prevObjects = try mainStorageManager.context.fetch(Pot.fetchRequest())
-            
-            objects.forEach { object in
+            for prevObject in prevObjects {
                 
-                var isAlreadyExists = false
-                
-                for prevObject in prevObjects {
+                if object.id == prevObject.id {
                     
-                    if object.id == prevObject.id {
-                        
-                        isAlreadyExists = true
-                        
-                        // 기존의 오브젝트를 업데이트
-                        potFromPotPbject(pot: prevObject, potObject: object)
-                        
-                        break
-                    }
+                    isAlreadyExists = true
                     
-                }
-                
-                if !isAlreadyExists {
+                    // 기존의 오브젝트를 업데이트
+                    potFromPotPbject(pot: prevObject, potObject: object)
                     
-                    // 새로운 엔티티 인스턴스를 생성
-                    potFromPotPbject(pot: Pot(context: context), potObject: object)
+                    break
                 }
                 
             }
             
-            try context.save()
+            if !isAlreadyExists, let key = object.imageKey {
+                
+                let pot = Pot(context: context)
+                
+                let urlString = "https://d1gmn3m06z496v.cloudfront.net/" + key
+                
+                print(urlString)
+                
+                let url = URL(string: urlString)!
+                
+                let request = URLRequest(url: url)
+                
+                URLSession.shared.dataTask(with: request) { data, res, error in
+                    
+                    DispatchQueue.main.async {
+                        pot.imageData = data
+                    }
+                    
+                }.resume()
+                
+                // 새로운 엔티티 인스턴스를 생성
+                potFromPotPbject(pot: pot, potObject: object)
+            }
+            
         }
+        
+        try context.save()
         
     }
     
@@ -99,78 +116,88 @@ public extension SpotStorage {
 // MARK: - 더미 팟
 public extension SpotStorage {
     
-    func makeDummyPot(object: SpotPotUploadObject) async {
+    @MainActor
+    func makeDummyPot(object: SpotPotUploadObject, imageData: Data) async {
         
-        await MainActor.run {
-            
-            let context = self.mainStorageManager.context
-            
-            let dummyPotObject = Pot(context: context)
-            
-            dummyPotObject.id = Self.dummyPotId
-            dummyPotObject.categoryId = object.category
-            dummyPotObject.content = object.text
-            dummyPotObject.latitude = object.latitude
-            dummyPotObject.longitude = object.longitude
-            dummyPotObject.isActive = false
-            dummyPotObject.expirationDate = Date.now + 86400
-        }
+        let context = self.mainStorageManager.context
+        
+        let dummyPotObject = Pot(context: context)
+        
+        dummyPotObject.id = Self.dummyPotId
+        dummyPotObject.categoryId = object.category
+        dummyPotObject.content = object.text
+        dummyPotObject.latitude = object.latitude
+        dummyPotObject.longitude = object.longitude
+        dummyPotObject.isActive = false
+        dummyPotObject.expirationDate = Date.now + 86400
+        dummyPotObject.imageData = imageData
     }
     
     
     private static let dummyPotId: Int64 = -12345
     
+    @MainActor
     func updateDummyPot(object: PotObject) async throws {
         
-        try await MainActor.run {
-            
-            let context = self.mainStorageManager.context
-            
-            let request = Pot.fetchRequest()
-            
-            request.predicate = NSPredicate(format: "id == %d", Self.dummyPotId)
-            
-            let fetchResult = try context.fetch(request)
-            
-            print("dummy오브젝트 서칭결과: ", fetchResult.count)
-            
-            let dummyObject = fetchResult.first!
-            
-            dummyObject.id = object.id
-            dummyObject.userId = object.userId
-            dummyObject.categoryId = object.categoryId
-            dummyObject.content = object.content
-            dummyObject.isActive = true
-            
-            // 만기날짜를 Date로 다시변경
-            let expirationDateString = object.expirationDate
-            
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SS"
-            dateFormatter.timeZone = TimeZone(identifier: "UTC")
-            
-            dummyObject.expirationDate = dateFormatter.date(from: expirationDateString)
-            dummyObject.latitude = object.latitude
-            dummyObject.longitude = object.longitude
-            dummyObject.imageKey = object.imageKey
-            
-            try context.save()
-        }
+        let context = self.mainStorageManager.context
+        
+        let request = Pot.fetchRequest()
+        
+        request.predicate = NSPredicate(format: "id == %d", Self.dummyPotId)
+        
+        let fetchResult = try context.fetch(request)
+        
+        print("dummy오브젝트 서칭결과: ", fetchResult.count)
+        
+        let dummyObject = fetchResult.first!
+        
+        dummyObject.id = object.id
+        dummyObject.userId = object.userId
+        dummyObject.categoryId = object.categoryId
+        dummyObject.content = object.content
+        dummyObject.isActive = true
+        
+        // 만기날짜를 Date로 다시변경
+        let expirationDateString = object.expirationDate
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SS"
+        dateFormatter.timeZone = TimeZone(identifier: "UTC")
+        
+        dummyObject.expirationDate = dateFormatter.date(from: expirationDateString)
+        dummyObject.latitude = object.latitude
+        dummyObject.longitude = object.longitude
+        dummyObject.imageKey = object.imageKey
+        
+        try context.save()
     }
     
+    @MainActor
     func deleteDummyPot() async throws {
         
-        try await MainActor.run {
-            
-            let context = self.mainStorageManager.context
-            
-            let request = Pot.fetchRequest()
-            
-            request.predicate = NSPredicate(format: "id == %d", Self.dummyPotId)
-            
-            let dummyObject = try context.fetch(request).first!
-            
-            context.delete(dummyObject)
-        }
+        let context = self.mainStorageManager.context
+        
+        let request = Pot.fetchRequest()
+        
+        request.predicate = NSPredicate(format: "id == %d", Self.dummyPotId)
+        
+        let dummyObject = try context.fetch(request).first!
+        
+        context.delete(dummyObject)
+    }
+    
+    func saveImageTo(id: Int64, data: Data) throws {
+        
+        let context = self.mainStorageManager.container.newBackgroundContext()
+        
+        let request = Pot.fetchRequest()
+        
+        request.predicate = NSPredicate(format: "id == %d", id)
+        
+        let pot = try context.fetch(request).first!
+        
+        pot.imageData = data
+        
+        try context.save()
     }
 }

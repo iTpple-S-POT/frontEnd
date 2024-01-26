@@ -20,9 +20,9 @@ public class PotAnnotation: NSObject, AnnotationClassType {
     
     var potObject: PotObject
     
-    var temporalImageData: Data?
+    var thumbNailIamge: Data?
     
-    public init(coordinate: CLLocationCoordinate2D, isActive: Bool, potObject: PotObject, temporalImageData: Data? = nil) {
+    public init(coordinate: CLLocationCoordinate2D, isActive: Bool, potObject: PotObject, thumbNailIamge: Data? = nil) {
         
         self.coordinate = coordinate
         
@@ -32,6 +32,12 @@ public class PotAnnotation: NSObject, AnnotationClassType {
         
         self.coordinate = CLLocationCoordinate2D(latitude: potObject.latitude, longitude: potObject.longitude)
     }
+}
+
+enum ImageDownloadError: Error {
+    
+    case downloadError
+    case internetError
     
 }
 

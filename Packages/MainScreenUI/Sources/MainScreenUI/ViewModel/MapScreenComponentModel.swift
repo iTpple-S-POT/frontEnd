@@ -133,7 +133,7 @@ class MapScreenComponentModel: ObservableObject {
                 print("서버에서 팟 가져오기 성공 현위치 팟개수: \(potsFromServer.count)개", functionName)
                 
                 // id가 같은 경우 삽입이 발생히지 않음
-                try await SpotStorage.default.insertPots(objects: potsFromServer)
+                try await SpotStorage.default.insertServerPots(objects: potsFromServer)
                 
                 print("서버에서 가져온 팟을 삽입 성공", functionName)
                 

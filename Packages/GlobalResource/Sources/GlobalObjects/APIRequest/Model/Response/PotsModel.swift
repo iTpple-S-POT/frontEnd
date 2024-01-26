@@ -26,12 +26,12 @@ public struct PotObject {
     public let userId: Int64
     public let categoryId: Int64
     public let content: String
-    public let imageKey: String
+    public let imageKey: String?
     public let expirationDate: String
     public let latitude: Double
     public let longitude: Double
     
-    public init(id: Int64, userId: Int64, categoryId: Int64, content: String, imageKey: String, expirationDate: String, latitude: Double, longitude: Double) {
+    public init(id: Int64, userId: Int64, categoryId: Int64, content: String, imageKey: String?, expirationDate: String, latitude: Double, longitude: Double) {
         self.id = id
         self.userId = userId
         self.categoryId = categoryId

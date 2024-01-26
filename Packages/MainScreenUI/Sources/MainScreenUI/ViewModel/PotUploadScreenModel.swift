@@ -111,7 +111,7 @@ public extension PotUploadScreenModel {
                 }
                 
                 // dummy생성
-                await SpotStorage.default.makeDummyPot(object: object)
+                await SpotStorage.default.makeDummyPot(object: object, imageData: imageInfo_unwrapped.data)
                 
                 print("낙관적 팟 생성완료")
                 
@@ -119,8 +119,6 @@ public extension PotUploadScreenModel {
                 
                 // dummy업데이트
                 do {
-                    
-                    // TODO: 이미지 데이터 획득하기
                     
                     try await SpotStorage.default.updateDummyPot(object: uploadedPotObject)
                     

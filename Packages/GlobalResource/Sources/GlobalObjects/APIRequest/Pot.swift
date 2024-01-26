@@ -191,14 +191,12 @@ public extension APIRequestGlobalObject {
             
             let potObjects = decoded.map { model in
                 
-                print(model)
-                
                 return PotObject(
                     id: model.id,
                     userId: model.userId,
                     categoryId: model.categoryId.first!,
                     content: model.content ?? "",
-                    imageKey: model.imageKey,
+                    imageKey: model.imageKey.isEmpty ? nil : model.imageKey,
                     expirationDate: model.expiredAt,
                     latitude: Double(model.location.lat),
                     longitude: Double(model.location.lon)
