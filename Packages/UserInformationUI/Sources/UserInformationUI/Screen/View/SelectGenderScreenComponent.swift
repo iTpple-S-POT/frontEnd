@@ -8,17 +8,10 @@
 import SwiftUI
 import GlobalUIComponents
 
-enum UserGenderCase: String {
-    case notDetermined = "notDetermined", male = "남성", female = "여성"
-}
-
 struct SelectGenderScreenComponent: View {
     
-    @State private var userGenderState: UserGenderCase = .notDetermined
+    @EnvironmentObject var screenModel: ConfigurationScreenModel
     
-    let userNickName = "닉네임"
-    
-    private let genderCaseList: [UserGenderCase] = [ .male, .female ]
     
     var body: some View {
         VStack(spacing: 0) {
@@ -27,7 +20,7 @@ struct SelectGenderScreenComponent: View {
             HStack {
                 VStack(alignment: .leading, spacing: 3) {
                     (
-                        Text(userNickName)
+                        Text(screenModel.nickNameInputString)
                             .font(.suite(type: .SUITE_SemiBold, size: 28))
                     +
                         Text("님의")
@@ -43,15 +36,15 @@ struct SelectGenderScreenComponent: View {
             // Select Button
             HStack(spacing: 16.5) {
                 
-                ForEach(genderCaseList, id: \.self) { element in
+                ForEach(screenModel.genderCaseList, id: \.self) { element in
                     GeometryReader { geo in
                         
                         let innerView = AnyView(Text(element.rawValue).font(.suite(type: .SUITE_Regular, size: 18)))
                         
                         SpotStateButton(innerView: innerView, idleColor: .spotLightGray, activeColor: .spotRed, frame: geo.size, radius: 20) {
-                            userGenderState = element
+                            screenModel.userGenderState = element
                         } activation: {
-                            userGenderState == element
+                            screenModel.userGenderState == element
                         }
                     }
                     .frame(height: 56)
@@ -67,5 +60,6 @@ struct SelectGenderScreenComponent: View {
 #Preview {
     PreviewForProcessView {
         SelectGenderScreenComponent()
+            .environmentObject(ConfigurationScreenModel())
     }
 }

@@ -1,7 +1,7 @@
 import ProjectDescription
 import Foundation
 
-private let bundleId: String = "com.spot"
+private let bundleId: String = "com.itpple.spot"
 private let version: String = "0.0.1"
 private let bundleVersion: String = "1"
 private let iOSTargetVersion: String = "16.0"
@@ -17,10 +17,8 @@ private let kakaoNativeAppKey = getKakaoAppKey()
 
 let project = Project(name: "\(appName)",
                       packages: [
-                            .local(path: "\(packagePath)/SplashUI"),
+                            .local(path: "\(packagePath)/ApplicationUI"),
                             .local(path: "\(packagePath)/LoginUI"),
-                            .local(path: "\(packagePath)/UserInformationUI"),
-                            .local(path: "\(packagePath)/DefaultExtensions"),
                             .local(path: "\(packagePath)/MainScreenUI"),
                             .local(path: "\(packagePath)/PotDetailUI"),
                       ],
@@ -39,9 +37,8 @@ let project = Project(name: "\(appName)",
                                 "Secrets/secret.json",
                               ],
                               dependencies: [
-                                .package(product: "SplashUI"),
+                                .package(product: "ApplicationUI"),
                                 .package(product: "LoginUI"),
-                                .package(product: "UserInformationUI"),
                                 .package(product: "MainScreenUI"),
                                 .package(product: "PotDetailUI"),
                               ],
@@ -66,7 +63,7 @@ private func makeInfoPlist(merging other: [String: Plist.Value] = [:]) -> InfoPl
         "CFBundleShortVersionString": "\(version)",
         "CFBundleVersion": "\(bundleVersion)",
         "CFBundleDisplayName": "$(APP_DISPLAY_NAME)",
-        "Privacy - Location When In Use Usage Description": "앱을 사용하는 동안 사용자의 위치를 특정합니다.",
+        "NSLocationWhenInUseUsageDescription": "앱을 사용하는 동안 사용자의 위치를 특정합니다.",
         "LSApplicationQueriesSchemes": ["kakaokompassauth", "kakaolink", "kakaoplus"],
         "CFBundleURLTypes": [
             ["CFBundleURLSchemes" : ["kakao\(kakaoNativeAppKey)"]]

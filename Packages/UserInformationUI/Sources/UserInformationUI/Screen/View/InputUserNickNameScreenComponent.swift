@@ -12,7 +12,7 @@ import GlobalUIComponents
 
 struct InputUserNickNameScreenComponent: View {
     
-    @StateObject private var viewModel = NickNameInputViewModel()
+    @EnvironmentObject var screenModel: ConfigurationScreenModel
     
     var xCircleImage: Image {
         let fileName = "XCircle"
@@ -71,7 +71,7 @@ struct InputUserNickNameScreenComponent: View {
                 
                 // 상단
                 HStack(spacing: 0) {
-                    TextField(text: $viewModel.nickNameInputString) {
+                    TextField(text: $screenModel.nickNameInputString) {
                         Text("닉네임을 입력해주세요")
                             .font(.suite(type: .SUITE_Light, size: 19.5))
                             .foregroundStyle(.grayForText)
@@ -81,14 +81,19 @@ struct InputUserNickNameScreenComponent: View {
                     .textInputAutocapitalization(.never)
                     .submitLabel(.done)
                     .frame(height: 22)
+                    .onChange(of: screenModel.nickNameInputString) { _ in
+                        
+                        screenModel.dontMoveOnToNext()
+                    }
+                    
                     
                     Spacer()
                     
                     // 텍스트를 지우는 버튼
                     Group {
-                        if !viewModel.isStringEmpty {
+                        if !screenModel.isStringEmpty {
                             Button {
-                                viewModel.makeNickNameInputStringEmpty()
+                                screenModel.makeNickNameInputStringEmpty()
                             } label: {
                                 xCircleImage
                                     .resizable()
@@ -99,7 +104,7 @@ struct InputUserNickNameScreenComponent: View {
                             .transition(.scale)
                         }
                     }
-                    .animation(.easeIn, value: viewModel.isStringEmpty)
+                    .animation(.easeIn, value: screenModel.isStringEmpty)
                     
                     
                     Rectangle()
@@ -112,7 +117,7 @@ struct InputUserNickNameScreenComponent: View {
                 
                 // 하단 바
                 Rectangle()
-                    .fill(viewModel.isNickNameInvalid ? .spotRed : .black)
+                    .fill(screenModel.isNickNameInvalid ? .spotRed : .black)
                     .frame(height: 1)
             }
             .frame(height: 42)
@@ -122,12 +127,12 @@ struct InputUserNickNameScreenComponent: View {
             // Validation Text
             HStack {
                 Group {
-                    if viewModel.isNickNameInvalid {
+                    if screenModel.isNickNameInvalid {
                         Text("사용할 수 없는 닉네임 입니다.")
                             .foregroundStyle(.spotRed)
                     }
                     
-                    if viewModel.isNickNameValid {
+                    if screenModel.isNickNameValid {
                         Text("멋진 닉네임이에요 :)")
                             .foregroundStyle(.black)
                     }
@@ -177,7 +182,6 @@ internal struct PreviewForProcessView<Content: View>: View {
 }
 
 #Preview {
-    PreviewForProcessView {
-        InputUserNickNameScreenComponent()
-    }
+    InputUserNickNameScreenComponent()
+        .environmentObject(ConfigurationScreenModel())
 }

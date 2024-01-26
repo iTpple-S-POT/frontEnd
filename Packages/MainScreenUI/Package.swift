@@ -25,7 +25,7 @@ let package = Package(
         .target(
             name: "MainScreenUI",
             dependencies: [
-                .product(name: "GlobalUIComponents", package: "GlobalResource"),
+                .product(name: "GlobalResource", package: "GlobalResource"),
                 .product(name: "DefaultExtensions", package: "DefaultExtensions"),
                 .product(name: "CJMapkit", package: "CJMapkit"),
                 .product(name: "CJPhotoCollection", package: "CJPhotoCollection"),
@@ -36,6 +36,8 @@ let package = Package(
                 .process("Resources/Tags"),
                 .process("Resources/Tab"),
                 .process("Resources/DetailPart"),
+                .process("Resources"),
+
             ]
         ),
         .testTarget(

@@ -1,7 +1,6 @@
 import SwiftUI
+import ApplicationUI
 import LoginUI
-import UserInformationUI
-import MainScreenUI
 
 @main
 struct SPOTFEApp: App {
@@ -12,14 +11,8 @@ struct SPOTFEApp: App {
     
     var body: some Scene {
         WindowGroup {
-//            LoginScreen()
-//                .onOpenURL { url in
-//                    KakaoLoginManager.shared.completeSocialLogin(url: url)
-//                }
-            
-//            UserInformationConfigurationScreen()
-            
-            MainScreen()
+        
+            ContentScreen()
             
         }
     }

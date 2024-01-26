@@ -11,9 +11,7 @@ import GlobalFonts
 
 struct SelectInterestsScreenComponent: View {
     
-    let userNickName = "닉네임"
-    
-    @StateObject private var viewModel = SelectInterestsViewModel()
+    @EnvironmentObject var screenModel: ConfigurationScreenModel
     
     var body: some View {
         VStack(spacing: 0) {
@@ -22,7 +20,7 @@ struct SelectInterestsScreenComponent: View {
             HStack {
                 VStack(alignment: .leading, spacing: 3) {
                     (
-                        Text(userNickName)
+                        Text(screenModel.nickNameInputString)
                             .font(.suite(type: .SUITE_SemiBold, size: 28))
                         +
                         Text("님의")
@@ -46,23 +44,23 @@ struct SelectInterestsScreenComponent: View {
             
             // 관심사 선택
             VStack(alignment: .leading, spacing: 9) {
-                ForEach(viewModel.userInterestMatrix, id: \.self) { list1D in
+                ForEach(screenModel.userInterestMatrix, id: \.self) { list1D in
                     
                     HStack(spacing: 9) {
                         
                         ForEach(list1D) { element in
                             
-                            SpotStateButton(innerView: AnyView(Text(element.rawValue).font(.suite(type: .SUITE_Regular, size: 16))), idleColor: .spotLightGray, activeColor: .spotRed, frame: viewModel.getViewSize(string: element.rawValue), radius: 20) {
+                            SpotStateButton(innerView: AnyView(Text(element.rawValue).font(.suite(type: .SUITE_Regular, size: 16))), idleColor: .spotLightGray, activeColor: .spotRed, frame: screenModel.getViewSize(string: element.rawValue), radius: 20) {
                                 
-                                if viewModel.isTypeExists(type: element) {
-                                    viewModel.deSelectType(type: element)
+                                if screenModel.isTypeExists(type: element) {
+                                    screenModel.deSelectType(type: element)
                                     return
                                 }
                                 
-                                viewModel.selectType(type: element)
+                                screenModel.selectType(type: element)
                                 
                             } activation: {
-                                viewModel.isTypeExists(type: element)
+                                screenModel.isTypeExists(type: element)
                             }
 
                         }
@@ -79,5 +77,6 @@ struct SelectInterestsScreenComponent: View {
 #Preview {
     PreviewForProcessView {
         SelectInterestsScreenComponent()
+            .environmentObject(ConfigurationScreenModel())
     }
 }

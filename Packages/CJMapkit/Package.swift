@@ -16,14 +16,22 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/realm/SwiftLint", exact: .init(0, 51, 0)),
+        .package(url: "https://github.com/airbnb/lottie-ios.git", from: "4.2.0"),
+        .package(path: "../DefaultExtensions"),
+        .package(path: "../GlobalResource"),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
             name: "CJMapkit",
+            dependencies: [
+                .product(name: "DefaultExtensions", package: "DefaultExtensions"),
+                .product(name: "GlobalResource", package: "GlobalResource"),
+                .product(name: "Lottie", package: "lottie-ios"),
+            ],
             resources: [
-                .process("Resources/Pot_anot")
+                .process("Resources")
             ],
             plugins: [
                 

@@ -1,36 +1,40 @@
 // The Swift Programming Language
 import SwiftUI
 import Combine
+import GlobalObjects
 
-public struct ImageInformation: Identifiable, Equatable {
+public class Coordinator {
     
-    public var id: UUID { UUID() }
+    var previousColleciton: CollectionTypeObject = .allPhoto
     
-    public var image: UIImage
+    var selectedPhotoSub: AnyCancellable?
     
-    public var orientation: CGImagePropertyOrientation
+    var collectionListSub: AnyCancellable?
     
-}
-
-class MySub {
+    var dismissSub: AnyCancellable?
     
-    var sub: AnyCancellable?
-    
+    deinit {
+        
+        selectedPhotoSub?.cancel()
+        collectionListSub?.cancel()
+    }
 }
 
 public struct CJPhotoCollectionView: UIViewControllerRepresentable {
     
-    public typealias SubClosure = (ImageInformation?) -> ()
+    @Binding var collectionType: CollectionTypeObject
     
     // publisher가 퍼블리쉬시 호출되는 클로저 타입입니다.
-    public var completion: SubClosure
+    public var selectedPhotoCompletion: (ImageInformation?) -> ()
+    public var collectionTypesCompletion: ([CollectionTypeObject]) -> ()
+    public var dismissCompletion: () -> ()
     
-    private var mySub = MySub()
-    
-    public init(completion: @escaping SubClosure) {
+    public init(collectionType: Binding<CollectionTypeObject>, selectedPhotoCompletion: @escaping (ImageInformation?) -> (), collectionTypesCompletion: @escaping ([CollectionTypeObject]) -> (), dismissCompletion: @escaping () -> ()) {
         
-        self.completion = completion
-        
+        self._collectionType = collectionType
+        self.selectedPhotoCompletion = selectedPhotoCompletion
+        self.collectionTypesCompletion = collectionTypesCompletion
+        self.dismissCompletion = dismissCompletion
     }
     
     public typealias UIViewControllerType = CJPhotoCollectionViewController
@@ -39,19 +43,55 @@ public struct CJPhotoCollectionView: UIViewControllerRepresentable {
         
         let collectionViewController = CJPhotoCollectionViewController()
         
-        mySub.sub = collectionViewController.pub.sink { _ in
+        let coordi = context.coordinator
+        
+        coordi.selectedPhotoSub = collectionViewController.selectedPhotoPub.sink { _ in
+            
+            print("connecton finished")
+            
+        } receiveValue: { result in
+            
+            switch result {
+            case .success(let data):
+                DispatchQueue.main.async {
+                    
+                    selectedPhotoCompletion(data)
+                    
+                }
+            case .failure(let error):
+                switch error {
+                    
+                case .invalidSuffix(let orignalExt):
+                    print("\(orignalExt)를 png로 변경 실패")
+                default:
+                    print(error.localizedDescription)
+                }
+                
+                selectedPhotoCompletion(nil)
+            }
+            
+        }
+        
+        coordi.collectionListSub = collectionViewController.collectionTypesPub.sink { _ in
             
             print("connecton finished")
             
         } receiveValue: { data in
             
             DispatchQueue.main.async {
-                
-                completion(data)
+             
+                collectionTypesCompletion(data)
                 
             }
             
         }
+        
+        coordi.dismissSub = collectionViewController.dismissPub.sink(receiveValue: { _ in
+            
+            dismissCompletion()
+            
+        })
+        
         
         return collectionViewController
         
@@ -59,8 +99,23 @@ public struct CJPhotoCollectionView: UIViewControllerRepresentable {
     
     public func updateUIViewController(_ uiViewController: UIViewControllerType, context: Context) {
         
-        // Binding 프롵퍼티 수정시 호출
+        let coodi = context.coordinator
         
+        if coodi.previousColleciton == collectionType {
+            
+            return
+        }
+        
+        // Binding 프롵퍼티 수정시 호출
+        coodi.previousColleciton = collectionType
+        
+        uiViewController.fetchPhotos(typeObject: collectionType)
+        uiViewController.collectionView.reloadData()
+        
+    }
+    
+    public func makeCoordinator() -> Coordinator {
+        Coordinator()
     }
     
 }

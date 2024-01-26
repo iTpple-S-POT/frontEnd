@@ -14,6 +14,7 @@ public struct CEBumping: ButtonStyle {
     let duration: CGFloat = 0.1
     
     public func makeBody(configuration: Configuration) -> some View {
+        
         configuration.label
             .scaleEffect(configuration.isPressed ? orgScale : clkScale)
             .animation(.easeInOut(duration: duration), value: configuration.isPressed)

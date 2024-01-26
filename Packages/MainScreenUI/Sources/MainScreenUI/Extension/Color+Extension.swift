@@ -13,4 +13,20 @@ extension ShapeStyle where Self == Color {
     
     static var btn_red_nt: Color { Color(hex: "FF533F") }
     
+    static var midium_gray: Color { Color(hex: "C7C7C7") }
+    
+    static var regular_gray: Color { Color(hex: "878787") }
+    
+}
+
+// 테그 색
+extension ShapeStyle where Self == Color {
+    
+    static var tag_black: Color { Color.black }
+    static var tag_red: Color { Color(hex: "FF533F") }
+    static var tag_yellow: Color { Color(hex: "FFB800") }
+    static var tag_green: Color { Color(hex: "86CC40") }
+    static var tag_purple: Color { Color(hex: "D092ED") }
+    static var tag_blue: Color { Color(hex: "5EA7FF") }
+    
 }

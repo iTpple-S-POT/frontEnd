@@ -6,10 +6,13 @@
 //
 
 import SwiftUI
+import GlobalObjects
 import GlobalFonts
 import GlobalUIComponents
 
 public struct UserInformationConfigurationScreen: View {
+    
+    @EnvironmentObject var mainNavigation: MainNavigation
     
     @StateObject private var screenModel = ConfigurationScreenModel()
     
@@ -71,6 +74,12 @@ public struct UserInformationConfigurationScreen: View {
             mainButtons
                 .ignoresSafeArea(.keyboard, edges: .bottom)
         }
+        .alert(screenModel.alertTitle, isPresented: $screenModel.showAlert, actions: {
+            Button("닫기") { }
+        }, message: {
+            Text(screenModel.alertContent)
+        })
+        .environmentObject(screenModel)
     }
 }
 
@@ -84,81 +93,49 @@ extension UserInformationConfigurationScreen {
             Spacer(minLength: 0)
             
             // 버튼1
-            SpotRoundedButton(text: button1Text, color: .spotRed) {
+            SpotRoundedButton(text: button1Text, color: .spotRed) {    
                 
-                if screenModel.screenState == .setting {
-                    let currentPhase = screenModel.getCurrentSettingPhase
+                switch screenModel.screenState {
+                case .initial:
+                    screenModel.startProfileSetting()
+                case .setting:
+                    let currentIndex = screenModel.settingPhaseIndex
+                    let currentObject = screenModel.settingScreenObjects[currentIndex]
                     
-                    //TODO: 입력 데이터를 저장
-                    switch currentPhase {
-                    case .inputUserNickName:
-                        break
-                    default:
-                        break
-                    }
+                    // 검증
+                    currentObject[keyPath: \.nextBtnValidation]()
                     
                     // 다음 세팅으로 넘어 갑니다.
-                    nextSetting()
-                } else {
-                    startProfileSetting()
+                    if screenModel.canMoveOnToNext {
+                        screenModel.nextSetting()
+                    }
+                case .final:
+                    Task {
+                        do {
+                            try await screenModel.sendUserInfoToServer()
+                            
+                            print("유저 초기정보 전송 성공")
+                            
+                            mainNavigation.addToStack(destination: .mainScreen)
+                        } catch {
+                            screenModel.showAlertWith(title: "에러", content: "잠시후 다시시도해주세요.")
+                        }
+                    }
                 }
-                
             }
-            .padding(.horizontal, 12)
+            .padding(.horizontal, 21)
             .padding(.top, 48)
             
             // 버튼2
             ZStack {
-                Group {
-                    if screenModel.screenState != .final {
-                        SpotTextButton(text: button2Text, color: .black) {
-                            //TODO: 디음에 하기
-                        }
-                        .padding(.top, 12)
-                    }
+                if (2..<5).contains(screenModel.settingPhaseIndex) {
+                    SpotTextButton(text: button2Text, color: .black, action: screenModel.nextSetting)
+                    .padding(.top, 12)
                 }
             }
             .frame(height: 44)
         }
     }
-    
-    /// 프로필 세팅을 시작하는 애니메이션
-    func startProfileSetting() {
-        
-        let viewTransitionTime = 0.5
-        
-        withAnimation(.easeInOut(duration: viewTransitionTime)) {
-            
-            screenModel.changeState(to: .setting)
-               
-        }
-    }
-    
-    /// 다음세팅 사항으로 화면을 넘긴다.
-    func nextSetting() {
-        
-        let viewTransitionTime = 0.5
-        
-        withAnimation(.easeInOut(duration: viewTransitionTime)) {
-            
-            // 해당 메서드가 false를 반환한다는 것은 마지막 세팅 화면에서 버튼을 눌렀음을 의미한다.
-            if !screenModel.increateSettingPhaseIndex() {
-                screenModel.changeState(to: .final)
-            }
-            
-        }
-    }
-    
-    /// 이전세팅 사항으로 돌아간다.
-    func previousSetting() {
-        
-        let viewTransitionTime = 0.5
-        
-        withAnimation(.easeInOut(duration: viewTransitionTime)) {
-            let _ = screenModel.decreateSettingPhaseIndex()
-        }
-    }
-    
 }
 
 
@@ -178,7 +155,7 @@ extension UserInformationConfigurationScreen {
                     
                     HStack {
                         if screenModel.settingPhaseIndex >= 1 {
-                            Button(action: previousSetting) {
+                            Button(action: screenModel.previousSetting) {
                                 ZStack {
                                     Image(systemName: "chevron.left")
                                         .resizable()
@@ -210,12 +187,12 @@ extension UserInformationConfigurationScreen {
                 
                 // 상단바 아래 뷰(세팅뷰들)
                 ZStack {
-                    ForEach(Array(screenModel.settingPhases.enumerated()), id: \.element) { index, element in
+                    ForEach((0..<5)) { index in
                         
                         let screenWidth = geo.size.width
                         let viewOffset = CGSize(width: screenWidth*CGFloat(index-screenModel.settingPhaseIndex), height: 0)
                         
-                        screenModel.viewForProgressPhase[element]
+                        screenModel.settingScreenObjects[index].screenComponent
                             .offset(viewOffset)
                     }
                 }

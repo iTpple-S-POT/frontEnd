@@ -72,4 +72,5 @@ struct FinishConfigurationScreenComponent: View {
 
 #Preview {
     FinishConfigurationScreenComponent()
+        .environmentObject(ConfigurationScreenModel())
 }

@@ -6,8 +6,11 @@
 //
 
 import SwiftUI
+import GlobalObjects
 
 public struct MainScreen: View {
+    
+    @StateObject var screenModel = MainScreenModel()
     
     public init() { }
     
@@ -16,10 +19,12 @@ public struct MainScreen: View {
             
             // 상단
             VStack(spacing: 0) {
+                
                 TopMostScreenComponent()
                     .frame(height: 56)
+                
                 SelectMapTagScreenComponent()
-                    .frame(height: 64)
+                    .frame(height: 88)
                 
                 Spacer(minLength: 0)
                 
@@ -30,7 +35,7 @@ public struct MainScreen: View {
             ZStack {
                 MapScreenComponent()
             }
-            .padding(.top, 110)
+            .padding(.top, 56)
             .padding(.bottom, 64)
             .zIndex(0)
             
@@ -39,12 +44,18 @@ public struct MainScreen: View {
                 
                 Spacer(minLength: 0)
                 
-                TabScreenComponent()
+                TabScreenComponent(mainScreenModel: screenModel)
                     .frame(height: 64)
             }
             .zIndex(1)
             
         }
+        .alert(isPresented: $screenModel.showAlert) {
+            
+            Alert(title: Text(screenModel.alertTitle), message: Text(screenModel.alertMessage), dismissButton: .default(Text("닫기")))
+            
+        }
+        .environmentObject(screenModel)
     }
 }
 

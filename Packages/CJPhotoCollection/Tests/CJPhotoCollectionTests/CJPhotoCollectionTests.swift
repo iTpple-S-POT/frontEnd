@@ -4,7 +4,13 @@ import XCTest
 final class CJPhotoCollectionTests: XCTestCase {
     
     
-    func testExample() throws {
+    func test_ImageInfoStringFromKey() throws {
+        
+        for key in CJPhotoCollectionViewController.ImageInfoKey.allCases {
+            
+            try key.getStringKey()
+            
+        }
         
     }
     

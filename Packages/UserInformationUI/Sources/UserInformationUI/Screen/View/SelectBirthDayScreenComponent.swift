@@ -9,23 +9,21 @@ import SwiftUI
 
 struct SelectBirthDayScreenComponent: View {
     
-    let userNickName = "닉네임"
-    
-    @State private var birthDay: Date = .now
+    @EnvironmentObject var screenModel: ConfigurationScreenModel
     
     private var dateRange: ClosedRange<Date> {
         // 최소 생일년도는 작성일 기준 80년전
         let min = Calendar.current.date(
           byAdding: .year,
           value: -80,
-          to: birthDay
+          to: Date.now
         )!
         
         // 생일년도는 현재년도부터 가능
         let max = Calendar.current.date(
             byAdding: .day,
             value: 0,
-            to: birthDay
+            to: Date.now
         )!
         
         return min...max
@@ -39,7 +37,7 @@ struct SelectBirthDayScreenComponent: View {
             HStack {
                 VStack(alignment: .leading, spacing: 3) {
                     (
-                        Text(userNickName)
+                        Text(screenModel.nickNameInputString)
                             .font(.suite(type: .SUITE_SemiBold, size: 28))
                     +
                         Text("님의")
@@ -53,7 +51,7 @@ struct SelectBirthDayScreenComponent: View {
             }
             
             // Date Picker
-            DatePicker("", selection: $birthDay, in: dateRange ,displayedComponents: [.date])
+            DatePicker("", selection: $screenModel.userBirthDay, in: dateRange ,displayedComponents: [.date])
                 .labelsHidden()
                 .datePickerStyle(.wheel)
             .padding(.top, 42)
