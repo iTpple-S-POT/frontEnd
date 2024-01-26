@@ -69,14 +69,15 @@ struct CommentRow: View {
 }
 
 struct CommentScreen: View {
+    @State private var isShowingEmojiPicker = false
+    
     @Environment(\.presentationMode) var presentationMode
     @State private var comments = [
         Comment(username: "KIM2", timeAgo: "3시간", commentText: "농구를 이번에 처음하는 것인데 참여할 수 있을까요?", imageName: "Profile"),
         Comment(username: "인터파크", timeAgo: "3시간", commentText: "서서울호수공원 농구장 좋죠~", imageName: "Profile2")
     ]
+    @State private var newCommentText = "" // 사용자 입력 상태변수
 
-
-    
     var body: some View {
         NavigationView {
             VStack {
@@ -88,10 +89,10 @@ struct CommentScreen: View {
                 Divider()
 
                 HStack {
-                    TextField("댓글 추가하기", text: .constant(""))
+                    TextField("댓글 추가하기", text: $newCommentText)
                         .textFieldStyle(PlainTextFieldStyle())
                     Button(action: {
-                    // 댓글 추가 로직
+                        addNewComment()
                     }) {
                         Image(systemName: "paperplane")
                             .foregroundColor(.gray)
@@ -109,6 +110,12 @@ struct CommentScreen: View {
                     }
                 )
         }
+    }
+    
+    func addNewComment() {
+        let newComment = Comment(username: "잇타", timeAgo: "방금", commentText: newCommentText, imageName: "Profile3")
+        comments.append(newComment)
+        newCommentText = ""
     }
 }
 
