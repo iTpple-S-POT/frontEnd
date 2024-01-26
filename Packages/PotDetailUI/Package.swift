@@ -32,6 +32,7 @@ let package = Package(
             resources: [
                 .process("Resources/Story"),
                 .process("Resources/Pretendard"),
+                .process("Resources/SearchImage")
             ]
         ),
         .testTarget(

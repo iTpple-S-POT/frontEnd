@@ -1,13 +1,19 @@
-import SwiftUI
-import GlobalFonts
-import DefaultExtensions
-import PotDetailUI
+//
+//  SwiftUIView 2.swift
+//  
+//
+//  Created by 최유빈 on 1/27/24.
+//
 
-public struct ImageScreen: View {
-    let images = ["detail1", "detail2", "detail3", "detail4", "detail5"]
+import SwiftUI
+import DefaultExtensions
+import GlobalFonts
+
+public struct SearchImageScreen: View {
+    let images = ["Se1", "Se2", "Se3", "Se4", "Se5", "Se6"]
 
     public init() {}
-    @State private var isPresentingStoryScreen = false
+    @State private var isShowingStoryScreen = false
     @State private var selectedImage: String?
     
     public var body: some View {
@@ -23,7 +29,7 @@ public struct ImageScreen: View {
                     ForEach(images, id: \.self) { imageName in
                         Button(action: {
                             self.selectedImage = imageName
-                            self.isPresentingStoryScreen = true
+                            self.isShowingStoryScreen = true
                         })  {
                         ZStack(alignment: .topLeading) { // 상단 좌측 정렬
                             Image.makeImageFromBundle(bundle: .module, name: imageName, ext: .png)
@@ -49,15 +55,13 @@ public struct ImageScreen: View {
                     }
                 }
             }
-            .fullScreenCover(isPresented: $isPresentingStoryScreen) {
+            .fullScreenCover(isPresented: $isShowingStoryScreen) {
                 StoryScreen()
             }
         }
     }
 }
 
-struct ImageScreen_Previews: PreviewProvider {
-    static var previews: some View {
-        ImageScreen()
-    }
+#Preview {
+    SearchImageScreen()
 }

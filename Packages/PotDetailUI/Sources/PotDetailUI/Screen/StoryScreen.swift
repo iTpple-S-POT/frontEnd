@@ -183,7 +183,7 @@ public struct StoryScreen: View {
                         Button(action: {
                         }) {
                             Text("🙂")
-                                .font(.system(size: 48))
+                                
                         }
                         
                         Button(action: {

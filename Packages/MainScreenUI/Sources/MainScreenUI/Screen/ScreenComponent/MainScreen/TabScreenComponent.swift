@@ -36,7 +36,6 @@ struct TabScreenComponent: View {
                         }
                         .frame(height: 47)
                     }
-                    
                 }
             
             // 팟 추가하기
