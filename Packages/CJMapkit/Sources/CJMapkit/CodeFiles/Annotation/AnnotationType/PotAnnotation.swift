@@ -11,8 +11,8 @@ import DefaultExtensions
 import GlobalObjects
 
 public class PotAnnotation: NSObject, Identifiable, AnnotationClassType {
-    public var id = UUID() // 고유 식별자를 위한 UUID 추가
-    public var type: PotAnnotationType
+//    public var id = UUID() // 고유 식별자를 위한 UUID 추가
+//    public var type: PotAnnotationType
 
     public var coordinate: CLLocationCoordinate2D
     
@@ -33,6 +33,7 @@ public class PotAnnotation: NSObject, Identifiable, AnnotationClassType {
         self.potObject = potObject
         
         self.coordinate = CLLocationCoordinate2D(latitude: potObject.latitude, longitude: potObject.longitude)
+        
     }
 }
 

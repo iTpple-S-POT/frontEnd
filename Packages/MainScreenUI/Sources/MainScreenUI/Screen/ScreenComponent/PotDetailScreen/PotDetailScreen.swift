@@ -43,27 +43,27 @@ struct PotDetailScreen: View {
     }
 }
 
-struct PotDetailScreen_Previews: PreviewProvider {
-    
-    static var annotationDummies: [PotAnnotation] {
-    
-        let longRange = 126.9244669...126.9254901
-        let latRange = 37.550756...37.557527
-        
-        return PotAnnotationType.allCases.map {
-            
-            let long = Double.random(in: longRange)
-            let lat = Double.random(in: latRange)
-            
-            return PotAnnotation(type: $0, coordinate: CLLocationCoordinate2DMake(lat, long))
-            
-        }
-        
-    }
-    
-    static var previews: some View {
-        
-        // 더미 PotAnnotation을 사용하여 PotDetailScreen 프리뷰 생성
-        PotDetailScreen(annotation: annotationDummies[0])
-    }
-}
+//struct PotDetailScreen_Previews: PreviewProvider {
+//    
+//    static var annotationDummies: [PotAnnotation] {
+//    
+//        let longRange = 126.9244669...126.9254901
+//        let latRange = 37.550756...37.557527
+//        
+//        return PotAnnotationType.allCases.map {
+//            
+//            let long = Double.random(in: longRange)
+//            let lat = Double.random(in: latRange)
+//            
+//            return PotAnnotation(type: $0, coordinate: CLLocationCoordinate2DMake(lat, long))
+//            
+//        }
+//        
+//    }
+//    
+//    static var previews: some View {
+//        
+//        // 더미 PotAnnotation을 사용하여 PotDetailScreen 프리뷰 생성
+//        PotDetailScreen(annotation: annotationDummies[0])
+//    }
+//}

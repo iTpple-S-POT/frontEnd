@@ -32,10 +32,6 @@ let package = Package(
                 .product(name: "PotDetailUI", package: "PotDetailUI"),
             ],
             resources: [
-                .process("Resources/TitlePart"),
-                .process("Resources/Tags"),
-                .process("Resources/Tab"),
-                .process("Resources/DetailPart"),
                 .process("Resources"),
 
             ]

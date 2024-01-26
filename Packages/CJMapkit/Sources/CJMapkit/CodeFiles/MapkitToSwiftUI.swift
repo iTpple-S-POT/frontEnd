@@ -118,7 +118,7 @@ extension MkMapViewCoordinator: MKMapViewDelegate {
     }
     
 
-    func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
+    public func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
             if let annotation = view.annotation as? PotAnnotation {
                 // 선택된 어노테이션 정보를 전달하며 notification을 post합니다.
                 NotificationCenter.default.post(name: Notification.Name("annotationDidSelect"), object: annotation)
