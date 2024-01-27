@@ -21,6 +21,7 @@ let project = Project(name: "\(appName)",
                             .local(path: "\(packagePath)/LoginUI"),
                             .local(path: "\(packagePath)/MainScreenUI"),
                             .local(path: "\(packagePath)/PotDetailUI"),
+                            .local(path: "\(packagePath)/MyPageUI"),
                       ],
                       settings: Settings.settings(configurations: makeConfiguration()),
                       targets: [
@@ -41,6 +42,7 @@ let project = Project(name: "\(appName)",
                                 .package(product: "LoginUI"),
                                 .package(product: "MainScreenUI"),
                                 .package(product: "PotDetailUI"),
+                                .package(product: "MyPageUI"),
                               ],
                               settings: baseSettings()
                           )
