@@ -24,16 +24,19 @@ struct FinalPotScreenComponent: View {
             Color.black
                 .ignoresSafeArea(.container)
             
-            // 선택한 사진
-            if let uiImage = UIImage(data: screenModelWithNav.imageInfo!.data) {
-                
-                Image(uiImage: uiImage)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(height: 300)
-                    .clipShape(Rectangle())
-                    .allowsTightening(false)
-                
+            
+            GeometryReader { geo in
+                // 선택한 사진
+                if let uiImage = UIImage(data: screenModelWithNav.imageInfo!.data) {
+                    
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: geo.size.width, height: geo.size.height/3)
+                        .allowsTightening(false)
+                        .position(x: geo.size.width/2, y: geo.size.height/2)
+                    
+                }
             }
             
             

@@ -51,7 +51,6 @@ struct PotUploadScreen: View {
             self.uploadSub = screenModel.potUploadPublisher.sink { uploadCompletion($0) }
         }
         
-        
     }
     
 }
