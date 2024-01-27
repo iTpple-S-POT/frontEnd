@@ -12,7 +12,24 @@ public struct SpotStorage {
     
     static public var `default` = SpotStorage()
     
-    private init() { }
+    let localImageUrl: URL
+    
+    private init() {
+        
+        let appDirec = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        
+        self.localImageUrl = appDirec
+            .appendingPathComponent("Local")
+            .appendingPathComponent("PotImage")
+        
+        do {
+            // 아까 만든 디렉토리 경로에 디렉토리 생성 (폴더가 만들어진다.)
+            try FileManager.default.createDirectory(at: localImageUrl, withIntermediateDirectories: true, attributes: nil)
+        } catch let e {
+            print(e.localizedDescription)
+        }
+        
+    }
     
     public var mainStorageManager = SpotStorageManager(configuration: PersistenceConfiguration(modelName: "SpotModel"))
     

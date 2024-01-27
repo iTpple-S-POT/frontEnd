@@ -22,9 +22,9 @@ public class PotAnnotation: NSObject, Identifiable, AnnotationClassType {
     
     var potObject: PotObject
     
-    var thumbNailIamge: Data?
+    var thumbNailIamgeUrl: URL?
     
-    public init(coordinate: CLLocationCoordinate2D, isActive: Bool, potObject: PotObject, thumbNailIamge: Data? = nil) {
+    public init(coordinate: CLLocationCoordinate2D, isActive: Bool, potObject: PotObject, thumbNailIamgeUrl: URL? = nil) {
         
         self.coordinate = coordinate
         
@@ -34,6 +34,7 @@ public class PotAnnotation: NSObject, Identifiable, AnnotationClassType {
         
         self.coordinate = CLLocationCoordinate2D(latitude: potObject.latitude, longitude: potObject.longitude)
         
+        self.thumbNailIamgeUrl = thumbNailIamgeUrl
     }
 }
 

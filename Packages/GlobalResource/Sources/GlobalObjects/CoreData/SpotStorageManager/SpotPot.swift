@@ -76,8 +76,20 @@ public extension SpotStorage {
                 
                 URLSession.shared.dataTask(with: request) { data, res, error in
                     
+                    let desUrl = makeImageUrlFrom(id: object.id)
+                    
                     DispatchQueue.main.async {
-                        pot.imageData = data
+                        do {
+                            
+                            if let imageData = data {
+                                
+                                pot.imageURL = try saveDataToLocal(id: object.id, data: imageData)
+                            }
+                            
+                            try context.save()
+                        } catch {
+                            print("팟이미지 불러오기 실패")
+                        }
                     }
                     
                 }.resume()
@@ -87,8 +99,6 @@ public extension SpotStorage {
             }
             
         }
-        
-        try context.save()
         
     }
     
@@ -117,7 +127,7 @@ public extension SpotStorage {
 public extension SpotStorage {
     
     @MainActor
-    func makeDummyPot(object: SpotPotUploadObject, imageData: Data) async {
+    func makeDummyPot(object: SpotPotUploadObject, imageData: Data) async throws {
         
         let context = self.mainStorageManager.context
         
@@ -130,7 +140,16 @@ public extension SpotStorage {
         dummyPotObject.longitude = object.longitude
         dummyPotObject.isActive = false
         dummyPotObject.expirationDate = Date.now + 86400
-        dummyPotObject.imageData = imageData
+        dummyPotObject.imageURL = try saveDataToLocal(id: Self.dummyPotId, data: imageData)
+    }
+    
+    private func saveDataToLocal(id: Int64, data: Data) throws -> URL {
+        
+        let fileUrl = makeImageUrlFrom(id: id)
+        
+        try data.write(to: fileUrl)
+        
+        return fileUrl
     }
     
     
@@ -169,6 +188,14 @@ public extension SpotStorage {
         dummyObject.longitude = object.longitude
         dummyObject.imageKey = object.imageKey
         
+        let dummyUrl = dummyObject.imageURL!
+        
+        let fileUrl = makeImageUrlFrom(id: object.id)
+        
+        try FileManager.default.moveItem(at: dummyUrl, to: fileUrl)
+        
+        dummyObject.imageURL = fileUrl
+        
         try context.save()
     }
     
@@ -196,8 +223,17 @@ public extension SpotStorage {
         
         let pot = try context.fetch(request).first!
         
-        pot.imageData = data
+        let imageUrl = makeImageUrlFrom(id: id)
+        
+        FileManager.default.createFile(atPath: imageUrl.absoluteString, contents: data)
+        
+        pot.imageURL = imageUrl
         
         try context.save()
     }
-}
+    
+    func makeImageUrlFrom(id: Int64) -> URL {
+        
+        return localImageUrl.appendingPathComponent("pot\(id)image", conformingTo: .png)
+    }
+ }

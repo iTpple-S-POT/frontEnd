@@ -168,7 +168,7 @@ extension MkMapViewCoordinator {
                 coordinate: CLLocationCoordinate2D(latitude: pot.latitude, longitude: pot.longitude),
                 isActive: pot.isActive,
                 potObject: object,
-                thumbNailIamge: pot.imageData
+                thumbNailIamgeUrl: pot.imageURL
                 )
         }
         
@@ -211,7 +211,7 @@ extension MkMapViewCoordinator {
                 coordinate: CLLocationCoordinate2D(latitude: $0.latitude, longitude: $0.longitude),
                 isActive: $0.isActive,
                 potObject: makePotObjectFrom(pot: $0),
-                thumbNailIamge: $0.imageData
+                thumbNailIamgeUrl: $0.imageURL
             )
         }
         
@@ -303,7 +303,7 @@ extension MkMapViewCoordinator {
                     coordinate: CLLocationCoordinate2D(latitude: pot.latitude, longitude: pot.longitude),
                     isActive: true,
                     potObject: makePotObjectFrom(pot: pot),
-                    thumbNailIamge: pot.imageData
+                    thumbNailIamgeUrl: pot.imageURL
                 )
             }
             

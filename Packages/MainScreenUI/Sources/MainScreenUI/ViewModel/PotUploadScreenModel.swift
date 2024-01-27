@@ -111,7 +111,7 @@ public extension PotUploadScreenModel {
                 }
                 
                 // dummy생성
-                await SpotStorage.default.makeDummyPot(object: object, imageData: imageInfo_unwrapped.data)
+                try await SpotStorage.default.makeDummyPot(object: object, imageData: imageInfo_unwrapped.data)
                 
                 print("낙관적 팟 생성완료")
                 
@@ -125,6 +125,8 @@ public extension PotUploadScreenModel {
                     print("낙관적 팟 업데이트 성공")
                 }
                 catch {
+                    
+                    print(error.localizedDescription)
                     
                     print("낙관적 팟 업데이트 실패")
                     

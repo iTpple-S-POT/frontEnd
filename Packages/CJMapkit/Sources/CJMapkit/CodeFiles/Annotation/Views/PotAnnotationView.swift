@@ -81,7 +81,7 @@ class PotAnnotationView: MKAnnotationView {
         }
         
         // 이미지 처리
-        if let imageData = annotation.thumbNailIamge {
+        if let imageUrl = annotation.thumbNailIamgeUrl, let imageData = try? Data(contentsOf: imageUrl) {
             
             print("이미지 데이터가 존재합니다.")
             
