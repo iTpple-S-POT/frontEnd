@@ -82,7 +82,7 @@ public extension APIRequestGlobalObject {
         
         let urlWithQuery = components.url!
         
-        let request = try getURLRequest(url: urlWithQuery, method: .get, isAuth: false)
+        let request = try getURLRequest(url: urlWithQuery, method: .get, isAuth: true)
         
         let (data, response) = try await URLSession.shared.data(for: request)
         
@@ -102,7 +102,6 @@ public extension APIRequestGlobalObject {
                     
                     throw SpotNetworkError.serverError(function: functionName)
                 }
-                print("!!")
                 return (false, error.message)
             default:
                 throw SpotNetworkError.unProcessedStatusCode(function: functionName)

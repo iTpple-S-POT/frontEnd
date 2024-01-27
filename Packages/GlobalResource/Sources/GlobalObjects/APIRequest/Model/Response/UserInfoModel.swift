@@ -22,7 +22,7 @@ struct UserInfoResponseModel: Decodable {
     let gender: String?
     let mbti: String?
     let interests: [String]
-    let status: String
+    let status: String?
 }
 
 // MARK: - Reqeust

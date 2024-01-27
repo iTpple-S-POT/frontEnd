@@ -143,7 +143,7 @@ public extension ContentScreenModel {
             let userObject = try await APIRequestGlobalObject.shared.getUserInfo()
             
             // 유저 선호도 입력이 필요한 경우
-            if userObject.status == "PROGRESS" {
+            if userObject.status == nil || userObject.status == "PROGRESS" {
                 
                return true
             }
