@@ -19,6 +19,7 @@ let package = Package(
         .package(url: "https://github.com/airbnb/lottie-ios.git", from: "4.2.0"),
         .package(path: "../DefaultExtensions"),
         .package(path: "../GlobalResource"),
+        .package(url: "https://github.com/onevcat/Kingfisher.git", from: "7.10.2"),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -29,6 +30,7 @@ let package = Package(
                 .product(name: "DefaultExtensions", package: "DefaultExtensions"),
                 .product(name: "GlobalResource", package: "GlobalResource"),
                 .product(name: "Lottie", package: "lottie-ios"),
+                .product(name: "Kingfisher", package: "kingfisher"),
             ],
             resources: [
                 .process("Resources")

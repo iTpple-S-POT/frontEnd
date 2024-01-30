@@ -7,7 +7,7 @@
 
 import CoreData
 
-extension SpotStorageManager {
+public extension SpotStorageManager {
     
     func loadUserInfo() async throws {
         

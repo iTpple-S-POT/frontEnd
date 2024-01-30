@@ -213,7 +213,7 @@ extension ConfigurationScreenModel {
 // MARK: - 데이타 트렌스퍼
 extension ConfigurationScreenModel {
     
-    func sendUserInfoToServer() async throws{
+    func sendUserInfoToServer() async throws -> UserInfoObject {
         
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
@@ -238,5 +238,7 @@ extension ConfigurationScreenModel {
                                    status: nil)
         
         try await APIRequestGlobalObject.shared.sendInitialUserInfomation(object: object)
+        
+        return object
     }
 }

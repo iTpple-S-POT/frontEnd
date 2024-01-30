@@ -8,11 +8,14 @@
 import SwiftUI
 import GlobalFonts
 
+extension Notification.Name {
+    
+    static let potUploadBtnClicked = Notification.Name("PotUploadBtnClicked")
+}
+
 struct TabScreenComponent: View {
     
     @ObservedObject var mainScreenModel: MainScreenModel
-    
-    @State private var showPotUploadScreen = false
     
     var body: some View {
         HStack(spacing: 0) {
@@ -47,7 +50,7 @@ struct TabScreenComponent: View {
                     
                     Button {
                         
-                        showPotUploadScreen = true
+                        NotificationCenter.default.post(name: .potUploadBtnClicked, object: nil)
                         
                     } label: {
                         Image.makeImageFromBundle(bundle: .module, name: "tab_plus", ext: .png)
@@ -86,22 +89,6 @@ struct TabScreenComponent: View {
                 .fill(.white)
                 .shadow(color: .gray.opacity(0.3), radius: 2.0, y: -2)
         )
-        .fullScreenCover(isPresented: $showPotUploadScreen, content: {
-            PotUploadScreen { result in
-                
-                // TODO: 추후 수정
-                DispatchQueue.main.async {
-                    if result {
-                        
-                        mainScreenModel.showPotUploadSuccess()
-                        
-                    } else {
-                        
-                        mainScreenModel.showPotUploadFailed()
-                    }
-                }
-            }
-        })   
     }
 }
 
