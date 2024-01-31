@@ -134,13 +134,13 @@ public struct MapkitViewRepresentable: UIViewRepresentable {
     
     @Binding var selectedCategory: TagCases
     
-    @Binding var potObjects: [PotObject]
+    @Binding var potObjects: Set<PotObject>
     
     var latestCenter: CLLocationCoordinate2D
     
     var mapCenterReciever: (CLLocationCoordinate2D) -> Void
     
-    public init(isLastestCenterAndMapEqual: Binding<Bool>, selectedCategory: Binding<TagCases>, potObjects: Binding<[PotObject]> ,latestCenter: CLLocationCoordinate2D, mapCenterReciever: @escaping (CLLocationCoordinate2D) -> Void) {
+    public init(isLastestCenterAndMapEqual: Binding<Bool>, selectedCategory: Binding<TagCases>, potObjects: Binding<Set<PotObject>> ,latestCenter: CLLocationCoordinate2D, mapCenterReciever: @escaping (CLLocationCoordinate2D) -> Void) {
         self._isLastestCenterAndMapEqual = isLastestCenterAndMapEqual
         self._selectedCategory = selectedCategory
         self._potObjects = potObjects
@@ -190,7 +190,7 @@ public struct MapkitViewRepresentable: UIViewRepresentable {
         
     }
     
-    func makePotAnnotationsFrom(mapView: MKMapView, potObjects: [PotObject]) {
+    func makePotAnnotationsFrom(mapView: MKMapView, potObjects: Set<PotObject>) {
         
         let annotations = potObjects.map { PotAnnotation(potObject: $0) }
         

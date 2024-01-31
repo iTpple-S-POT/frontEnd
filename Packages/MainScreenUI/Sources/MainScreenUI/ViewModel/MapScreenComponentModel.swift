@@ -30,7 +30,7 @@ class MapScreenComponentModel: ObservableObject {
     
     @Published var isLastestCenterAndMapEqual: Bool = false
     @Published var isUserAndLatestCenterEqual: Bool = false
-    @Published var potObjects: [PotObject] = []
+    @Published var potObjects: Set<PotObject> = []
     @Published var showAlert = false
     var alertTitle = ""
     var alertMessage = ""
@@ -153,7 +153,8 @@ class MapScreenComponentModel: ObservableObject {
                 let potObjects = try await APIRequestGlobalObject.shared.getPots(latitude: location.latitude, longitude: location.longitude, diameter: 500)
                 
                 await MainActor.run {
-                    self.potObjects = potObjects
+                    
+                    self.insertPotObjects(objects: potObjects)
                 }
                 
             } catch {
@@ -175,21 +176,25 @@ class MapScreenComponentModel: ObservableObject {
     
     func addPot(object: PotObject) {
         
-        self.potObjects.append(object)
+        self.potObjects.insert(object)
     }
     
     func removePot(id: Int64) throws {
         
         let countBefore = self.potObjects.count
         
-        self.potObjects.removeAll { $0.id == id }
+        guard let object = self.potObjects.first(where: { $0.id == id }) else {
+            throw SpotPotAnnotationError.removeFailure
+        }
+                                                
+        self.potObjects.remove(object)
         
         if countBefore == potObjects.count {
             throw SpotPotAnnotationError.removeFailure
         }
     }
     
-    func updatePot(prevId: Int64, object: PotObject) {
+    func updatePotWith(prevId: Int64, object: PotObject) {
         
         do {
             try removePot(id: prevId)
@@ -199,6 +204,11 @@ class MapScreenComponentModel: ObservableObject {
             
             fatalError()
         }
+    }
+    
+    func insertPotObjects(objects: [PotObject]) {
+        
+        self.potObjects.formUnion(objects)
     }
 }
 
@@ -230,7 +240,7 @@ extension MapScreenComponentModel {
                 
                 let uploadedPotObject = try await APIRequestGlobalObject.shared.executePotUpload(imageInfo: imageInfo, uploadObject: potDTO)
                 
-                await self.updatePot(prevId: dummyPotId, object: uploadedPotObject)
+                await self.updatePotWith(prevId: dummyPotId, object: uploadedPotObject)
                 
             } catch {
                 
