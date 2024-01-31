@@ -10,38 +10,38 @@ import SwiftUI
 import CJMapkit
 import CoreLocation
 
-struct PotDetailScreen: View {
-    var annotation: PotAnnotation // PotAnnotation 인스턴스를 저장하기 위한 프로퍼티
-       
-       public init(annotation: PotAnnotation) {
-           self.annotation = annotation
-       }
-    
-    @Environment(\.presentationMode) var presentationMode
-
-    var body: some View {
-        NavigationView {
-            ImageScreen()
-                .navigationBarTitle("모임", displayMode: .inline)
-                .navigationBarItems(
-                    leading: Button(action: {
-                        // 백 버튼 액션
-                        print("Back button tapped")
-                    }) {
-                        Image(systemName: "chevron.left")
-                            .foregroundColor(.black)
-                    },
-                    trailing: Button(action: {
-                        // 닫기 버튼 액션
-                        presentationMode.wrappedValue.dismiss()
-                    }) {
-                        Image(systemName: "xmark")
-                            .foregroundColor(.black)
-                    }
-                )
-        }
-    }
-}
+//struct PotDetailScreen: View {
+//    var annotation: PotAnnotation // PotAnnotation 인스턴스를 저장하기 위한 프로퍼티
+//       
+//    public init(annotation: PotAnnotation) {
+//        self.annotation = annotation
+//    }
+//    
+//    @Environment(\.presentationMode) var presentationMode
+//
+//    var body: some View {
+//        NavigationView {
+//            ImageScreen()
+//                .navigationBarTitle("모임", displayMode: .inline)
+//                .navigationBarItems(
+//                    leading: Button(action: {
+//                        // 백 버튼 액션
+//                        print("Back button tapped")
+//                    }) {
+//                        Image(systemName: "chevron.left")
+//                            .foregroundColor(.black)
+//                    },
+//                    trailing: Button(action: {
+//                        // 닫기 버튼 액션
+//                        presentationMode.wrappedValue.dismiss()
+//                    }) {
+//                        Image(systemName: "xmark")
+//                            .foregroundColor(.black)
+//                    }
+//                )
+//        }
+//    }
+//}
 
 //struct PotDetailScreen_Previews: PreviewProvider {
 //    

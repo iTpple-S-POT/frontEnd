@@ -9,32 +9,19 @@ import GlobalObjects
 //}
 
 struct MapScreenComponent: View {
-    @State private var selectedAnnotation: PotAnnotation?
     
-    @EnvironmentObject var mainScreenModel: MainScreenModel
+    @EnvironmentObject private var mainScreenModel: MainScreenModel
     
     @StateObject private var screenModel = MapScreenComponentModel()
     
-    @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(key: "id", ascending: true)]
-        ,predicate: NSPredicate(format: "expirationDate >= %@", Date.now as NSDate)
-    )
-    private var potsFromLocal: FetchedResults<Pot>
-    
     var body: some View {
-//      CJMapkitView(userLocation: CLLocation(latitude: 37.550756, longitude: 126.9254901), annotations: annotationDummies)
-//                    .onReceive(NotificationCenter.default.publisher(for: .annotationDidSelect)) { notification in
-//                        // 주석 선택 핸들러
-//                        if let annotation = notification.object as? PotAnnotation {
-//                            selectedAnnotation = annotation
-//                        }
-//                    }
-//                    .sheet(item: $selectedAnnotation) { annotation in
-//                        PotDetailScreen(annotation: annotation)
-//                    }
-      
+        
         ZStack {
-            MapkitViewRepresentable(isLastestCenterAndMapEqual: $screenModel.isLastestCenterAndMapEqual, selectedCategory: $mainScreenModel.selectedTag, latestCenter: screenModel.lastestCenter) { mapCenter in
+            MapkitViewRepresentable(
+                isLastestCenterAndMapEqual: $screenModel.isLastestCenterAndMapEqual,
+                selectedCategory: $mainScreenModel.selectedTag,
+                potObjects: $screenModel.potObjects,
+                latestCenter: screenModel.lastestCenter) { mapCenter in
                 
                 print("지도 중심이 업데이트됨")
                 
@@ -122,48 +109,25 @@ struct MapScreenComponent: View {
             }
             
         }
-        .onChange(of: potsFromLocal) { newValue in
-            
-            print("Pots가 업데이트 되었습니다.")
-            
-            
-        }
-        
-    }
-}
-
-extension FetchedResults: Equatable where Result == Pot {
-    
-    public static func == (lhs: FetchedResults, rhs: FetchedResults) -> Bool {
-        if lhs.count == rhs.count {
-            
-            for index in (0..<lhs.count) {
+        .fullScreenCover(isPresented: $screenModel.showPotUploadScreen, content: {
+            PotUploadScreen { result in
                 
-                let p1 = lhs[index] as Pot
-                let p2 = rhs[index] as Pot
-                
-                if p1.isActive != p2.isActive {
-                    
-                    return false
+                // TODO: 추후 수정
+                DispatchQueue.main.async {
+                    if result {
+                        
+                        mainScreenModel.showPotUploadSuccess()
+                        
+                    } else {
+                        
+                        mainScreenModel.showPotUploadFailed()
+                    }
                 }
-                
             }
-            
-            return true
-        } else {
-            
-            return false
-        }
-        
+        })
+        .environmentObject(screenModel)
     }
-    
 }
-
-
-extension Notification.Name {
-    static let annotationDidSelect = Notification.Name("annotationDidSelect")
-}
-
 
 #Preview {
     MapScreenComponent()

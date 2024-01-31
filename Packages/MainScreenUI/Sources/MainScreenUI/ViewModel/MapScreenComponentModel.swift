@@ -17,12 +17,23 @@ enum SpotLocationError: Error {
     
 }
 
+enum SpotPotAnnotationError: Error {
+    
+    case removeFailure
+}
+
+@MainActor
 class MapScreenComponentModel: ObservableObject {
+    
+    // TODO: 수정예정
+    @Published var showPotUploadScreen = false
     
     @Published var isLastestCenterAndMapEqual: Bool = false
     @Published var isUserAndLatestCenterEqual: Bool = false
-    
-    @Published var annotations: [AnnotationClassType] = []
+    @Published var potObjects: Set<PotObject> = []
+    @Published var showAlert = false
+    var alertTitle = ""
+    var alertMessage = ""
     
     // 마지막으로 전달한 맵의 중앙점
     var lastestCenter = CLLocationCoordinate2D()
@@ -38,6 +49,22 @@ class MapScreenComponentModel: ObservableObject {
     var userLocationSubscriber: AnyCancellable?
     
     private var isFirstUpdate = true
+    
+    init() {
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(potUploadBtnClickedCompletion(_:)),
+            name: .potUploadBtnClicked,
+            object: nil
+        )
+    }
+    
+    @objc
+    func potUploadBtnClickedCompletion(_ notification: Notification) {
+        
+        self.showPotUploadScreen = true
+    }
     
     func registerLocationSubscriber() {
         
@@ -119,23 +146,16 @@ class MapScreenComponentModel: ObservableObject {
         
         let functionName = #function
         
-        Task {
+        Task.detached {
             
             do {
+                // 서버로부터 팟을 가져옴
+                let potObjects = try await APIRequestGlobalObject.shared.getPots(latitude: location.latitude, longitude: location.longitude, diameter: 500)
                 
-                // 로컬데이터 업로드(자동 필터링)
-                try await SpotStorage.default.filteringLocalPots()
-                print("팟 필터링 성공", functionName)
-                
-                // 서버 요청한 데이터 메모리에 올림
-                let potsFromServer = try await APIRequestGlobalObject.shared.getPots(latitude: location.latitude, longitude: location.longitude, diameter: 300)
-                
-                print("서버에서 팟 가져오기 성공 현위치 팟개수: \(potsFromServer.count)개", functionName)
-                
-                // id가 같은 경우 삽입이 발생히지 않음
-                try await SpotStorage.default.insertServerPots(objects: potsFromServer)
-                
-                print("서버에서 가져온 팟을 삽입 성공", functionName)
+                await MainActor.run {
+                    
+                    self.insertPotObjects(objects: potObjects)
+                }
                 
             } catch {
                 
@@ -146,5 +166,88 @@ class MapScreenComponentModel: ObservableObject {
             
         }
         
+    }
+    
+    func showPotRefreshAlert() {
+        self.alertTitle = "팟불러오기 실패"
+        self.alertMessage = "네트워크 연결 확인 혹은 재시도"
+        self.showAlert = true
+    }
+    
+    func addPot(object: PotObject) {
+        
+        self.potObjects.insert(object)
+    }
+    
+    func removePot(id: Int64) throws {
+        
+        let countBefore = self.potObjects.count
+        
+        guard let object = self.potObjects.first(where: { $0.id == id }) else {
+            throw SpotPotAnnotationError.removeFailure
+        }
+                                                
+        self.potObjects.remove(object)
+        
+        if countBefore == potObjects.count {
+            throw SpotPotAnnotationError.removeFailure
+        }
+    }
+    
+    func updatePotWith(prevId: Int64, object: PotObject) {
+        
+        do {
+            try removePot(id: prevId)
+            
+            addPot(object: object)
+        } catch {
+            
+            fatalError()
+        }
+    }
+    
+    func insertPotObjects(objects: [PotObject]) {
+        
+        self.potObjects.formUnion(objects)
+    }
+}
+
+// pot업로드
+extension MapScreenComponentModel {
+    
+    func uploadPot(
+        categoryId: Int64,
+        content: String,
+        imageInfo: ImageInformation
+    ) {
+         
+        let dummyPotId: Int64 = -12345
+        
+        Task.detached {
+            do {
+                
+                guard let location = CJLocationManager.shared.currentUserLocation else {
+                    
+                    throw PotUploadPrepareError.cantGetUserLocation(function: #function)
+                }
+                
+                let potDTO = SpotPotUploadObject(category: categoryId, text: content, latitude: location.latitude, longitude: location.longitude)
+                
+                let potObject = PotObject(id: dummyPotId, userId: -1, categoryId: categoryId, content: "", imageKey: nil, expirationDate: "", latitude: location.latitude, longitude: location.longitude)
+                
+                // dummy생성
+                await self.addPot(object: potObject)
+                
+                let uploadedPotObject = try await APIRequestGlobalObject.shared.executePotUpload(imageInfo: imageInfo, uploadObject: potDTO)
+                
+                await self.updatePotWith(prevId: dummyPotId, object: uploadedPotObject)
+                
+            } catch {
+                
+                print(error, error.localizedDescription)
+                
+                try! await self.removePot(id: dummyPotId)
+            }
+        }
     }
 }

@@ -10,8 +10,24 @@ import UIKit
 import MapKit
 import GlobalObjects
 import Lottie
+import Kingfisher
 
 class PotAnnotationView: MKAnnotationView {
+    
+    let layer1: PotShapeView = {
+        
+        let view = PotShapeView()
+        
+        view.color = .white
+        return view
+    }()
+    
+    let layer2: PotShapeView = {
+        
+        let view = PotShapeView()
+        
+        return view
+    }()
     
     let layer3: UIImageView = {
         
@@ -19,38 +35,6 @@ class PotAnnotationView: MKAnnotationView {
         
         view.contentMode = .scaleAspectFill
         view.clipsToBounds = true
-        let path = Bundle.module.provideFilePath(name: "test", ext: "png")
-        
-        view.image = UIImage(named: path)
-        
-        return view
-    }()
-    
-    let loadingLayer: UIView  = {
-        
-        let path = Bundle.module.provideFilePath(name: "pot_upload_loading_lottie", ext: "json")
-        
-        let view = PotShapeView()
-        view.color = .black.withAlphaComponent(0.3)
-        
-        let animationView = LottieAnimationView(filePath: path)
-        
-        animationView.loopMode = .loop
-        
-        animationView.play()
-        
-        // AutoLayout
-        view.translatesAutoresizingMaskIntoConstraints = false
-        animationView.translatesAutoresizingMaskIntoConstraints = false
-        
-        view.addSubview(animationView)
-        
-        NSLayoutConstraint.activate([
-            animationView.topAnchor.constraint(equalTo: view.topAnchor),
-            animationView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            animationView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            animationView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-        ])
         
         return view
     }()
@@ -69,39 +53,15 @@ class PotAnnotationView: MKAnnotationView {
     
     func setUp(annotation: PotAnnotation) {
         
-        self.clipsToBounds = false
-        
-        // 로딩화면 최초처리
-        if annotation.isActive {
-            
-            turnOffLoadingLayer()
-        } else {
-            
-            turnOnLoadingLayer()
-        }
-        
-        // 이미지 처리
-        if let imageData = annotation.thumbNailIamge {
-            
-            layer3.image = UIImage(data: imageData)
-        }
-        
-        // 팟 업로드 후 처리
-        let layer1 = PotShapeView()
-        layer1.color = .white
-        
-        let layer2 = PotShapeView()
         layer2.color = PotAnnotationType(rawValue: Int(annotation.potObject.categoryId))!.getAnnotationColor()
         
         self.addSubview(layer1)
-        self.addSubview(layer2)
-        self.addSubview(layer3)
-        self.addSubview(loadingLayer)
+        self.insertSubview(layer2, aboveSubview: layer1)
+        self.insertSubview(layer3, aboveSubview: layer2)
         
         layer1.translatesAutoresizingMaskIntoConstraints = false
         layer2.translatesAutoresizingMaskIntoConstraints = false
         layer3.translatesAutoresizingMaskIntoConstraints = false
-        loadingLayer.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
             
@@ -119,11 +79,6 @@ class PotAnnotationView: MKAnnotationView {
             layer3.heightAnchor.constraint(equalTo: layer2.heightAnchor, constant: -6),
             layer3.centerXAnchor.constraint(equalTo: self.centerXAnchor),
             layer3.centerYAnchor.constraint(equalTo: self.centerYAnchor),
-            
-            loadingLayer.widthAnchor.constraint(equalTo: self.widthAnchor),
-            loadingLayer.heightAnchor.constraint(equalTo: self.heightAnchor),
-            loadingLayer.centerXAnchor.constraint(equalTo: self.centerXAnchor),
-            loadingLayer.centerYAnchor.constraint(equalTo: self.centerYAnchor),
         ])
         
         // shadow
@@ -139,36 +94,45 @@ class PotAnnotationView: MKAnnotationView {
         
         let height = self.bounds.height
         
-        self.bounds.origin.y = -sqrt(2.0) * height/2
+        self.bounds.origin.y = sqrt(2.0) * height/2
         
-        layer3.layer.cornerRadius = layer3.frame.width / 2
+        layer3.layer.cornerRadius = layer3.bounds.width/2
+        
+        if let potAnot = annotation as? PotAnnotation, let imageKey = potAnot.potObject.imageKey {
+            loadImageView(imageKey: imageKey)
+        }
     }
     
-    func turnOffLoadingLayer() {
+    func loadImageView(imageKey: String) {
         
-        loadingLayer.isHidden = true
+        let url = URL(string: "https://d1gmn3m06z496v.cloudfront.net/" + imageKey)
         
-        if let lottieView = loadingLayer.subviews.first! as? LottieAnimationView {
-            lottieView.stop()
+        let processor = DownsamplingImageProcessor(size: layer3.bounds.size) |> RoundCornerImageProcessor(cornerRadius: layer3.bounds.size.width/2)
+        
+        layer3.kf.indicatorType = .none
+        layer3.kf.setImage(
+            with: url,
+            options: [
+                .processor(processor),
+                .scaleFactor(UIScreen.main.scale),
+                .transition(.fade(1)),
+                .cacheOriginalImage
+            ]) {
+            result in
+            switch result {
+            case .success(let value):
+                print("Task done for: \(value.source.url?.absoluteString ?? "")")
+            case .failure(let error):
+                print("Job failed: \(error.localizedDescription)")
+            }
         }
         
-        setNeedsDisplay()
-    }
-    
-    func turnOnLoadingLayer() {
         
-        loadingLayer.isHidden = false
-        
-        if let lottieView = loadingLayer.subviews.first! as? LottieAnimationView {
-            lottieView.play()
-        }
-        
-        setNeedsDisplay()
     }
 }
 
 
-private class PotShapeView: UIView {
+class PotShapeView: UIView {
     
     var color: UIColor = .black
     

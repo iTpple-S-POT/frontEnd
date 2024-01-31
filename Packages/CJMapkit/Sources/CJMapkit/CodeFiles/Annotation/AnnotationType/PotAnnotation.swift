@@ -10,30 +10,17 @@ import SwiftUI
 import DefaultExtensions
 import GlobalObjects
 
-public class PotAnnotation: NSObject, Identifiable, AnnotationClassType {
-//    public var id = UUID() // 고유 식별자를 위한 UUID 추가
-//    public var type: PotAnnotationType
+class PotAnnotation: NSObject, Identifiable, AnnotationClassType {
 
-    public var coordinate: CLLocationCoordinate2D
-    
-    var isActive: Bool
-    
-    var isHiiden: Bool = false
+    var coordinate: CLLocationCoordinate2D
     
     var potObject: PotObject
     
-    var thumbNailIamge: Data?
-    
-    public init(coordinate: CLLocationCoordinate2D, isActive: Bool, potObject: PotObject, thumbNailIamge: Data? = nil) {
-        
-        self.coordinate = coordinate
-        
-        self.isActive = isActive
+    public init(potObject: PotObject) {
         
         self.potObject = potObject
         
         self.coordinate = CLLocationCoordinate2D(latitude: potObject.latitude, longitude: potObject.longitude)
-        
     }
 }
 

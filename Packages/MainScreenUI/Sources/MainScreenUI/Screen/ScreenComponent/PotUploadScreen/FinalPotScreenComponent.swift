@@ -16,6 +16,8 @@ struct FinalPotScreenComponent: View {
     
     @EnvironmentObject var screenModelWithNav: PotUploadScreenModel
     
+    @EnvironmentObject var mapScreenComponentModel: MapScreenComponentModel
+    
     var tagObject: TagCases { TagCases[screenModelWithNav.selectedCategoryId ?? 1] }
     
     var body: some View {
@@ -24,16 +26,19 @@ struct FinalPotScreenComponent: View {
             Color.black
                 .ignoresSafeArea(.container)
             
-            // 선택한 사진
-            if let uiImage = UIImage(data: screenModelWithNav.imageInfo!.data) {
-                
-                Image(uiImage: uiImage)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(height: 300)
-                    .clipShape(Rectangle())
-                    .allowsTightening(false)
-                
+            
+            GeometryReader { geo in
+                // 선택한 사진
+                if let uiImage = UIImage(data: screenModelWithNav.imageInfo!.data) {
+                    
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: geo.size.width, height: geo.size.height/3)
+                        .allowsTightening(false)
+                        .position(x: geo.size.width/2, y: geo.size.height/2)
+                    
+                }
             }
             
             
@@ -156,7 +161,11 @@ struct FinalPotScreenComponent: View {
                     screenModelWithNav.dismiss?()
                     
                     // 팟 업로드
-                    screenModelWithNav.uploadPot()
+                    mapScreenComponentModel.uploadPot(
+                        categoryId: screenModelWithNav.selectedCategoryId!,
+                        content: screenModelWithNav.potText,
+                        imageInfo: screenModelWithNav.imageInfo!
+                    )
                 }
                 .padding(.horizontal, 21)
                 .padding(.vertical, 24)

@@ -8,6 +8,7 @@
 import Foundation
 
 struct PotsResponseModel: Decodable {
+    
     let id, userId: Int64
     let categoryId: [Int64]
     let potType: String
@@ -16,9 +17,11 @@ struct PotsResponseModel: Decodable {
     let imageKey, expiredAt: String
     let hashtagList: [String]
     let viewCount: Int64
+    
+    
 }
 
-public struct PotObject {
+public struct PotObject: Hashable {
     
     /// 팟 식별자
     public let id: Int64
@@ -40,5 +43,9 @@ public struct PotObject {
         self.expirationDate = expirationDate
         self.latitude = latitude
         self.longitude = longitude
+    }
+    
+    public static func ==(lhs: Self, rhs: Self) -> Bool {
+        lhs.id == rhs.id
     }
 }
