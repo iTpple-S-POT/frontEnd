@@ -30,19 +30,24 @@ struct MapScreenComponent: View {
                 
                 HStack {
                     
-                    Button {
+                    if screenModel.userPositionIsAvailable {
                         
-                        screenModel.moveMapToCurrentLocation()
-                        
-                    } label: {
-                        
-                        Image.makeImageFromBundle(bundle: .module, name: "pos_image", ext: .png)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 40)
+                        Button {
+                            
+                            screenModel.moveMapToCurrentLocation()
+                            
+                        } label: {
+                            
+                            Image.makeImageFromBundle(bundle: .module, name: "pos_image", ext: .png)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 40)
+                            
+                        }
+                        .padding(.leading, 21)
+                        .transition(.opacity)
                         
                     }
-                    .padding(.leading, 21)
                     
                     Spacer()
                     

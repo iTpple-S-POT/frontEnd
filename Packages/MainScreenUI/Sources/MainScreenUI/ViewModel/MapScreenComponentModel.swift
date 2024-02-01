@@ -29,6 +29,8 @@ class MapScreenComponentModel: ObservableObject {
     @Published var isUserAndLatestCenterEqual: Bool = false
     @Published var potObjects: Set<PotObject> = []
     @Published var showAlert = false
+    @Published var userPositionIsAvailable = false
+    
     var alertTitle = ""
     var alertMessage = ""
     
@@ -36,7 +38,7 @@ class MapScreenComponentModel: ObservableObject {
     var lastestCenter = CLLocationCoordinate2D()
     
     // 유저의 가장최근 위치
-    private var userPosition: CLLocationCoordinate2D?
+    private var userPosition: CLLocationCoordinate2D!
     
     // 현재 지도의 중심
     var currentCenterPositionOfMap: CLLocationCoordinate2D!
@@ -53,10 +55,13 @@ class MapScreenComponentModel: ObservableObject {
         } receiveValue: { coordinate in
             
             self.userPosition = coordinate
+            self.userPositionIsAvailable = true
             
             DispatchQueue.main.async {
                 
-                self.isUserAndLatestCenterEqual = false
+                withAnimation(.linear(duration: 0.5)) {
+                    self.isUserAndLatestCenterEqual = false
+                }
                 
                 // 첫 요청시에만 자동 업데이트
                 // 이후에는 버튼 눌렀을 때만 업데이트
