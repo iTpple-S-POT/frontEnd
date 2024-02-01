@@ -4,10 +4,6 @@ import DefaultExtensions
 import GlobalUIComponents
 import GlobalObjects
 
-//extension Notification.Name {
-//    static let annotationDidSelect = Notification.Name("annotationDidSelect")
-//}
-
 struct MapScreenComponent: View {
     
     @EnvironmentObject private var mainScreenModel: MainScreenModel
@@ -34,19 +30,24 @@ struct MapScreenComponent: View {
                 
                 HStack {
                     
-                    Button {
+                    if screenModel.userPositionIsAvailable {
                         
-                        screenModel.moveMapToCurrentLocation()
-                        
-                    } label: {
-                        
-                        Image.makeImageFromBundle(bundle: .module, name: "pos_image", ext: .png)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 40)
+                        Button {
+                            
+                            screenModel.moveMapToCurrentLocation()
+                            
+                        } label: {
+                            
+                            Image.makeImageFromBundle(bundle: .module, name: "pos_image", ext: .png)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 40)
+                            
+                        }
+                        .padding(.leading, 21)
+                        .transition(.opacity)
                         
                     }
-                    .padding(.leading, 21)
                     
                     Spacer()
                     
@@ -109,7 +110,7 @@ struct MapScreenComponent: View {
             }
             
         }
-        .fullScreenCover(isPresented: $screenModel.showPotUploadScreen, content: {
+        .fullScreenCover(isPresented: $mainScreenModel.showPotUploadScreen, content: {
             PotUploadScreen { result in
                 
                 // TODO: 추후 수정

@@ -17,7 +17,7 @@ struct TopMostScreenComponent: View {
         ZStack {
             
             Color.mainScreenRed
-                .ignoresSafeArea(.container)
+                .ignoresSafeArea(.all, edges: .top)
             
             HStack(spacing: 0) {
                 Image.makeImageFromBundle(bundle: Bundle.module,name: "spot_logo_image", ext: .png)
@@ -47,6 +47,11 @@ struct TopMostScreenComponent: View {
 }
 
 #Preview {
-    TopMostScreenComponent()
-        .frame(height: 56)
+    VStack {
+        TopMostScreenComponent()
+            .frame(height: 56)
+        
+        Spacer()
+    }
+    
 }

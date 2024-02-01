@@ -10,6 +10,12 @@ import GlobalObjects
 
 class MainScreenModel: ObservableObject {
     
+    // 팟업로드 화면
+    @Published var showPotUploadScreen = false
+    
+    // 탭 상태
+    @Published var selectedTabItem: SpotTapItemSample = .home
+    
     // 데이터를 받을 수 없는 사진의 경우 Alert표시
     @Published var showAlert = false
     @Published private(set) var alertTitle = ""
@@ -25,6 +31,7 @@ class MainScreenModel: ObservableObject {
         .information : false,
         .party : false
     ]
+    
     // 현재활성화 되어있는 테그의 수를 추적합니다.
     var activeTagCount: Int = 1
     
@@ -43,4 +50,52 @@ class MainScreenModel: ObservableObject {
         alertMessage = "팟을 업로드하지 못했습니다."
     }
     
+}
+
+
+enum ImageType { case idle, clk }
+
+enum SpotTapItemSample: Int, CaseIterable, Identifiable {
+    
+    case home, search, potUpload, myPot, myPage
+    
+    var id: UUID { UUID() }
+    
+    func tagItemImage(type: ImageType) -> Image {
+        
+        var imageName = ""
+        
+        switch self {
+        case .home:
+            imageName = "mt_home_"
+        case .search:
+            imageName = "mt_search_"
+        case .potUpload:
+            imageName = "mt_pu_"
+        case .myPot:
+            imageName = "mt_mp_"
+        case .myPage:
+            imageName = "mt_mypage_"
+        }
+        
+        imageName += type == .idle ? "idle" : "clk"
+        
+        return Image.makeImageFromBundle(bundle: .module, name: imageName, ext: .png)
+    }
+    
+    func tagItemTitle() -> String {
+        switch self {
+        case .home:
+            return "홈"
+        case .search:
+            return "검색"
+        case .potUpload:
+            return "업로드"
+        case .myPot:
+            return "나의 POT"
+        case .myPage:
+            return "마이페이지"
+        }
+    }
+
 }

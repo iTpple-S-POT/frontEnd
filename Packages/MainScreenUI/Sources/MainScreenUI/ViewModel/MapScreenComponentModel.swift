@@ -25,13 +25,12 @@ enum SpotPotAnnotationError: Error {
 @MainActor
 class MapScreenComponentModel: ObservableObject {
     
-    // TODO: 수정예정
-    @Published var showPotUploadScreen = false
-    
     @Published var isLastestCenterAndMapEqual: Bool = false
     @Published var isUserAndLatestCenterEqual: Bool = false
     @Published var potObjects: Set<PotObject> = []
     @Published var showAlert = false
+    @Published var userPositionIsAvailable = false
+    
     var alertTitle = ""
     var alertMessage = ""
     
@@ -50,32 +49,19 @@ class MapScreenComponentModel: ObservableObject {
     
     private var isFirstUpdate = true
     
-    init() {
-        
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(potUploadBtnClickedCompletion(_:)),
-            name: .potUploadBtnClicked,
-            object: nil
-        )
-    }
-    
-    @objc
-    func potUploadBtnClickedCompletion(_ notification: Notification) {
-        
-        self.showPotUploadScreen = true
-    }
-    
     func registerLocationSubscriber() {
         
         self.userLocationSubscriber = locationManager.currentLocationPublisher.sink { _ in
         } receiveValue: { coordinate in
             
             self.userPosition = coordinate
+            self.userPositionIsAvailable = true
             
             DispatchQueue.main.async {
                 
-                self.isUserAndLatestCenterEqual = false
+                withAnimation(.linear(duration: 0.5)) {
+                    self.isUserAndLatestCenterEqual = false
+                }
                 
                 // 첫 요청시에만 자동 업데이트
                 // 이후에는 버튼 눌렀을 때만 업데이트
@@ -122,17 +108,21 @@ class MapScreenComponentModel: ObservableObject {
     }
     
     public func moveMapToCurrentLocation() {
+       
+        guard let currentPos = userPosition else {
+            return
+        }
         
-        print("실시간 위치, 지도 중심, 가장최근위치 일치")
+        self.lastestCenter = currentPos
         
-        self.lastestCenter = userPosition
-        
-        self.currentCenterPositionOfMap = userPosition
+        self.currentCenterPositionOfMap = currentPos
         
         self.isUserAndLatestCenterEqual = true
         
         // 맵의 init, updateUIView순서대로 호출
         self.isLastestCenterAndMapEqual = true
+        
+        print("실시간 위치, 지도 중심, 가장최근위치 일치")
         
     }
     

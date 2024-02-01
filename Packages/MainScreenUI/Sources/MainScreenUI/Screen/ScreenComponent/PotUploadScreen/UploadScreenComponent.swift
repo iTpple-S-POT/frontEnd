@@ -31,7 +31,7 @@ struct UploadScreenComponent: View {
             .fill(.btn_light_grey)
             .overlay(content: {
                 RoundedRectangle(cornerRadius: 10)
-                    .strokeBorder(.midium_gray, lineWidth: 1)
+                    .strokeBorder(.medium_gray, lineWidth: 1)
                 Image.makeImageFromBundle(bundle: .module, name: "Camera", ext: .png)
                     .resizable()
                     .scaledToFit()
@@ -138,7 +138,7 @@ struct UploadScreenComponent: View {
                     
                     Text("#해시 태그")
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(.midium_gray)
+                        .foregroundStyle(.medium_gray)
 
                     
                     Spacer()
@@ -163,7 +163,7 @@ struct UploadScreenComponent: View {
                 .textFieldStyle(TappableTextFieldStyle(verPadding: 14, horPadding: 0))
                 .placeholder(when: screenModelWithNav.potText.isEmpty, placeholder: {
                     Text(textFieldPHString)
-                        .foregroundStyle(.midium_gray)
+                        .foregroundStyle(.medium_gray)
                 })
                 .autocorrectionDisabled()
                 .textInputAutocapitalization(.never)
