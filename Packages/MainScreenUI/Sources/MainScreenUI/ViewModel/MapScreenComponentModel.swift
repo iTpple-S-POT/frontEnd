@@ -25,9 +25,6 @@ enum SpotPotAnnotationError: Error {
 @MainActor
 class MapScreenComponentModel: ObservableObject {
     
-    // TODO: 수정예정
-    @Published var showPotUploadScreen = false
-    
     @Published var isLastestCenterAndMapEqual: Bool = false
     @Published var isUserAndLatestCenterEqual: Bool = false
     @Published var potObjects: Set<PotObject> = []
@@ -39,7 +36,7 @@ class MapScreenComponentModel: ObservableObject {
     var lastestCenter = CLLocationCoordinate2D()
     
     // 유저의 가장최근 위치
-    private var userPosition: CLLocationCoordinate2D!
+    private var userPosition: CLLocationCoordinate2D?
     
     // 현재 지도의 중심
     var currentCenterPositionOfMap: CLLocationCoordinate2D!
@@ -49,22 +46,6 @@ class MapScreenComponentModel: ObservableObject {
     var userLocationSubscriber: AnyCancellable?
     
     private var isFirstUpdate = true
-    
-    init() {
-        
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(potUploadBtnClickedCompletion(_:)),
-            name: .potUploadBtnClicked,
-            object: nil
-        )
-    }
-    
-    @objc
-    func potUploadBtnClickedCompletion(_ notification: Notification) {
-        
-        self.showPotUploadScreen = true
-    }
     
     func registerLocationSubscriber() {
         
@@ -122,17 +103,21 @@ class MapScreenComponentModel: ObservableObject {
     }
     
     public func moveMapToCurrentLocation() {
+       
+        guard let currentPos = userPosition else {
+            return
+        }
         
-        print("실시간 위치, 지도 중심, 가장최근위치 일치")
+        self.lastestCenter = currentPos
         
-        self.lastestCenter = userPosition
-        
-        self.currentCenterPositionOfMap = userPosition
+        self.currentCenterPositionOfMap = currentPos
         
         self.isUserAndLatestCenterEqual = true
         
         // 맵의 init, updateUIView순서대로 호출
         self.isLastestCenterAndMapEqual = true
+        
+        print("실시간 위치, 지도 중심, 가장최근위치 일치")
         
     }
     

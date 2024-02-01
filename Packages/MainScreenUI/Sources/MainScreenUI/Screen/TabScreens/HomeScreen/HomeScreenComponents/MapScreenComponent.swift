@@ -4,10 +4,6 @@ import DefaultExtensions
 import GlobalUIComponents
 import GlobalObjects
 
-//extension Notification.Name {
-//    static let annotationDidSelect = Notification.Name("annotationDidSelect")
-//}
-
 struct MapScreenComponent: View {
     
     @EnvironmentObject private var mainScreenModel: MainScreenModel
@@ -109,7 +105,7 @@ struct MapScreenComponent: View {
             }
             
         }
-        .fullScreenCover(isPresented: $screenModel.showPotUploadScreen, content: {
+        .fullScreenCover(isPresented: $mainScreenModel.showPotUploadScreen, content: {
             PotUploadScreen { result in
                 
                 // TODO: 추후 수정

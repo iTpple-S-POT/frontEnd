@@ -50,7 +50,7 @@ struct HashTagScreenComponent: View {
                         .autocorrectionDisabled()
                         .placeholder(when: screenModelWithNav.temporalHashTagString.isEmpty, placeholder: {
                             Text("해시태그를 입력해 주세요")
-                                .foregroundStyle(.midium_gray)
+                                .foregroundStyle(.medium_gray)
                         })
                         .font(.system(size: 16, weight: .semibold))
                         .focused($focusState)
