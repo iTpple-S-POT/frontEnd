@@ -20,6 +20,8 @@ extension ShapeStyle where Self == Color {
     
 }
 
+public typealias TagsDict = [TagCases: Bool]
+
 /// 카테고리 정보와 혼용됩니다.
 public enum TagCases: Int, Identifiable, CaseIterable {
     case all = 10

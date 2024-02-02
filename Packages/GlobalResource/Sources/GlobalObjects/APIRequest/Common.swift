@@ -62,7 +62,7 @@ public extension APIRequestGlobalObject {
         case userInfo
         case userNickNameCheck
         
-        static let baseUrl = "http://13.209.233.160"
+        static let baseUrl = "http://15.164.165.156"
         
         public func getApiUrl() throws -> URL {
             

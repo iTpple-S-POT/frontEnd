@@ -53,6 +53,9 @@ class PotAnnotationView: MKAnnotationView {
     
     func setUp(annotation: PotAnnotation) {
         
+        // Annotation크기 조정
+        self.bounds.size = CGSize(width: 54, height: 54)
+        
         layer2.color = PotAnnotationType(rawValue: Int(annotation.potObject.categoryId))!.getAnnotationColor()
         
         self.addSubview(layer1)
