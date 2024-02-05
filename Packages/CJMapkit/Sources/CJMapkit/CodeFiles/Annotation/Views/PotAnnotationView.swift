@@ -41,20 +41,31 @@ class PotAnnotationView: MKAnnotationView {
     
     init(annotation: PotAnnotation, reuseIdentifier: String?) {
         super.init(annotation: annotation, reuseIdentifier: reuseIdentifier)
-        
-        self.annotation = annotation
-        
-        setUp(annotation: annotation)
     }
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented!")
     }
     
+    override func prepareForDisplay() {
+        super.prepareForDisplay()
+        
+        setUp(annotation: self.annotation as! PotAnnotation)
+        
+        setNeedsDisplay()
+    }
+    
+    override func prepareForReuse() {
+        self.alpha = 1.0
+        self.isHidden = false
+    }
+    
     func setUp(annotation: PotAnnotation) {
         
+        self.collisionMode = .circle
+        
         // Annotation크기 조정
-        self.bounds.size = CGSize(width: 54, height: 54)
+        self.bounds.size = CGSize(width: 27, height: 27)
         
         layer2.color = PotAnnotationType(rawValue: Int(annotation.potObject.categoryId))!.getAnnotationColor()
         
@@ -68,8 +79,8 @@ class PotAnnotationView: MKAnnotationView {
         
         NSLayoutConstraint.activate([
             
-            layer1.widthAnchor.constraint(equalTo: self.widthAnchor),
-            layer1.heightAnchor.constraint(equalTo: self.heightAnchor),
+            layer1.widthAnchor.constraint(equalTo: self.widthAnchor, multiplier: 2),
+            layer1.heightAnchor.constraint(equalTo: self.heightAnchor, multiplier: 2),
             layer1.centerXAnchor.constraint(equalTo: self.centerXAnchor),
             layer1.centerYAnchor.constraint(equalTo: self.centerYAnchor),
             
@@ -97,9 +108,9 @@ class PotAnnotationView: MKAnnotationView {
         
         let height = self.bounds.height
         
-        self.bounds.origin.y = sqrt(2.0) * height/2
+        self.bounds.origin.y = sqrt(2.0) * height
         
-        layer3.layer.cornerRadius = layer3.bounds.width/2
+        layer3.layer.cornerRadius = layer3.bounds.width / 2
         
         if let potAnot = annotation as? PotAnnotation, let imageKey = potAnot.potObject.imageKey {
             loadImageView(imageKey: imageKey)
@@ -129,8 +140,21 @@ class PotAnnotationView: MKAnnotationView {
                 print("Job failed: \(error.localizedDescription)")
             }
         }
+    }
+    
+    func pathForAnnotationViewCollisionBound(rect: CGRect) -> UIBezierPath {
         
+        let path = UIBezierPath()
         
+        let center = CGPoint(x: rect.width/2, y: rect.height/2)
+        
+        path.move(to: CGPoint(x: rect.width/2, y: rect.width/4))
+        
+        path.addArc(withCenter: center, radius: rect.width/2, startAngle: (-90 * .pi) / 180, endAngle: 0, clockwise: false)
+        
+        path.close()
+        
+        return path
     }
 }
 

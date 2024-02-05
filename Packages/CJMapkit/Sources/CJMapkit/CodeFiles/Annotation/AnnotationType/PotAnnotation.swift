@@ -9,8 +9,9 @@ import CoreLocation
 import SwiftUI
 import DefaultExtensions
 import GlobalObjects
+import MapKit
 
-class PotAnnotation: NSObject, Identifiable, AnnotationClassType {
+class PotAnnotation: NSObject, Identifiable, MKAnnotation {
 
     var coordinate: CLLocationCoordinate2D
     

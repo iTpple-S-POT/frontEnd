@@ -7,11 +7,3 @@
 
 import MapKit
 
-// MARK: - Custom MKAnnotation
-public protocol AnnotationClassType: MKAnnotation {
-    var identifier: String { get }
-}
-
-public extension AnnotationClassType {
-    var identifier: String { NSStringFromClass(Self.self) }
-}

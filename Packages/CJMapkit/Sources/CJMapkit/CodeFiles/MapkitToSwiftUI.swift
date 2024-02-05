@@ -13,14 +13,6 @@ public enum MapViewState {
     case movingToEqual
 }
 
-extension CLLocationCoordinate2D: Equatable {
-    
-    public static func == (lhs: CLLocationCoordinate2D, rhs: CLLocationCoordinate2D) -> Bool {
-        lhs.latitude == rhs.latitude && lhs.longitude == rhs.longitude
-    }
-    
-}
-
 // MARK: - Coordinator
 public class MkMapViewCoordinator: NSObject {
     
@@ -38,6 +30,10 @@ public class MkMapViewCoordinator: NSObject {
     
     let mapCenterChangedPublisher = PassthroughSubject<CLLocationCoordinate2D, Never>()
     
+    private static let potAnnotationViewIdentifier = NSStringFromClass(PotAnnotationView.self)
+    private static let potClusterAnnotationViewIdentifier = NSStringFromClass(PotClusterAnnotationView.self)
+    private static let potClusterAnnotationId = "potAnnotation"
+    
     override init() {
         super.init()
         registerAnnotation()
@@ -47,7 +43,8 @@ public class MkMapViewCoordinator: NSObject {
     private func registerAnnotation() {
         guard let mapView = self.mapView else { return }
         
-        mapView.register(PotAnnotationView.self, forAnnotationViewWithReuseIdentifier: NSStringFromClass(PotAnnotationView.self))
+        mapView.register(PotAnnotationView.self, forAnnotationViewWithReuseIdentifier: Self.potAnnotationViewIdentifier)
+        mapView.register(PotClusterAnnotationView.self, forAnnotationViewWithReuseIdentifier: Self.potClusterAnnotationViewIdentifier)
     }
     
     func setUserMapEqual(location: CLLocationCoordinate2D) {
@@ -73,32 +70,36 @@ extension MkMapViewCoordinator: MKMapViewDelegate {
     
     public func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
         
-        let someAnnotation = annotation as! AnnotationClassType
-        
-        switch someAnnotation.identifier {
-        case NSStringFromClass(PotAnnotation.self):
+        switch annotation {
+        case let potAnnot as PotAnnotation:
+            let reuseAnnotationView = mapView.dequeueReusableAnnotationView(withIdentifier: Self.potAnnotationViewIdentifier)
             
-            let potAnnotation = someAnnotation as! PotAnnotation
-            
-            let reuseIdentifier = NSStringFromClass(PotAnnotationView.self)
-            
-            let reuseAnnotationView = mapView.dequeueReusableAnnotationView(withIdentifier: reuseIdentifier)
-            
-            var potAnnotationView: PotAnnotationView!
-            
-            if let reuseAnot = reuseAnnotationView as? PotAnnotationView {
+            if let reusable = reuseAnnotationView {
+
+                reusable.annotation = potAnnot
                 
-                potAnnotationView = reuseAnot
-                
-                potAnnotationView.annotation = potAnnotation
-                potAnnotationView.setUp(annotation: potAnnotation)
-            } else {
-                
-                // 새로운 AnnotationView생성
-                potAnnotationView = PotAnnotationView(annotation: potAnnotation, reuseIdentifier: NSStringFromClass(PotAnnotationView.self))
+                return reusable
             }
             
+            // 새로운 AnnotationView생성
+            let potAnnotationView = PotAnnotationView(annotation: potAnnot, reuseIdentifier: Self.potAnnotationViewIdentifier)
+            
+            potAnnotationView.clusteringIdentifier = Self.potClusterAnnotationId
+            
             return potAnnotationView
+        case let potClusterAnnot as MKClusterAnnotation:
+            
+            let reuseAnnotationView = mapView.dequeueReusableAnnotationView(withIdentifier: Self.potClusterAnnotationViewIdentifier)
+            
+            if let reusable = reuseAnnotationView {
+                
+                reusable.annotation = potClusterAnnot
+                
+                return reusable
+            }
+            
+            // 새로운 AnnotationView생성
+            return PotClusterAnnotationView(annotation: potClusterAnnot, reuseIdentifier: Self.potClusterAnnotationViewIdentifier)
         default:
             return nil
         }
@@ -308,177 +309,4 @@ public struct MapkitViewRepresentable: UIViewRepresentable {
         mapView.hideAnnotations(wiilHideAnnotations)
         mapView.unhideAnnotations(willDisplayAnnotations)
     }
-}
-
-
-// MARK: - 테스트중
-
-extension MKAnnotationView {
-    
-    private struct Holder {
-        static var heldSavedCollision = [String: CollisionMode]()
-        static var heldSavedAnnotation = [String: MKAnnotation]()
-    }
-    
-    var savedAnnotation: MKAnnotation? {
-        get { return Holder.heldSavedAnnotation[debugDescription] ?? nil }
-        set(newValue) { Holder.heldSavedAnnotation[debugDescription] = newValue }
-    }
-    
-    // used for saving and restoring collisionmode
-    var savedCollision: CollisionMode? {
-        get { return Holder.heldSavedCollision[debugDescription] ?? nil }
-        set(newValue) { Holder.heldSavedCollision[debugDescription] = newValue }
-    }
-    
-    func hideAnimated(withDuration: Double = 0.2 , delay: Double = 0, completion: (() -> Void)? = nil) {
-        savedAnnotation = self.annotation
-        self.savedCollision = self.collisionMode
-        
-        let dispGroup = DispatchGroup()
-        dispGroup.enter()
-        DispatchQueue.main.async(group: dispGroup) {
-            // small delay is needed to make the collisons recalculate
-            UIView.animate(withDuration: withDuration, delay: delay, options: .curveEaseInOut,
-                           animations: { self.alpha = 0 },
-                           completion: { _ in dispGroup.leave()})
-        }
-        
-        dispGroup.notify(queue: .main) {
-            self.collisionMode = .none
-            
-            // don't complete the animation if the annotation has changed meanwhile
-            // when using reusable annotations the annotation could have changed
-            // while the animation was running
-            // therefore we dont want to complete the animation when the annotation has changed
-            
-            if self.hasAnnotationChanged() {
-                completion?()
-                return
-                
-            } else {
-                self.alpha = 0
-                self.isHidden = true
-                completion?()
-            }
-            
-        }
-    }
-    
-    func hide() {
-        savedCollision = collisionMode
-        collisionMode = .none
-        alpha = 0
-        isHidden = true
-    }
-    
-    private func hasAnnotationChanged() -> Bool {
-        return !(self.savedAnnotation?.title == self.annotation?.title && self.savedAnnotation?.subtitle == self.annotation?.subtitle)
-    }
-    
-    func showAnimated(withDuration: Double = 0.2 , delay: Double = 0, completion: (() -> Void)? = nil) {
-        savedAnnotation = self.annotation
-        collisionMode = savedCollision ?? .rectangle
-        
-        isHidden = false
-        
-        let dispGroup = DispatchGroup()
-        dispGroup.enter()
-        DispatchQueue.main.async(group: dispGroup) {
-            // small delay is needed to make the collisons recalculate
-            UIView.animate(withDuration: withDuration, delay: delay, options: .curveEaseInOut,
-                           animations: { self.alpha = 1.0 },
-                           completion: { _ in dispGroup.leave() }
-            )
-        }
-        
-        dispGroup.notify(queue: .main) {
-            // don't complete the animation if the annotation has changed meanwhile
-            if self.hasAnnotationChanged() {
-                completion?()
-                return
-            } else {
-                self.alpha = 1
-                completion?()
-            }
-        }
-        
-    }
-    
-    func show() {
-        collisionMode = savedCollision ?? .rectangle
-        alpha = 1
-        isHidden = false
-    }
-}
-
-extension MKMapView {
-    
-    func unhideAnnotation(_ annotation: MKAnnotation, animated: Bool = false, withDuration: Double = 0.2, delay: Double = 0,
-                          completion: (() -> Void)? = nil) {
-        DispatchQueue.main.async {
-            if let annotationView = self.view(for: annotation) {
-                if animated {
-                    annotationView.showAnimated(withDuration: withDuration , delay: delay,  completion: completion)
-                } else {
-                    annotationView.show()
-                    completion?()
-                }
-            }
-        }
-    }
-    
-    /**
-     shows all given annotations
-     completion is run after all annotations are shown
-     */
-    func unhideAnnotations(_ annotations: [MKAnnotation], animated: Bool = false, withDuration: Double = 0.2, delay: Double = 0,
-                           completion: (() -> Void)? = nil) {
-        
-        let dispGroup = DispatchGroup()
-        for annotation in annotations {
-            dispGroup.enter()
-            unhideAnnotation(annotation, animated: animated, withDuration: withDuration , delay: delay, completion: {
-                dispGroup.leave()
-            })
-        }
-        
-        dispGroup.notify(queue: .main) {
-            completion?()
-        }
-        
-    }
-    
-    
-    func hideAnnotation(_ annotation: MKAnnotation, animated: Bool = false, withDuration: Double = 0.2 , delay: Double = 0, completion: (() -> Void)? = nil) {
-        DispatchQueue.main.async {
-            if let annotationView = self.view(for: annotation) {
-                if animated {
-                    annotationView.hideAnimated(withDuration: withDuration , delay: delay, completion: completion)
-                } else {
-                    annotationView.hide()
-                    completion?()
-                }
-            } else {
-                // when no annotationview is found run the completion
-                completion?()
-            }
-        }
-    }
-    
-    func hideAnnotations(_ annotations: [MKAnnotation], animated: Bool = false, withDuration: Double = 0.2, delay: Double = 0,
-                         completion: (() -> Void)? = nil) {
-        let dispGroup = DispatchGroup()
-        for annotation in annotations {
-            dispGroup.enter()
-            hideAnnotation(annotation, animated: animated, withDuration: withDuration , delay: delay,  completion: {
-                dispGroup.leave()
-            })
-        }
-        
-        dispGroup.notify(queue: .main) {
-            completion?()
-        }
-    }
-    
 }
