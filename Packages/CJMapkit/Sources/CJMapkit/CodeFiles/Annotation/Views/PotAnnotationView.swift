@@ -41,6 +41,8 @@ class PotAnnotationView: MKAnnotationView {
     
     init(annotation: PotAnnotation, reuseIdentifier: String?) {
         super.init(annotation: annotation, reuseIdentifier: reuseIdentifier)
+        
+        setUp(annotation: self.annotation as! PotAnnotation)
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -49,8 +51,6 @@ class PotAnnotationView: MKAnnotationView {
     
     override func prepareForDisplay() {
         super.prepareForDisplay()
-        
-        setUp(annotation: self.annotation as! PotAnnotation)
         
         setNeedsDisplay()
     }
@@ -64,8 +64,8 @@ class PotAnnotationView: MKAnnotationView {
         
         self.collisionMode = .circle
         
-        // Annotation크기 조정
-        self.bounds.size = CGSize(width: 27, height: 27)
+        // Annotation크기 조정(collision을 위한 설정)
+        self.frame.size = CGSize(width: 13.5, height: 13.5)
         
         layer2.color = PotAnnotationType(rawValue: Int(annotation.potObject.categoryId))!.getAnnotationColor()
         
@@ -79,8 +79,8 @@ class PotAnnotationView: MKAnnotationView {
         
         NSLayoutConstraint.activate([
             
-            layer1.widthAnchor.constraint(equalTo: self.widthAnchor, multiplier: 2),
-            layer1.heightAnchor.constraint(equalTo: self.heightAnchor, multiplier: 2),
+            layer1.widthAnchor.constraint(equalTo: self.widthAnchor, multiplier: 4.0),
+            layer1.heightAnchor.constraint(equalTo: self.heightAnchor, multiplier: 4.0),
             layer1.centerXAnchor.constraint(equalTo: self.centerXAnchor),
             layer1.centerYAnchor.constraint(equalTo: self.centerYAnchor),
             
@@ -108,7 +108,7 @@ class PotAnnotationView: MKAnnotationView {
         
         let height = self.bounds.height
         
-        self.bounds.origin.y = sqrt(2.0) * height
+        self.bounds.origin.y = sqrt(2.0) * (height * 2)
         
         layer3.layer.cornerRadius = layer3.bounds.width / 2
         
@@ -129,7 +129,7 @@ class PotAnnotationView: MKAnnotationView {
             options: [
                 .processor(processor),
                 .scaleFactor(UIScreen.main.scale),
-                .transition(.fade(1)),
+                .transition(.fade(0.5)),
                 .cacheOriginalImage
             ]) {
             result in

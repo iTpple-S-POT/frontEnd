@@ -29,6 +29,10 @@ class PotClusterAnnotationView: MKAnnotationView {
         self.image = drawCircleWithCountText(count: clusterAnnotation.memberAnnotations.count)
     }
     
+    override func prepareForReuse() {
+        super.prepareForReuse()
+    }
+    
     func drawCircleWithCountText(count: Int) -> UIImage {
         
         let annotationSize = CGSize(width: 104, height: 104)
