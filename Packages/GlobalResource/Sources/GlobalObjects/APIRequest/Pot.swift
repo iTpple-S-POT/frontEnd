@@ -139,7 +139,8 @@ public extension APIRequestGlobalObject {
                 imageKey: decoded.imageKey,
                 expirationDate: decoded.expiredAt,
                 latitude: decoded.location.lat,
-                longitude: decoded.location.lon
+                longitude: decoded.location.lon,
+                viewCount: 0
             )
             
             print("팟 업로드 성공")
@@ -189,6 +190,8 @@ public extension APIRequestGlobalObject {
             
             let decoded: [PotsResponseModel] = try jsonDecoder.decode([PotsResponseModel].self, from: data)
             
+            print("팟 수: \(decoded.count)")
+            
             let potObjects = decoded.map { model in
                 
                 return PotObject(
@@ -199,7 +202,8 @@ public extension APIRequestGlobalObject {
                     imageKey: model.imageKey.isEmpty ? nil : model.imageKey,
                     expirationDate: model.expiredAt,
                     latitude: Double(model.location.lat),
-                    longitude: Double(model.location.lon)
+                    longitude: Double(model.location.lon),
+                    viewCount: Int(model.viewCount)
                 )
             }
             
@@ -208,5 +212,37 @@ public extension APIRequestGlobalObject {
             
             throw SpotNetworkError.unknownError(function: #function)
         }
+    }
+    
+    // 팟 클릭시 팟데이터 데요청(viewCount증가 로직)
+    func getPotForPotDetailAbout(potId: Int64) async throws -> PotObject {
+        
+        var url = try SpotAPI.getPots.getApiUrl()
+        url = url.appendingPathComponent(String(potId))
+        
+        let request = try getURLRequest(url: url, method: .get, isAuth: true)
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        if let httpResponse = response as? HTTPURLResponse {
+            
+            try defaultCheckStatusCode(response: httpResponse, functionName: #function, data: data)
+            
+            let decoded: PotsResponseModel = try jsonDecoder.decode(PotsResponseModel.self, from: data)
+            
+            return PotObject(
+                id: decoded.id,
+                userId: decoded.userId,
+                categoryId: decoded.categoryId.first!,
+                content: decoded.content ?? "",
+                imageKey: decoded.imageKey.isEmpty ? nil : decoded.imageKey,
+                expirationDate: decoded.expiredAt,
+                latitude: Double(decoded.location.lat),
+                longitude: Double(decoded.location.lon),
+                viewCount: Int(decoded.viewCount)
+            )
+        }
+        
+        throw SpotNetworkError.unknownError(function: #function)
     }
 }

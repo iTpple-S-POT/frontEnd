@@ -13,6 +13,11 @@ public enum MapViewState {
     case movingToEqual
 }
 
+public extension Notification.Name {
+    static let singlePotSelection: Self = .init("singlePotSelection")
+}
+
+
 // MARK: - Coordinator
 public class MkMapViewCoordinator: NSObject {
     
@@ -65,9 +70,9 @@ public class MkMapViewCoordinator: NSObject {
 }
 
 // MARK: - MKMapViewDelegate
-
 extension MkMapViewCoordinator: MKMapViewDelegate {
     
+    // Annotation
     public func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
         
         switch annotation {
@@ -105,6 +110,23 @@ extension MkMapViewCoordinator: MKMapViewDelegate {
         }
     }
     
+    // Annotation selection
+    public func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
+        
+        mapView.selectedAnnotations.removeAll()
+        
+        switch view.annotation {
+        case let potAnnotation as PotAnnotation:
+            NotificationCenter.default.post(name: .singlePotSelection, object: potAnnotation.potObject)
+        case let clusterAnnotation as MKClusterAnnotation:
+            // TODO: 클러스터 선택시
+            return
+        default:
+            return
+        }
+    }
+    
+    // map위치 변동
     public func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
         
         // 맵중심 변동 Publisher
@@ -129,14 +151,6 @@ extension MkMapViewCoordinator: MKMapViewDelegate {
             return
         }
         
-    }
-    
-    
-    public func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
-        if let annotation = view.annotation as? PotAnnotation {
-            // 선택된 어노테이션 정보를 전달하며 notification을 post합니다.
-            NotificationCenter.default.post(name: Notification.Name("annotationDidSelect"), object: annotation)
-        }
     }
 }
 
@@ -221,27 +235,24 @@ public struct MapkitViewRepresentable: UIViewRepresentable {
         
     }
     
-    func makePotAnnotationsFrom(mapView: MKMapView, potObjects: Set<PotObject>) {
+    func makePotAnnotationsFrom(mapView: MKMapView, potObjects newPotObjects: Set<PotObject>) {
         
-        let annotations = potObjects.map { PotAnnotation(potObject: $0) }
+        var oldPotObjects: Set<PotObject> = []
         
-        let ids = mapView.annotations.compactMap { anot in
-            if let potAnot = anot as? PotAnnotation {
+        mapView.annotations.forEach { annot in
+            
+            if let potAnot = annot as? PotAnnotation {
                 
-                return potAnot.potObject.id
-                
-            } else {
-                return nil
+                oldPotObjects.insert(potAnot.potObject)
             }
         }
         
-        let newAnnotations = annotations.filter { anot in
-            !ids.contains { id in anot.potObject.id == id }
-        }
+        let willAddAnnotations = newPotObjects.subtracting(oldPotObjects).map { PotAnnotation(potObject: $0) }
+        let willDiscardAnnotations = oldPotObjects.subtracting(newPotObjects).map { PotAnnotation(potObject: $0) }
         
-        mapView.addAnnotations(newAnnotations)
+        mapView.addAnnotations(willAddAnnotations)
+        mapView.removeAnnotations(willDiscardAnnotations)
     }
-    
     
     func setSubscription(coordinator: MkMapViewCoordinator) {
         

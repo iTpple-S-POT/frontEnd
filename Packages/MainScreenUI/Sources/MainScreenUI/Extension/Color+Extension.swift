@@ -1,4 +1,5 @@
 import SwiftUI
+import DefaultExtensions
 
 extension ShapeStyle where Self == Color {
     
@@ -16,6 +17,12 @@ extension ShapeStyle where Self == Color {
     static var medium_gray: Color { Color(hex: "C7C7C7") }
     
     static var regular_gray: Color { Color(hex: "878787") }
+    
+}
+
+extension UIColor {
+    
+    static let medium_gray = UIColor(hex: "C7C7C7")
     
 }
 

@@ -149,8 +149,6 @@ class MapScreenComponentModel: ObservableObject {
                 
             } catch {
                 
-                print("초기 팟 처리 실패", functionName)
-                
                 print(error.localizedDescription)
             }
             
@@ -225,12 +223,9 @@ extension MapScreenComponentModel {
                 
                 let potObject = PotObject(id: dummyPotId, userId: -1, categoryId: categoryId, content: "", imageKey: nil, expirationDate: "", latitude: location.latitude, longitude: location.longitude)
                 
-                // dummy생성
-                await self.addPot(object: potObject)
-                
                 let uploadedPotObject = try await APIRequestGlobalObject.shared.executePotUpload(imageInfo: imageInfo, uploadObject: potDTO)
                 
-                await self.updatePotWith(prevId: dummyPotId, object: uploadedPotObject)
+                await self.addPot(object: uploadedPotObject)
                 
             } catch {
                 

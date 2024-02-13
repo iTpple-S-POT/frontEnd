@@ -17,8 +17,6 @@ struct PotsResponseModel: Decodable {
     let imageKey, expiredAt: String
     let hashtagList: [String]
     let viewCount: Int64
-    
-    
 }
 
 public struct PotObject: Hashable {
@@ -33,8 +31,9 @@ public struct PotObject: Hashable {
     public let expirationDate: String
     public let latitude: Double
     public let longitude: Double
+    public var viewCount: Int
     
-    public init(id: Int64, userId: Int64, categoryId: Int64, content: String, imageKey: String?, expirationDate: String, latitude: Double, longitude: Double) {
+    public init(id: Int64, userId: Int64, categoryId: Int64, content: String, imageKey: String?, expirationDate: String, latitude: Double, longitude: Double, viewCount: Int=0) {
         self.id = id
         self.userId = userId
         self.categoryId = categoryId
@@ -43,6 +42,7 @@ public struct PotObject: Hashable {
         self.expirationDate = expirationDate
         self.latitude = latitude
         self.longitude = longitude
+        self.viewCount = viewCount
     }
     
     public static func ==(lhs: Self, rhs: Self) -> Bool {

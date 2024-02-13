@@ -16,4 +16,8 @@ public extension String{
         
         return size.width
     }
+    
+    func getPreSignedUrlString() -> String {
+        "https://d1gmn3m06z496v.cloudfront.net/" + self
+    }
 }

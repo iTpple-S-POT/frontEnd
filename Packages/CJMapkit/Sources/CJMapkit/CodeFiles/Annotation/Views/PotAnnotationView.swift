@@ -9,6 +9,7 @@ import SwiftUI
 import UIKit
 import MapKit
 import GlobalObjects
+import DefaultExtensions
 import Lottie
 import Kingfisher
 
@@ -65,7 +66,7 @@ class PotAnnotationView: MKAnnotationView {
         self.collisionMode = .circle
         
         // Annotation크기 조정(collision을 위한 설정)
-        self.frame.size = CGSize(width: 13.5, height: 13.5)
+        self.frame.size = CGSize(width: 52, height: 52)
         
         layer2.color = PotAnnotationType(rawValue: Int(annotation.potObject.categoryId))!.getAnnotationColor()
         
@@ -79,8 +80,8 @@ class PotAnnotationView: MKAnnotationView {
         
         NSLayoutConstraint.activate([
             
-            layer1.widthAnchor.constraint(equalTo: self.widthAnchor, multiplier: 4.0),
-            layer1.heightAnchor.constraint(equalTo: self.heightAnchor, multiplier: 4.0),
+            layer1.widthAnchor.constraint(equalToConstant: self.frame.width),
+            layer1.heightAnchor.constraint(equalToConstant: self.frame.height),
             layer1.centerXAnchor.constraint(equalTo: self.centerXAnchor),
             layer1.centerYAnchor.constraint(equalTo: self.centerYAnchor),
             
@@ -108,7 +109,9 @@ class PotAnnotationView: MKAnnotationView {
         
         let height = self.bounds.height
         
-        self.bounds.origin.y = sqrt(2.0) * (height * 2)
+        print(frame)
+        
+        self.frame.origin.y = sqrt(2.0) * height/2
         
         layer3.layer.cornerRadius = layer3.bounds.width / 2
         
@@ -119,7 +122,7 @@ class PotAnnotationView: MKAnnotationView {
     
     func loadImageView(imageKey: String) {
         
-        let url = URL(string: "https://d1gmn3m06z496v.cloudfront.net/" + imageKey)
+        let url = URL(string: imageKey.getPreSignedUrlString())
         
         let processor = DownsamplingImageProcessor(size: layer3.bounds.size) |> RoundCornerImageProcessor(cornerRadius: layer3.bounds.size.width/2)
         

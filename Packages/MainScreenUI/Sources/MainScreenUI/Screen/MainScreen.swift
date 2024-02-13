@@ -11,6 +11,8 @@ public struct MainScreen: View  {
     
     @StateObject private var screenModel = MainScreenModel()
     
+    @StateObject private var mainScreenConfig = MainScreenConfig()
+    
     private let tabs: [SpotTapItemSample : AnyView] = [
         .home : AnyView(HomeScreen()),
         .search : AnyView(Text("검색")),
@@ -75,24 +77,35 @@ public struct MainScreen: View  {
             ZStack {
 
                 //여기를 조작하여 원하는 백그라운드를 설정할 수 있다.
-                Color.white
+                Color(uiColor: mainScreenConfig.tabViewMode.getColorSet().tabViewBackgroundColor)
                     .ignoresSafeArea(.all, edges: .bottom)
-
-                HStack(spacing: 0) {
+                
+                GeometryReader { geo in
                     
-                    ForEach(SpotTapItemSample.allCases) { item in
+                    let cellWidth = geo.size.width / 5
+                    let cellHeight = geo.size.height
+                    
+                    HStack(spacing: 0) {
                         
-                        SpotTabItem(activeSample: screenModel.selectedTabItem, identitiy: item) {
+                        ForEach(SpotTapItemSample.allCases) { item in
                             
-                            // 팟업로드를 제외한 경우(탭 전환)
-                            if item != .potUpload {
+                            SpotTabItem(activeSample: screenModel.selectedTabItem, identitiy: item) {
                                 
-                                screenModel.selectedTabItem = item
-                            } else {
-                                
-                                // 팟업로드 화면 표시
-                                screenModel.showPotUploadScreen = true
+                                // 팟업로드를 제외한 경우(탭 전환)
+                                if item != .potUpload {
+                                    
+                                    // 다른 탭으로 전환시 탭 테마 변경
+                                    mainScreenConfig.onTabTransition(nextState: item, prevState: screenModel.selectedTabItem)
+                                    
+                                    screenModel.selectedTabItem = item
+                                    
+                                } else {
+                                    
+                                    // 팟업로드 화면 표시
+                                    screenModel.showPotUploadScreen = true
+                                }
                             }
+                            .frame(width: cellWidth, height: cellHeight)
                         }
                     }
                 }
@@ -107,12 +120,15 @@ public struct MainScreen: View  {
             Text(screenModel.alertMessage)
         })
         .environmentObject(screenModel)
+        .environment(\.mainScreenConfig, mainScreenConfig)
     }
 }
 
 
 // MARK: - 탭 버튼
 fileprivate struct SpotTabItem: View {
+    
+    @Environment(\.mainScreenConfig) var mainScreenConfig
     
     var activeSample: SpotTapItemSample
     
@@ -122,32 +138,30 @@ fileprivate struct SpotTabItem: View {
     
     private var isActive: Bool { activeSample == identitiy }
     
-    private var textColor: Color { isActive ? .black : .medium_gray }
-    
     private var imageType: ImageType { isActive ? .clk : .idle }
     
+    private var tabViewColorSet: TabItemColorSet { mainScreenConfig.tabViewMode.getColorSet() }
+    
+    private var backgroundColor: UIColor { tabViewColorSet.tabViewBackgroundColor }
+    private var idleColor: UIColor { tabViewColorSet.itemIdleColor }
+    private var clkColor: UIColor { tabViewColorSet.itemClkColor }
+    
     var body: some View {
-        ZStack {
+        VStack(spacing: 4) {
             
-            Color.clear
+            identitiy.tagItemImage(type: imageType, color: isActive ? clkColor : idleColor)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 30)
             
-            VStack(spacing: 4) {
+            Text(identitiy.tagItemTitle())
+                .font(.system(size: 12))
+                .foregroundStyle(Color(uiColor: isActive ? clkColor : idleColor))
                 
-                identitiy.tagItemImage(type: imageType)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 30)
-                
-                Text(identitiy.tagItemTitle())
-                    .font(.system(size: 12))
-                    .foregroundStyle(textColor)
-                    
-            }
-            
         }
+        .animation(.easeOut(duration: 0.1), value: imageType)
         .contentShape(Circle())
         .onTapGesture {
-            
             action()
         }
     }

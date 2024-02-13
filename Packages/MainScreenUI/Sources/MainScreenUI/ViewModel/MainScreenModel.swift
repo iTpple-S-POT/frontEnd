@@ -7,6 +7,7 @@
 
 import SwiftUI
 import GlobalObjects
+import DefaultExtensions
 
 class MainScreenModel: ObservableObject {
     
@@ -61,7 +62,7 @@ enum SpotTapItemSample: Int, CaseIterable, Identifiable {
     
     var id: UUID { UUID() }
     
-    func tagItemImage(type: ImageType) -> Image {
+    func tagItemImage(type: ImageType, color: UIColor) -> Image {
         
         var imageName = ""
         
@@ -80,7 +81,11 @@ enum SpotTapItemSample: Int, CaseIterable, Identifiable {
         
         imageName += type == .idle ? "idle" : "clk"
         
-        return Image.makeImageFromBundle(bundle: .module, name: imageName, ext: .png)
+        let path = Bundle.module.provideFilePath(name: imageName, ext: "png")
+        
+        let uiImage = UIImage(named: path)!.imageWithColor(color: color)
+        
+        return Image(uiImage: uiImage)
     }
     
     func tagItemTitle() -> String {
@@ -97,5 +102,30 @@ enum SpotTapItemSample: Int, CaseIterable, Identifiable {
             return "마이페이지"
         }
     }
+}
 
+
+// MARK: - tabItemColorSet
+
+enum TabViewMode {
+    
+    case idleMode
+    case blackMode
+    
+    func getColorSet() -> TabItemColorSet {
+        
+        switch self {
+        case .idleMode:
+            return TabItemColorSet(tabViewBackgroundColor: .white, itemIdleColor: .medium_gray, itemClkColor: .black)
+        case .blackMode:
+            return TabItemColorSet(tabViewBackgroundColor: .black, itemIdleColor: .white, itemClkColor: .white)
+        }
+    }
+}
+
+struct TabItemColorSet {
+    
+    let tabViewBackgroundColor: UIColor
+    let itemIdleColor: UIColor
+    let itemClkColor: UIColor
 }
