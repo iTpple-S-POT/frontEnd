@@ -68,10 +68,10 @@ struct HomeScreen: View {
                     }
                 }
                 .slideTransition(
-                    from: CGPoint(x: 0, y: height/2),
+                    from: CGPoint(x: 0, y: height/3),
                     to: CGPoint(x: 0, y: 0)
                 )
-                .animation(.easeIn(duration: 0.5), value: homeScreenModel.presentPotDetailView)
+                .animation(.easeIn(duration: 0.3), value: homeScreenModel.presentPotDetailView)
                 
             }
             .zIndex(2)

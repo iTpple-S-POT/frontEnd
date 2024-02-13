@@ -58,9 +58,10 @@ public struct PotDetailView: View {
             GeometryReader { geo in
                 
                 KFImage(URL(string: potObject.imageKey?.getPreSignedUrlString() ?? "")!)
-                    .setProcessor(DownsamplingImageProcessor(size: CGSize(width: geo.size.width, height: geo.size.height+geo.safeAreaInsets.top)))
                     .resizable()
+                    .fade(duration: 0.5)
                     .scaledToFill()
+                    .frame(width: geo.size.width, height: geo.size.height+geo.safeAreaInsets.top)
                     .position(x: geo.size.width/2, y: (geo.size.height+geo.safeAreaInsets.top)/2)
             }
             .ignoresSafeArea(.container, edges: .top)
