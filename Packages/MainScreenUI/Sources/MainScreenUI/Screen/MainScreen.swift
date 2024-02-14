@@ -79,7 +79,6 @@ public struct MainScreen: View  {
                 //여기를 조작하여 원하는 백그라운드를 설정할 수 있다.
                 Color(uiColor: mainScreenConfig.tabViewMode.getColorSet().tabViewBackgroundColor)
                     .ignoresSafeArea(.all, edges: .bottom)
-                    .animation(.easeIn(duration: 0.3), value: mainScreenConfig.tabViewMode)
                 
                 GeometryReader { geo in
                     

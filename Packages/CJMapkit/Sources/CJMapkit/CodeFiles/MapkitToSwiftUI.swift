@@ -64,7 +64,6 @@ public class MkMapViewCoordinator: NSObject {
     func regionWith(center: CLLocationCoordinate2D) -> MKCoordinateRegion {
         
         return MKCoordinateRegion(center: center, latitudinalMeters: 500, longitudinalMeters: 500)
-        
     }
     
 }
@@ -107,22 +106,6 @@ extension MkMapViewCoordinator: MKMapViewDelegate {
             return PotClusterAnnotationView(annotation: potClusterAnnot, reuseIdentifier: Self.potClusterAnnotationViewIdentifier)
         default:
             return nil
-        }
-    }
-    
-    // Annotation selection
-    public func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
-        
-        mapView.selectedAnnotations.removeAll()
-        
-        switch view.annotation {
-        case let potAnnotation as PotAnnotation:
-            NotificationCenter.default.post(name: .singlePotSelection, object: potAnnotation.potObject)
-        case let clusterAnnotation as MKClusterAnnotation:
-            // TODO: 클러스터 선택시
-            return
-        default:
-            return
         }
     }
     

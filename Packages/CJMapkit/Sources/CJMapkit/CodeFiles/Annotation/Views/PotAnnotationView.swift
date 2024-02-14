@@ -70,9 +70,16 @@ class PotAnnotationView: MKAnnotationView {
         
         layer2.color = PotAnnotationType(rawValue: Int(annotation.potObject.categoryId))!.getAnnotationColor()
         
+        // TapGesture
+        // MapView를 거치지 않고 이벤트를 바로호출하는 경우가 훨씬 빠르다.
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(tapGestureCallBack))
+        self.addGestureRecognizer(tapGesture)
+        
         self.addSubview(layer1)
         self.insertSubview(layer2, aboveSubview: layer1)
         self.insertSubview(layer3, aboveSubview: layer2)
+        
+        // AutoLayout
         
         layer1.translatesAutoresizingMaskIntoConstraints = false
         layer2.translatesAutoresizingMaskIntoConstraints = false
@@ -158,6 +165,17 @@ class PotAnnotationView: MKAnnotationView {
         path.close()
         
         return path
+    }
+}
+
+extension PotAnnotationView {
+    
+    @objc
+    func tapGestureCallBack() {
+        
+        let potObject = (annotation as! PotAnnotation).potObject
+        
+        NotificationCenter.potSelection.post(name: .singlePotSelection, object: potObject)
     }
 }
 

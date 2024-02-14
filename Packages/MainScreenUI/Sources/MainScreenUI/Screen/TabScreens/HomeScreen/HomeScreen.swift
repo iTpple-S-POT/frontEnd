@@ -87,7 +87,7 @@ extension View {
     func slideTransition(from: CGPoint, to: CGPoint) -> some View {
         self
             .transition(
-                .customSlide(from: from, to: to).combined(with: .opacity)
+                .opacity.combined(with: .customSlide(from: from, to: to))
             )
     }
 }
@@ -107,29 +107,6 @@ struct CustomSilde: ViewModifier {
             .offset(x: point.x, y: point.y)
     }
     
-}
-
-@MainActor
-class HomeScreenModel: ObservableObject {
-    
-    @Published private(set) var selectedPotObject: PotObject?
-    @Published var presentPotDetailView = false
-    
-    init() {
-        NotificationCenter.default.addObserver(self, selector: #selector(singlePotSelected(_:)), name: .singlePotSelection, object: nil)
-    }
-    
-    @objc
-    func singlePotSelected(_ notification: Notification) {
-        
-        let object = notification.object as! PotObject
-        
-        DispatchQueue.main.async(qos: .userInteractive) {
-            self.selectedPotObject = object
-            
-            self.presentPotDetailView = true
-        }
-    }
 }
 
 #Preview {
