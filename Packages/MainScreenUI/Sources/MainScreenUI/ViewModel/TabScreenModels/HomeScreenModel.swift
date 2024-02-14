@@ -11,7 +11,7 @@ import GlobalObjects
 @MainActor
 class HomeScreenModel: ObservableObject {
     
-    @Published private(set) var selectedPotObject: PotObject?
+    private(set) var selectedPotModel: PotModel?
     @Published var presentPotDetailView = false
     
     init() {
@@ -21,9 +21,11 @@ class HomeScreenModel: ObservableObject {
     @objc
     func singlePotSelected(_ notification: Notification) {
         
-        let object = notification.object as! PotObject
+        objectWillChange.send()
         
-        self.selectedPotObject = object
+        let model = notification.object as! PotModel
+        
+        self.selectedPotModel = model
         
         self.presentPotDetailView = true
     }

@@ -7,7 +7,13 @@
 
 import Foundation
 
+// for CJMap
 public extension NotificationCenter {
     
     static let potSelection = NotificationCenter()
+}
+
+public extension Notification.Name {
+    
+    static let potChange: Self = .init("potChange")
 }

@@ -15,13 +15,13 @@ class PotAnnotation: NSObject, Identifiable, MKAnnotation {
 
     var coordinate: CLLocationCoordinate2D
     
-    var potObject: PotObject
+    var potModel: PotModel
     
-    public init(potObject: PotObject) {
+    public init(potModel: PotModel) {
         
-        self.potObject = potObject
+        self.potModel = potModel
         
-        self.coordinate = CLLocationCoordinate2D(latitude: potObject.latitude, longitude: potObject.longitude)
+        self.coordinate = CLLocationCoordinate2D(latitude: potModel.latitude, longitude: potModel.longitude)
     }
 }
 

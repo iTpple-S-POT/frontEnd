@@ -56,7 +56,7 @@ struct HomeScreen: View {
                 Group {
                     if homeScreenModel.presentPotDetailView {
                         
-                        PotDetailView(potObject: homeScreenModel.selectedPotObject!, dismissAction: {
+                        PotDetailView(potModel: homeScreenModel.selectedPotModel!, dismissAction: {
                             
                             homeScreenModel.presentPotDetailView = false
                             mainScreenConfig.setMode(mode: .idleMode)

@@ -220,21 +220,41 @@ public struct MapkitViewRepresentable: UIViewRepresentable {
     
     func makePotAnnotationsFrom(mapView: MKMapView, potObjects newPotObjects: Set<PotObject>) {
         
-        var oldPotObjects: Set<PotObject> = []
+        let newPotModels: Set<PotModel> = Set(newPotObjects.map {PotModel.makePotModelFrom(potObject: $0)})
         
-        mapView.annotations.forEach { annot in
+        var oldPotModels: Set<PotModel> = Set(mapView.annotations.compactMap {
             
-            if let potAnot = annot as? PotAnnotation {
-                
-                oldPotObjects.insert(potAnot.potObject)
-            }
-        }
+            guard let potAnnot = $0 as? PotAnnotation else { return nil }
+            
+            return potAnnot.potModel
+        })
         
-        let willAddAnnotations = newPotObjects.subtracting(oldPotObjects).map { PotAnnotation(potObject: $0) }
-        let willDiscardAnnotations = oldPotObjects.subtracting(newPotObjects).map { PotAnnotation(potObject: $0) }
+        let newMinusOld = newPotModels.subtracting(oldPotModels)
+        
+        let willAddAnnotations = newMinusOld.map { PotAnnotation(potModel: $0) }
+        let willDiscardAnnotations = oldPotModels.subtracting(newPotModels).map { PotAnnotation(potModel: $0) }
         
         mapView.addAnnotations(willAddAnnotations)
         mapView.removeAnnotations(willDiscardAnnotations)
+        
+        // viewCount update
+        DispatchQueue.global().async {
+            
+            let innerSet = newPotModels.subtracting(newMinusOld)
+            
+            mapView.annotations.forEach { annot in
+                
+                oldPotModels.forEach { model in
+                    
+                    innerSet.forEach { newModel in
+                        
+                        if newModel == model {
+                            model.viewCount = newModel.viewCount
+                        }
+                    }
+                }
+            }
+        }
     }
     
     func setSubscription(coordinator: MkMapViewCoordinator) {
@@ -288,7 +308,7 @@ public struct MapkitViewRepresentable: UIViewRepresentable {
             
             if let potAnot = annotation as? PotAnnotation {
                 
-                let annotationCatId = potAnot.potObject.categoryId
+                let annotationCatId = potAnot.potModel.categoryId
                 
                 if activeCategoryIds.contains(Int(annotationCatId)) {
                     

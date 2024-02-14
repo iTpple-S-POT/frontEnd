@@ -68,7 +68,7 @@ class PotAnnotationView: MKAnnotationView {
         // Annotation크기 조정(collision을 위한 설정)
         self.frame.size = CGSize(width: 52, height: 52)
         
-        layer2.color = PotAnnotationType(rawValue: Int(annotation.potObject.categoryId))!.getAnnotationColor()
+        layer2.color = PotAnnotationType(rawValue: Int(annotation.potModel.categoryId))!.getAnnotationColor()
         
         // TapGesture
         // MapView를 거치지 않고 이벤트를 바로호출하는 경우가 훨씬 빠르다.
@@ -122,7 +122,7 @@ class PotAnnotationView: MKAnnotationView {
         
         layer3.layer.cornerRadius = layer3.bounds.width / 2
         
-        if let potAnot = annotation as? PotAnnotation, let imageKey = potAnot.potObject.imageKey {
+        if let potAnot = annotation as? PotAnnotation, let imageKey = potAnot.potModel.imageKey {
             loadImageView(imageKey: imageKey)
         }
     }
@@ -173,9 +173,9 @@ extension PotAnnotationView {
     @objc
     func tapGestureCallBack() {
         
-        let potObject = (annotation as! PotAnnotation).potObject
+        let potModel = (annotation as! PotAnnotation).potModel
         
-        NotificationCenter.potSelection.post(name: .singlePotSelection, object: potObject)
+        NotificationCenter.potSelection.post(name: .singlePotSelection, object: potModel)
     }
 }
 

@@ -14,13 +14,13 @@ import GlobalUIComponents
 
 public struct PotDetailView: View {
     
-    @State var potObject: PotObject
+    @StateObject var potModel: PotModel
     
     let dismissAction: () -> Void
     
-    public init(potObject: PotObject, dismissAction: @escaping () -> Void) {
+    public init(potModel: PotModel, dismissAction: @escaping () -> Void) {
         
-        self._potObject = State<PotObject>(wrappedValue: potObject)
+        self._potModel = StateObject(wrappedValue: potModel)
         self.dismissAction = dismissAction
     }
     
@@ -30,7 +30,7 @@ public struct PotDetailView: View {
         formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SS"
         formatter.timeZone = TimeZone(identifier: "UTC")
         
-        let expirationDate = formatter.date(from: potObject.expirationDate)!
+        let expirationDate = formatter.date(from: potModel.expirationDate)!
         
         let calendar = Calendar.current
         
@@ -48,7 +48,7 @@ public struct PotDetailView: View {
         return "방금전"
     }
     
-    private var tagObject: TagCases { TagCases[potObject.categoryId ] }
+    private var tagObject: TagCases { TagCases[potModel.categoryId ] }
     
     public var body: some View {
         ZStack {
@@ -57,7 +57,7 @@ public struct PotDetailView: View {
             
             GeometryReader { geo in
                 
-                KFImage(URL(string: potObject.imageKey?.getPreSignedUrlString() ?? "")!)
+                KFImage(URL(string: potModel.imageKey?.getPreSignedUrlString() ?? "")!)
                     .resizable()
                     .fade(duration: 0.5)
                     .scaledToFill()
@@ -129,7 +129,6 @@ public struct PotDetailView: View {
                     .frame(height: 56)
                     
                     // 지난 시간, 뷰 카운트
-                    
                     VStack(spacing: 6) {
                         
                         HStack(spacing: 8) {
@@ -149,7 +148,7 @@ public struct PotDetailView: View {
                                 .resizable()
                                 .scaledToFit()
                             
-                            Text("\(potObject.viewCount)")
+                            Text("\(potModel.viewCount)")
                             
                             Spacer()
                         }
@@ -173,10 +172,12 @@ public struct PotDetailView: View {
              
                 do {
                     
-                    let object = try await APIRequestGlobalObject.shared.getPotForPotDetailAbout(potId: potObject.id)
+                    let potObject = try await APIRequestGlobalObject.shared.getPotForPotDetailAbout(potId: potModel.id)
                     
+                    // viewCount update
                     DispatchQueue.main.async {
-                        self.potObject = potObject
+                        
+                        self.potModel.viewCount = potObject.viewCount
                     }
                 } catch {
                     print(error.localizedDescription)
@@ -195,8 +196,8 @@ public struct PotDetailView: View {
             .ignoresSafeArea(.container)
         
         PotDetailView(
-            potObject: {
-                var potObject = PotObject(
+            potModel: {
+                var potModel = PotModel(
                     id: 1,
                     userId: 1,
                     categoryId: 1,
@@ -207,10 +208,8 @@ public struct PotDetailView: View {
                     longitude: 0,
                     viewCount: 20
                 )
-                
-                potObject.viewCount = 20
                                                         
-                return potObject
+                return potModel
             }()
         ) {
             
