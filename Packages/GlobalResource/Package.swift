@@ -47,8 +47,11 @@ let package = Package(
             dependencies: [
                 .product(name: "DefaultExtensions", package: "DefaultExtensions"),
                 "GlobalFonts",
+                "GlobalObjects",
             ],
-            resources: [ ]
+            resources: [
+                .process("Resources")
+            ]
         ),
         .target(
             name: "GlobalObjects",
