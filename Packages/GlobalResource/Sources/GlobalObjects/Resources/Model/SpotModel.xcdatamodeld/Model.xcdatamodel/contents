@@ -27,9 +27,18 @@
         </uniquenessConstraints>
     </entity>
     <entity name="SpotUser" representedClassName="SpotUser" syncable="YES" codeGenerationType="class">
+        <attribute name="birthDay" optional="YES" attributeType="String"/>
+        <attribute name="gender" optional="YES" attributeType="String"/>
         <attribute name="id" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="interests" optional="YES" attributeType="String"/>
+        <attribute name="loginType" optional="YES" attributeType="String"/>
+        <attribute name="mbti" optional="YES" attributeType="String"/>
+        <attribute name="name" optional="YES" attributeType="String"/>
         <attribute name="nickName" optional="YES" attributeType="String"/>
+        <attribute name="phoneNumber" optional="YES" attributeType="String"/>
         <attribute name="profileImageUrl" optional="YES" attributeType="String"/>
+        <attribute name="role" optional="YES" attributeType="String"/>
+        <attribute name="status" optional="YES" attributeType="String"/>
         <uniquenessConstraints>
             <uniquenessConstraint>
                 <constraint value="id"/>

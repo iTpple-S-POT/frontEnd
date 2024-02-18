@@ -142,15 +142,16 @@ public extension ContentScreenModel {
             
             let userObject = try await APIRequestGlobalObject.shared.getUserInfo()
             
+            print(userObject)
+            
+            // 유저정보 업데이트
+            try SpotStorage.default.mainStorageManager.updateUserInfo(newUserInfo: userObject)
+            
             // 유저 선호도 입력이 필요한 경우
             if userObject.status == nil || userObject.status == "PROGRESS" {
                 
                return true
             }
-            
-            // 선호도 입력이 필요없는 경우
-            // 유저 데이터를 메모리와 저장소에 저장 혹은 업데이트(동시처리)
-            try SpotStorage.default.mainStorageManager.updateUserInfo(newUserInfo: userObject)
             
             return false
             

@@ -33,59 +33,50 @@ public extension SpotStorageManager {
             let userInfoFromServer = try await APIRequestGlobalObject.shared.getUserInfo()
             
             // TODO: 다른 데이터 생길경우 배치처리
-            try self.insertUserInfoToMainStorage(userInfo: userInfoFromServer, immediateSave: true)
+            try self.insertUserInfoToMainStorage(userInfo: userInfoFromServer)
         }
     }
     
-    func insertUserInfoToMainStorage(userInfo: UserInfoObject, immediateSave: Bool = false) throws {
+    func insertUserInfoToMainStorage(userInfo: UserInfoObject) throws {
         
-        let context = context
+        let users = try context.fetch(SpotUser.fetchRequest())
         
-        let spotUser = SpotUser(context: context)
-        
-        // TODO: 필요한 유저데이터 추가확인
-        spotUser.id = userInfo.id
-        spotUser.nickName = userInfo.nickname
-        spotUser.profileImageUrl = userInfo.profileImageUrl
-        
-        if immediateSave {
-            try context.save()
+        if users.isEmpty {
+            let spotUser = SpotUser(context: context)
             
+            spotUser.id = userInfo.id
+            spotUser.birthDay = userInfo.birthDay
+            spotUser.nickName = userInfo.nickname
+            spotUser.profileImageUrl = userInfo.profileImageUrl
+            spotUser.gender = userInfo.gender
+            spotUser.mbti = userInfo.mbti
+            spotUser.name = userInfo.name
+            spotUser.interests = userInfo.interests.joined(separator: ",")
+            spotUser.loginType = userInfo.loginType
+            spotUser.role = userInfo.role
+            spotUser.status = userInfo.status
+        } else {
+            
+            let user = users.first!
+            
+            user.id = userInfo.id
+            user.birthDay = userInfo.birthDay
+            user.nickName = userInfo.nickname
+            user.profileImageUrl = userInfo.profileImageUrl
+            user.gender = userInfo.gender
+            user.mbti = userInfo.mbti
+            user.name = userInfo.name
+            user.interests = userInfo.interests.joined(separator: ",")
+            user.loginType = userInfo.loginType
+            user.role = userInfo.role
+            user.status = userInfo.status
         }
-        
+        try context.save()
     }
     
     /// 로컬에 존재하는 경우에만 업데이트
     func updateUserInfo(newUserInfo: UserInfoObject) throws {
         
-        let oldUserInfo: [SpotUser] = try fetchObjectsFromMainStorage()
-        
-        // 저장된 것이 없는 경우, 업데이트할 것이 없음으로 내용을 그대로 저장소에 저장
-        if oldUserInfo.isEmpty {
-            
-            try insertUserInfoToMainStorage(userInfo: newUserInfo, immediateSave: true)
-            
-            return
-        }
-        
-        let oldUser = oldUserInfo.first!
-        
-        oldUser.id = newUserInfo.id
-        oldUser.nickName = newUserInfo.nickname
-        oldUser.profileImageUrl = newUserInfo.profileImageUrl
-        
-        // 변동사항이 있는 경우 업데이트, 백그라운드 실행
-        if context.hasChanges {
-            
-            Task.detached {
-                
-                try? await self.container.performBackgroundTask { context in
-                    
-                    try context.save()
-                    
-                    print("메인 저장소 저장 성공")
-                }
-            }
-        }
+        try insertUserInfoToMainStorage(userInfo: newUserInfo)
     }
 }

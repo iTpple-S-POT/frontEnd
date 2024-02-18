@@ -63,7 +63,7 @@ public struct MainScreen: View  {
                             .zIndex(screenModel.selectedTabItem == .myPot ? 1 : 0)
                         
                         // myPage
-                        placHolderView
+                        MyPageScreen()
                             .zIndex(screenModel.selectedTabItem == .myPage ? 1 : 0)
                         
                     }

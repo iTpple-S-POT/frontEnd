@@ -41,75 +41,103 @@ public struct SpotProfileDetailView: View {
         UIScreen.main.bounds.width
     }
     
+    public init(userInfo: UserInfoObject) {
+        self.userInfo = userInfo
+    }
+    
+    public init(userInfo: SpotUser) {
+        
+        self.userInfo = UserInfoObject(
+            id: userInfo.id,
+            loginType: userInfo.loginType,
+            role: userInfo.role,
+            profileImageUrl: userInfo.profileImageUrl,
+            name: userInfo.name,
+            nickname: userInfo.nickName,
+            phoneNumber: userInfo.phoneNumber,
+            birthDay: userInfo.birthDay,
+            gender: userInfo.gender,
+            mbti: userInfo.mbti,
+            interests: userInfo.interests?.components(separatedBy: ",") ?? [],
+            status:userInfo.status
+        )
+    }
+    
     public var body: some View {
         
-        ScrollView {
+        ZStack {
             
-            VStack {
+            Color.white
+            
+            ScrollView {
                 
-                ProfileShortCapView(
-                    nickName: userInfo.nickname ?? "비지정 닉네임",
-                    platformDescription: {
-                        guard let loginType = userInfo.loginType else {
-                            return "처리되지 못한 플랫폼"
-                        }
-                        
-                        switch loginType {
-                        case "KAKAO":
-                            return "카카오톡 회원"
-                        case "APPLE":
-                            return "애플회원"
-                        default:
-                            fatalError("처리되지 못한 플랫폼 형식")
-                        }
-                        
-                    }()
-                )
-                
-                Rectangle()
-                    .fill(.light_gray)
-                    .frame(height: 8)
-                    .padding(.top, 8)
-                
-                
-                HStack {
+                VStack {
                     
-                    VStack(alignment: .leading, spacing: 40) {
-                        
-                        ForEach(profileData, id: \.self) { element in
+                    ProfileShortCapView(
+                        nickName: userInfo.nickname ?? "비지정 닉네임",
+                        platformDescription: {
+                            guard let loginType = userInfo.loginType else {
+                                return "처리되지 못한 플랫폼"
+                            }
                             
-                            VStack(alignment: .leading, spacing: 12) {
+                            switch loginType {
+                            case "KAKAO":
+                                return "카카오톡 회원"
+                            case "APPLE":
+                                return "애플회원"
+                            default:
+                                fatalError("처리되지 못한 플랫폼 형식")
+                            }
+                            
+                        }()
+                    )
+                    
+                    Rectangle()
+                        .fill(.light_gray)
+                        .frame(height: 8)
+                        .padding(.top, 8)
+                    
+                    
+                    HStack {
+                        
+                        VStack(alignment: .leading, spacing: 40) {
+                            
+                            ForEach(profileData, id: \.self) { element in
                                 
-                                Text(element.key)
-                                
-                                if element.values.count >= 2 {
+                                VStack(alignment: .leading, spacing: 12) {
                                     
-                                    ScrollView(.horizontal) {
+                                    Text(element.key)
+                                    
+                                    if element.values.count >= 2 {
                                         
-                                        HStack(spacing: 12) {
+                                        ScrollView(.horizontal) {
                                             
-                                            ForEach(element.values, id: \.self) {
+                                            HStack(spacing: 12) {
                                                 
-                                                CircleTextView(text: $0)
+                                                ForEach(element.values, id: \.self) {
+                                                    
+                                                    CircleTextView(text: $0)
+                                                }
                                             }
                                         }
+                                        .scrollIndicators(.hidden)
+                                    } else if !element.values.isEmpty {
+                                        
+                                        CircleTextView(text: element.values.first!)
                                     }
-                                } else {
-                                    
-                                    CircleTextView(text: element.values.first!)
                                 }
                             }
                         }
+                        .font(.system(size: 18, weight: .semibold))
+                        
+                        Spacer()
                     }
-                    .font(.system(size: 18, weight: .semibold))
+                    .padding(.horizontal, 21)
+                    .padding(.top, 24)
                     
                     Spacer()
+                    
                 }
-                .padding(.horizontal, 21)
-                .padding(.top, 24)
-                
-                Spacer()
-                
             }
         }
     }

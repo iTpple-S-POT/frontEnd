@@ -68,6 +68,8 @@ public struct ContentScreen: View {
                 
                 print("--데이터 확보 성공--")
                 
+                // 유저프로필 업데이트
+                
                 let isInitial = try await screenModel.checkIsUserInitialSignUp()
                 
                 if isInitial {

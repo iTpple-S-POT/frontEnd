@@ -237,8 +237,8 @@ extension ConfigurationScreenModel {
                                    interests: korInterests,
                                    status: nil)
         
-        try await APIRequestGlobalObject.shared.sendInitialUserInfomation(object: object)
+        let userObject = try await APIRequestGlobalObject.shared.sendInitialUserInfomation(object: object)
         
-        return object
+        return userObject
     }
 }

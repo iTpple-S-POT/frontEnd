@@ -38,7 +38,7 @@ public extension APIRequestGlobalObject {
     
     
     // 최초 유저 정보전송
-    func sendInitialUserInfomation(object: UserInfoObject) async throws {
+    func sendInitialUserInfomation(object: UserInfoObject) async throws -> UserInfoObject {
         
         let modelObject = UserInfoRequestModel(nickname: object.nickname, phoneNumber: object.phoneNumber, birthDay: object.birthDay!, gender: object.gender, mbti: object.mbti, interests: object.interests)
         
@@ -54,7 +54,9 @@ public extension APIRequestGlobalObject {
             
             try defaultCheckStatusCode(response: httpResponse, functionName: #function, data: data)
             
-            return
+            let decoded = try jsonDecoder.decode(UserInfoResponseModel.self, from: data)
+            
+            return UserInfoObject(id: decoded.id, loginType: decoded.loginType, role: decoded.role, profileImageUrl: decoded.profileImageUrl, name: decoded.name, nickname: decoded.nickname, phoneNumber: decoded.phoneNumber, birthDay: decoded.birthDay, gender: decoded.gender, mbti: decoded.mbti, interests: decoded.interests, status: decoded.status)
             
         } else {
             

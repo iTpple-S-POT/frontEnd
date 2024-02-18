@@ -305,6 +305,7 @@ public struct PotDetailView: View {
                         
                         self.userInfo = userObject
                         self.potModel.viewCount = potObject.viewCount
+                        
                     }
                 } catch {
                     print(error.localizedDescription)

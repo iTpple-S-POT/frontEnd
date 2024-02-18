@@ -114,7 +114,6 @@ extension UserInformationConfigurationScreen {
                         do {
                             let object = try await screenModel.sendUserInfoToServer()
                             
-                            
                             try SpotStorage.default.mainStorageManager.updateUserInfo(newUserInfo: object)
                             
                             print("유저 초기정보 전송 성공")

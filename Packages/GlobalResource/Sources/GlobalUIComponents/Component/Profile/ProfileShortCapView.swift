@@ -17,6 +17,11 @@ public struct ProfileShortCapView: View {
         UIScreen.main.bounds.width
     }
     
+    public init(nickName: String, platformDescription: String) {
+        self.nickName = nickName
+        self.platformDescription = platformDescription
+    }
+    
     public var body: some View {
         ZStack {
             

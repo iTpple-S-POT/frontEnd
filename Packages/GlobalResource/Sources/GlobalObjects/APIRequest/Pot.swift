@@ -49,6 +49,8 @@ public extension APIRequestGlobalObject {
         
         let hashtagList = try await postHashtags(hashtags: uploadObject.hashtagList)
         
+        print(hashtagList)
+        
         print("해쉬테그 id로 변환 성공")
         
         let object = SpotPotUploadRequestModel(
@@ -147,6 +149,8 @@ public extension APIRequestGlobalObject {
     // 팟 최종 업로드
     private func uploadPotData(object: SpotPotUploadRequestModel) async throws -> PotObject {
         
+        print(object)
+        
         let url = try SpotAPI.postPot.getApiUrl()
         
         var request = try getURLRequest(url: url, method: .post)
@@ -161,7 +165,7 @@ public extension APIRequestGlobalObject {
             
             let decoded = try jsonDecoder.decode(SpotPotUploadResponseModel.self, from: data)
             
-            let object = PotObject(
+            let objectFromServer = PotObject(
                 id: decoded.id,
                 userId: decoded.userID,
                 categoryId: decoded.categoryID,
@@ -173,9 +177,11 @@ public extension APIRequestGlobalObject {
                 viewCount: 0
             )
             
+            print(objectFromServer)
+            
             print("팟 업로드 성공")
             
-            return object
+            return objectFromServer
             
         } else {
             
@@ -208,8 +214,6 @@ public extension APIRequestGlobalObject {
         
         let urlWithQuery = components.url!
         
-//        print("팟 fetch url: \(urlWithQuery)")
-        
         let request = try getURLRequest(url: urlWithQuery, method: .get)
         
         let (data, response) = try await URLSession.shared.data(for: request)
@@ -223,6 +227,8 @@ public extension APIRequestGlobalObject {
             print("팟 수: \(decoded.count)")
             
             let potObjects = decoded.map { model in
+                
+                print(model)
                 
                 return PotObject(
                     id: model.id,
@@ -253,6 +259,8 @@ public extension APIRequestGlobalObject {
         let request = try getURLRequest(url: url, method: .get, isAuth: true)
         
         let (data, response) = try await URLSession.shared.data(for: request)
+        
+        print(String(data: data, encoding: .utf8))
         
         if let httpResponse = response as? HTTPURLResponse {
             
