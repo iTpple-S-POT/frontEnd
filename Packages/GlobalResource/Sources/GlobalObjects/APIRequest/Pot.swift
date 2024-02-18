@@ -34,7 +34,7 @@ public extension APIRequestGlobalObject {
         throw SpotNetworkError.unknownError(function: #function)
     }
     
-    // 팟 업로드
+    // 팟 업로드 태스크 실행
     func executePotUpload(imageInfo: ImageInformation, uploadObject: SpotPotUploadObject) async throws -> PotObject {
         
         let s3Object = try await getPreSignedUrl(imageInfo: imageInfo)
@@ -45,18 +45,56 @@ public extension APIRequestGlobalObject {
         
         try await uploadImageToS3(url: preUrl, imageData: imageInfo.data)
         
-        print("S3 업로드 성공")
+        print("S3 업로드 성공", s3Object.fileKey)
         
-        print(s3Object.fileKey)
+        let hashtagList = try await postHashtags(hashtags: uploadObject.hashtagList)
         
-        let uploadedObject = try await uploadPotData(fileKey: s3Object.fileKey, uploadObject: uploadObject)
+        print("해쉬테그 id로 변환 성공")
+        
+        let object = SpotPotUploadRequestModel(
+            categoryId: uploadObject.category,
+            imageKey: s3Object.fileKey,
+            type: "IMAGE",
+            location: Location(lat: uploadObject.latitude, lon: uploadObject.longitude),
+            content: uploadObject.text,
+            hashtagIdList: hashtagList.map { $0.hashtagId }
+        )
+        
+        let uploadedObject = try await uploadPotData(object: object)
         
         print("팟 업로드 성공")
         
         return uploadedObject
     }
     
+    private func postHashtags(hashtags: [String]) async throws -> [HashTagDTO] {
+        
+        if hashtags.isEmpty { return [] }
+        
+        let url = try SpotAPI.potHashtag.getApiUrl()
+        
+        var request = try getURLRequest(url: url, method: .post, isAuth: true)
+        
+        let jsonObject: [String: Any] = [ "hashtagList" : hashtags ]
+        
+        request.httpBody = try JSONSerialization.data(withJSONObject: jsonObject)
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        if let httpResponse = response as? HTTPURLResponse {
+            
+            try defaultCheckStatusCode(response: httpResponse, functionName: #function, data: data)
+            
+            // status code 정상
+            return try jsonDecoder.decode([HashTagDTO].self, from: data)
+            
+        } else {
+            
+            throw SpotNetworkError.unknownError(function: #function)
+        }
+    }
     
+    // PreSignedUrl획득
     private func getPreSignedUrl(
         imageInfo: ImageInformation) async throws -> PreSignedUrlObject {
             
@@ -87,7 +125,7 @@ public extension APIRequestGlobalObject {
             
         }
     
-    
+    // S3에 업로드
     private func uploadImageToS3(url: URL, imageData: Data) async throws {
         
         var request = try getURLRequest(url: url, method: .put, isAuth: false)
@@ -106,16 +144,8 @@ public extension APIRequestGlobalObject {
         
     }
     
-    // 팟업로드
-    private func uploadPotData(fileKey: String, uploadObject: SpotPotUploadObject) async throws -> PotObject {
-        
-        let object = SpotPotUploadRequestModel(
-            categoryId: uploadObject.category,
-            imageKey: fileKey,
-            type: "IMAGE",
-            location: Location(lat: uploadObject.latitude, lon: uploadObject.longitude),
-            content: uploadObject.text
-        )
+    // 팟 최종 업로드
+    private func uploadPotData(object: SpotPotUploadRequestModel) async throws -> PotObject {
         
         let url = try SpotAPI.postPot.getApiUrl()
         
@@ -178,7 +208,7 @@ public extension APIRequestGlobalObject {
         
         let urlWithQuery = components.url!
         
-        print("팟 fetch url: \(urlWithQuery)")
+//        print("팟 fetch url: \(urlWithQuery)")
         
         let request = try getURLRequest(url: urlWithQuery, method: .get)
         

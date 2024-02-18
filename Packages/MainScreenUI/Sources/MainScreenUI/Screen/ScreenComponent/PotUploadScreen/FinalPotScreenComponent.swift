@@ -164,6 +164,7 @@ struct FinalPotScreenComponent: View {
                     mapScreenComponentModel.uploadPot(
                         categoryId: screenModelWithNav.selectedCategoryId!,
                         content: screenModelWithNav.potText,
+                        hashtagList: screenModelWithNav.potHashTags,
                         imageInfo: screenModelWithNav.imageInfo!
                     )
                 }

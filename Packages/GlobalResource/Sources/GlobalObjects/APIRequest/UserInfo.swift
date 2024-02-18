@@ -10,9 +10,12 @@ import SwiftUI
 public extension APIRequestGlobalObject {
     
     // 유저 정보 수신
-    func getUserInfo() async throws -> UserInfoObject {
+    func getUserInfo(userId: Int? = nil) async throws -> UserInfoObject {
         
-        let url = try SpotAPI.userInfo.getApiUrl()
+        var url = try SpotAPI.userInfo.getApiUrl()
+        
+        // 특정 유저를 찾는 경유 유저아이디와 함께 검색
+        if let id = userId { url = url.appendingPathComponent(String(id)) }
         
         let request = try getURLRequest(url: url, method: .get, isAuth: true)
         
@@ -59,7 +62,6 @@ public extension APIRequestGlobalObject {
         }
         
     }
-    
 }
 
 

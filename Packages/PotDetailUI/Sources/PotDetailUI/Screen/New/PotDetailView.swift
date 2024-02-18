@@ -16,6 +16,10 @@ public struct PotDetailView: View {
     
     @StateObject var potModel: PotModel
     
+    @State private var userInfo: UserInfoObject?
+    
+    @State private var isLineLimit = true
+    
     let dismissAction: () -> Void
     
     public init(potModel: PotModel, dismissAction: @escaping () -> Void) {
@@ -60,7 +64,7 @@ public struct PotDetailView: View {
                 KFImage(URL(string: potModel.imageKey?.getPreSignedUrlString() ?? "")!)
                     .resizable()
                     .fade(duration: 0.5)
-                    .scaledToFill()
+                    .aspectRatio(contentMode: .fill)
                     .frame(width: geo.size.width, height: geo.size.height+geo.safeAreaInsets.top)
                     .position(x: geo.size.width/2, y: (geo.size.height+geo.safeAreaInsets.top)/2)
             }
@@ -83,9 +87,46 @@ public struct PotDetailView: View {
                 .frame(height: 240)
             }
             
+            // Like
+            
+            HStack {
+                
+                Spacer()
+                
+                // 공유, 좋아요, 댓글 컨테이너
+                VStack {
+                    
+                    Spacer()
+                    Spacer()
+                    
+                    // 좋아요 아이템
+                    VStack {
+                        Image.makeImageFromBundle(bundle: .module, name: "emotion_Btn", ext: .png)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 32, height: 32)
+                            .contentShape(Circle())
+                            .onTapGesture {
+                                // TODO: 감정 전달
+                            }
+                        
+                        Text("")
+                            .font(.system(size: 12))
+                            .foregroundStyle(.white)
+                    }
+                    .frame(height: 50)
+                    .shadow(color: .black, radius: 3, y: 2)
+                    
+                    Spacer()
+                    
+                }
+                .padding(.trailing, 21)
+                
+            }
+            
+            // ZStack위의 최초 VStack
             VStack {
                 
-                // 상단
                 VStack {
                     
                     // 나가기, 카테고리
@@ -102,6 +143,7 @@ public struct PotDetailView: View {
                             
                             Text(tagObject.getKorString())
                                 .font(.system(size: 18, weight: .semibold))
+                                .shadow(color: .black, radius: 3, y: 2)
                                 .foregroundStyle(.white)
                             
                             Spacer()
@@ -114,6 +156,7 @@ public struct PotDetailView: View {
                                 .resizable()
                                 .scaledToFit()
                                 .foregroundStyle(.white)
+                                .shadow(color: .black, radius: 3, y: 2)
                                 .frame(width: 20, height: 20)
                                 .padding(10)
                                 .onTapGesture {
@@ -158,12 +201,93 @@ public struct PotDetailView: View {
                     .foregroundStyle(.white)
                     .padding(.top, 12)
                     
+                    Spacer(minLength: 0)
+                    
+                    HStack {
+                        
+                        VStack(alignment: .leading) {
+                            
+                            // 유저 프로필
+                            HStack(spacing: 12) {
+
+                                if let imageUrl = userInfo?.profileImageUrl, let url = URL(string: imageUrl), let data = try? Data(contentsOf: url), let uiImage = UIImage(data: data) {
+                                    Image(uiImage: uiImage)
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 40)
+                                    
+                                } else {
+                                   Image(systemName: "person.crop.circle")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .foregroundStyle(.white)
+                                        .frame(width: 40)
+                                }
+                                
+                                Text(userInfo?.nickname ?? "비지정 닉네임")
+                                    .font(.system(size: 20, weight: .semibold))
+                                    .foregroundStyle(.white)
+                                
+                                Spacer(minLength: 0)
+                                
+                                
+                            }
+                            
+                            // 팟내용
+                            Text(potModel.content)
+                                .lineLimit(isLineLimit ? 2 : .max)
+                            
+                            // 더보기및 접기
+                            if !potModel.content.isEmpty {
+                                
+                                Button {
+                                    
+                                    isLineLimit.toggle()
+
+                                } label: {
+                                    
+                                    Text(isLineLimit ? "더보기" : "접기")
+                                        .fontWeight(.semibold)
+                                        .underline(true, color: .white)
+                                }
+                            }
+                        }
+                        
+                        // 댓글 좋아요등을 위한 Spacer
+                        Spacer(minLength: 44)
+                        
+                    }
+                    .font(.system(size: 16))
+                    .foregroundStyle(.white)
+                    
                 }
                 .padding(.horizontal, 21)
                 
-                
-                Spacer(minLength: 0)
-                
+                ScrollView(.horizontal) {
+                    
+                    LazyHStack(spacing: 8) {
+                        Spacer()
+                            .frame(height: 21)
+                        
+//                        ForEach(, id: \.self) { tag in
+//                            
+//                            Text("#\(tag)")
+//                                .font(.system(size: 16, weight: .semibold))
+//                                .foregroundStyle(.white)
+//                                .frame(height: 32)
+//                                .padding(.horizontal, 15)
+//                                .background(
+//                                    RoundedRectangle(cornerRadius: 30)
+//                                        .strokeBorder(.white, lineWidth: 1)
+//                                )
+//                            
+//                        }
+                        
+                    }
+                    
+                }
+                .scrollIndicators(.hidden)
+                .frame(height: 32)
             }
         }
         .onAppear {
@@ -174,9 +298,12 @@ public struct PotDetailView: View {
                     
                     let potObject = try await APIRequestGlobalObject.shared.getPotForPotDetailAbout(potId: potModel.id)
                     
+                    let userObject = try await APIRequestGlobalObject.shared.getUserInfo(userId: Int(potObject.userId))
+                    
                     // viewCount update
                     DispatchQueue.main.async {
                         
+                        self.userInfo = userObject
                         self.potModel.viewCount = potObject.viewCount
                     }
                 } catch {
@@ -187,7 +314,6 @@ public struct PotDetailView: View {
         }
     }
 }
-
 
 #Preview {
     ZStack {
@@ -219,3 +345,6 @@ public struct PotDetailView: View {
         
     }
 }
+
+
+

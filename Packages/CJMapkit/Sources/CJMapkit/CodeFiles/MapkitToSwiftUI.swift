@@ -242,6 +242,10 @@ public struct MapkitViewRepresentable: UIViewRepresentable {
             
             let innerSet = newPotModels.subtracting(newMinusOld)
             
+            let operationQueue = OperationQueue()
+            
+            operationQueue.underlyingQueue = .main
+            
             mapView.annotations.forEach { annot in
                 
                 oldPotModels.forEach { model in
@@ -249,7 +253,11 @@ public struct MapkitViewRepresentable: UIViewRepresentable {
                     innerSet.forEach { newModel in
                         
                         if newModel == model {
-                            model.viewCount = newModel.viewCount
+                            
+                            operationQueue.addOperation {
+                                
+                                model.viewCount = newModel.viewCount
+                            }
                         }
                     }
                 }

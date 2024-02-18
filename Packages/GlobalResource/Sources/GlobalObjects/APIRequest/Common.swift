@@ -57,6 +57,7 @@ public extension APIRequestGlobalObject {
         case getPots
         case postPot
         case preSignedUrl
+        case potHashtag
         
         // User
         case userInfo
@@ -77,6 +78,8 @@ public extension APIRequestGlobalObject {
                 additinalUrl = "/api/v1/pot/category"
             case .getPots, .postPot:
                 additinalUrl = "/api/v1/pot"
+            case .potHashtag:
+                additinalUrl = "/api/v1/pot/hashtag"
             case .preSignedUrl:
                 additinalUrl = "/api/v1/pot/image/pre-signed-url"
             case .userInfo:

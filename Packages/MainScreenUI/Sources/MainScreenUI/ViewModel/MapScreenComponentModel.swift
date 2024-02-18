@@ -206,6 +206,7 @@ extension MapScreenComponentModel {
     func uploadPot(
         categoryId: Int64,
         content: String,
+        hashtagList: [String],
         imageInfo: ImageInformation
     ) {
          
@@ -219,9 +220,14 @@ extension MapScreenComponentModel {
                     throw PotUploadPrepareError.cantGetUserLocation(function: #function)
                 }
                 
-                let potDTO = SpotPotUploadObject(category: categoryId, text: content, latitude: location.latitude, longitude: location.longitude)
+                let potDTO = SpotPotUploadObject(
+                    category: categoryId,
+                    text: content,
+                    hashtagList: hashtagList,
+                    latitude: location.latitude,
+                    longitude: location.longitude)
                 
-                let potObject = PotObject(id: dummyPotId, userId: -1, categoryId: categoryId, content: "", imageKey: nil, expirationDate: "", latitude: location.latitude, longitude: location.longitude)
+                let potObject = PotObject(id: dummyPotId, userId: -1, categoryId: categoryId, content: content, imageKey: nil, expirationDate: "", latitude: location.latitude, longitude: location.longitude)
                 
                 let uploadedPotObject = try await APIRequestGlobalObject.shared.executePotUpload(imageInfo: imageInfo, uploadObject: potDTO)
                 
@@ -230,8 +236,6 @@ extension MapScreenComponentModel {
             } catch {
                 
                 print(error, error.localizedDescription)
-                
-                try! await self.removePot(id: dummyPotId)
             }
         }
     }

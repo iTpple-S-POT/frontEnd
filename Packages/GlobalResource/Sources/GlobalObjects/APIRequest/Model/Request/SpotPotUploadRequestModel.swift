@@ -13,6 +13,7 @@ struct SpotPotUploadRequestModel: Codable {
     let type: String
     let location: Location
     let content: String
+    let hashtagIdList: [Int64]
 }
 
 // MARK: - Location
@@ -25,12 +26,14 @@ public struct SpotPotUploadObject {
     
     let category: Int64
     let text: String
+    let hashtagList: [String]
     let latitude: Double
     let longitude: Double
     
-    public init(category: Int64, text: String, latitude: Double, longitude: Double) {
+    public init(category: Int64, text: String, hashtagList: [String] = [], latitude: Double, longitude: Double) {
         self.category = category
         self.text = text
+        self.hashtagList = hashtagList
         self.latitude = latitude
         self.longitude = longitude
     }
