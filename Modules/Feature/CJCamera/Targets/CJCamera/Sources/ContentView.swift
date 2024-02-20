@@ -1,12 +1,19 @@
 import SwiftUI
 
-
-
-public struct ContentView: View {
+public struct TestCameraView: View {
+    
+    @StateObject private var viewModel = CJCameraViewModel()
     
     public init() { }
     
     public var body: some View {
-        Text("Hello world")
+        ZStack {
+            
+            viewModel.cameraPreview
+                .onAppear(perform: {
+                    
+                    viewModel.configure()
+                })
+        }
     }
 }

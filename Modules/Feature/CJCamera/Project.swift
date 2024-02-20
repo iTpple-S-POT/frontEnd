@@ -24,6 +24,7 @@ let cjCameraProject = Project(
             platform: .iOS,
             product: .staticFramework,
             bundleId: "\(bundleId)",
+            deploymentTarget: .iOS(targetVersion: iOSTargetVersion, devices: .iphone),
             sources: ["Targets/CJCamera/Sources/**"],
             resources: ["Targets/CJCamera/Resources/**"],
             dependencies: [
@@ -37,6 +38,8 @@ let cjCameraProject = Project(
             platform: .iOS,
             product: .app,
             bundleId: "\(bundleId).dempApp",
+            deploymentTarget: .iOS(targetVersion: iOSTargetVersion, devices: .iphone),
+            infoPlist: dempAppInfoPlist(),
             sources: ["Targets/DemoApp/Sources/**"],
             dependencies: [
                 .target(name: "CJCamera")
@@ -52,4 +55,16 @@ func getSettings() -> Settings {
     ])
     
     return baseSettings
+}
+
+func dempAppInfoPlist() -> InfoPlist {
+    
+    let additionalList: [String : Plist.Value] = [
+        "NSCameraUsageDescription" : "팟 업로드및 프로필 이미지촤영을 위해 사용합니다.",
+        "UILaunchScreen": [],
+        "UISupportedInterfaceOrientations":
+            ["UIInterfaceOrientationPortrait"],
+    ]
+    
+    return InfoPlist.extendingDefault(with: additionalList)
 }
