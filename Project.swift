@@ -49,7 +49,8 @@ let project = Project(name: "\(appName)",
                       ],
                       additionalFiles: [
                           "README.md"
-                      ])
+                      ]
+)
 /// Create extended plist for iOS
 /// - Returns: InfoPlist
 private func makeInfoPlist(merging other: [String: Plist.Value] = [:]) -> InfoPlist {
