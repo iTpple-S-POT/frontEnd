@@ -16,7 +16,6 @@ let package = Package(
         .package(path: "../GlobalResource"),
         .package(path: "../DefaultExtensions"),
         .package(path: "../CJMapkit"),
-        .package(path: "../CJPhotoCollection"),
         .package(url: "https://github.com/onevcat/Kingfisher.git", from: "7.10.2"),
     ],
     targets: [
@@ -28,7 +27,6 @@ let package = Package(
                 .product(name: "GlobalUIComponents", package: "GlobalResource"),
                 .product(name: "DefaultExtensions", package: "DefaultExtensions"),
                 .product(name: "CJMapkit", package: "CJMapkit"),
-                .product(name: "CJPhotoCollection", package: "CJPhotoCollection"),
                 .product(name: "Kingfisher", package: "kingfisher"),
             ],
             resources: [

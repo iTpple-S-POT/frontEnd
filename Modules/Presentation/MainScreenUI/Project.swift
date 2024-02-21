@@ -10,7 +10,6 @@ let project = Project(name: "MainScreenUI",
                         .local(path: .relativeToRoot("Packages/GlobalResource")),
                         .local(path: .relativeToRoot("Packages/DefaultExtensions")),
                         .local(path: .relativeToRoot("Packages/CJMapkit")),
-                        .local(path: .relativeToRoot("Packages/CJPhotoCollection")),
                         .local(path: .relativeToRoot("Packages/PotDetailUI")),
                       ],
                       targets: [
@@ -31,9 +30,9 @@ let project = Project(name: "MainScreenUI",
                                 .package(product: "GlobalResource"),
                                 .package(product: "DefaultExtensions"),
                                 .package(product: "CJMapkit"),
-                                .package(product: "CJPhotoCollection"),
                                 .package(product: "PotDetailUI"),
-                                .project(target: "CJCamera", path: .relativeToRoot("Modules/Feature/CJCamera"))
+                                .project(target: "CJCamera", path: .relativeToRoot("Modules/Feature/CJCamera")),
+                                .project(target: "CJPhotoCollection", path: .relativeToRoot("Modules/Presentation/CJPhotoCollection"))
                               ]
                           )
                       ])
