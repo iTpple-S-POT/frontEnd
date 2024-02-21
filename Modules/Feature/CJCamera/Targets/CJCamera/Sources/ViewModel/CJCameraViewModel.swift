@@ -11,12 +11,15 @@ import Combine
 
 public class CJCameraViewModel: ObservableObject {
     
-    private let model: CJCamera
+    private let model: CJCamera?
     private let session: AVCaptureSession
-    public let cameraPreview: AnyView
+    public private(set) var cameraPreview: AnyView?
     
     // Camera options
+    @Published public private(set) var isCameraAvailable = false
     @Published public var isFlashModeOn = false
+    
+    let hapticImpact = UIImpactFeedbackGenerator()
     
     // current photo
     @Published public var currentImage: UIImage?
@@ -28,10 +31,12 @@ public class CJCameraViewModel: ObservableObject {
         
         self.session = AVCaptureSession()
         self.model = CJCamera(session: session)
-        self.cameraPreview = AnyView(CJCameraPreviewView(captureSession: session))
+        
+        if model == nil { self.cameraPreview = nil }
+        else { self.cameraPreview = AnyView(CJCameraPreviewView(captureSession: session)) }
         
         // set publisher
-        model
+        model?
             .$currentImage
             .receive(on: DispatchQueue.main)
             .sink { result in
@@ -48,16 +53,33 @@ public class CJCameraViewModel: ObservableObject {
                 self.currentImage = image
             }
             .store(in: &subscriptions)
-
+        
+        model?
+            .$isCameraAvailable
+            .receive(on: DispatchQueue.main)
+            .sink { result in
+                self.isCameraAvailable = result
+            }
+            .store(in: &subscriptions)
+        
+        hapticImpact.prepare()
     }
     
-    public func configure() {
-        model.requestAndCheckPermissions()
+    public func checkAuthAndExecute() {
+        
+        model?.requestAndCheckPermissions()
     }
     
     public func flashSwitch() {
         
+        isFlashModeOn.toggle()
         
+        model?.flashMode = isFlashModeOn ? .on : .off
+    }
+    
+    public func positionSwitch() {
+        
+        model?.flipCamera()
     }
 }
 
@@ -66,8 +88,11 @@ public class CJCameraViewModel: ObservableObject {
 public extension CJCameraViewModel {
     
     func takePhoto() {
-        
-        model.capturePhoto()
+        hapticImpact.impactOccurred()
+            
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            self.model?.capturePhoto()
+        }
     }
     
 }

@@ -55,11 +55,16 @@ struct ImageDetailView: View {
 
 
 struct SpotCameraView: View {
-    @StateObject private var viewModel = CJCameraViewModel()
+    @ObservedObject private var viewModel = CJCameraViewModel()
     
     @StateObject private var navController = NavigationController<NavDes>()
     
     private var subscriptions: Set<AnyCancellable> = []
+    
+    init() {
+        
+        viewModel.checkAuthAndExecute()
+    }
     
     var body: some View {
         
@@ -68,14 +73,43 @@ struct SpotCameraView: View {
             // Root
             VStack(spacing: 0) {
                 
+                HStack {
+                    
+                    Button {
+                        
+                        viewModel.positionSwitch()
+                        
+                    } label: {
+                        Image(systemName: "arrow.triangle.2.circlepath")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 32)
+                            .foregroundStyle(.spot_red)
+                    }
+                    
+                    Spacer()
+                    
+                    Button {
+                        
+                        viewModel.flashSwitch()
+                        
+                    } label: {
+                        Image(systemName: viewModel.isFlashModeOn ? "bolt.fill" : "bolt.slash.fill")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 32, height: 32)
+                            .foregroundStyle(.spot_red)
+                    }
+                }
+                .frame(height: 56)
+                .background(Rectangle().fill(.white))
+                .padding(.horizontal, 21)
+                
                 GeometryReader { geo in
                     
                     viewModel.cameraPreview
                         .frame(width: geo.size.width, height: geo.size.height)
                         .position(x: geo.size.width/2, y: geo.size.height/2)
-                        .onAppear {
-                            viewModel.configure()
-                        }
                     
                 }
                 
@@ -99,9 +133,10 @@ struct SpotCameraView: View {
                             }
                             .frame(width: 64)
                             .contentShape(Circle())
+                            .shadow(color: .spot_red, radius: 3)
                     }
-                    .shadow(color: .spot_red, radius: 3)
-                        
+                    .disabled(!viewModel.isCameraAvailable)
+                    
                         
                     Spacer()
                     

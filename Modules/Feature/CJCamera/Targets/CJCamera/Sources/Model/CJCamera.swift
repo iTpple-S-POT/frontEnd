@@ -9,62 +9,120 @@ import AVFoundation
 import SwiftUI
 
 public enum CJCameraError: Error {
+    case inputNotAvailable
     case cantGetCertainDevice
     case cantAddInput
     case cantAddOutput
     case cantMakeDataToUIImage
 }
 
+public enum CameraInputState {
+    
+    case frontOnly
+    case backOnly
+    case frontAndBack
+    case neither
+}
+
 // Input을 다루는 부분
 class CJCamera: NSObject, ObservableObject {
     
-    var session: AVCaptureSession
-    var input: AVCaptureDeviceInput!
+    var session = AVCaptureSession()
+    
+    var frontCameraInput: AVCaptureDeviceInput!
+    var backCameraInput: AVCaptureDeviceInput!
+    
     let output = AVCapturePhotoOutput()
+    
+    var state: CameraInputState = .frontAndBack
+    
+    private var isInitial = true
     
     // 촬영관련
     var photoData = Data(count: 0)
-    private var isProcessing = false
+    @Published private(set) var isCameraAvailable = false
     @Published var currentImage: UIImage?
     
-    init(session: AVCaptureSession) {
+    // 촬영 옵션
+    var flashMode: AVCaptureDevice.FlashMode = .off
+    private var currentPosition: AVCaptureDevice.Position = .back
+    
+    init?(session: AVCaptureSession) {
+        super.init()
+        
         self.session = session
+        
+        if !setInputs() { return nil }
     }
     
-    func setUpSession() {
+    func setInputs() -> Bool {
+        var front = false
+        var back = false
+        
+        if let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back), let input = try? AVCaptureDeviceInput(device: device) {
+            
+            self.backCameraInput = input
+            
+            front = session.canAddInput(input)
+        }
+        
+        if let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front), let input = try? AVCaptureDeviceInput(device: device) {
+            
+            self.frontCameraInput = input
+            
+            back = session.canAddInput(input)
+        }
+        
+        if front, back { self.state = .frontAndBack }
+        else if front { self.state = .frontOnly }
+        else if back { self.state = .backOnly }
+        else { self.state = .neither }
+        
+        return self.state != .neither
+    }
+    
+    func setUpInitialSession() {
+        
+        if !isInitial { return }
+        
+        isInitial = false
         
         do {
             
-            // Device
-            guard let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) else {
-                throw CJCameraError.cantGetCertainDevice
+            if state == .frontOnly {
+                currentPosition = .front
+                
+                session.addInput(frontCameraInput)
+                
+            } else {
+                currentPosition = .back
+                
+                session.addInput(backCameraInput)
             }
             
-            input = try AVCaptureDeviceInput(device: device)
-            
-            // Input
-            guard session.canAddInput(input) else {
-                throw CJCameraError.cantAddInput
-            }
-            
-            session.addInput(input)
-            
-            // OutPut
             guard session.canAddOutput(output) else {
                 throw CJCameraError.cantAddOutput
             }
             
             session.addOutput(output)
-            output.maxPhotoQualityPrioritization = .quality
             
             DispatchQueue.global().async {
                 self.session.startRunning()
+                self.isCameraAvailable = true
             }
         } catch {
             
-            print("세션 셋업 실패: \(error.localizedDescription)")
+            print("session초기화 세팅중 오류 발생: \(error)")
         }
+    }
+    
+    private func addInputToSession(input: AVCaptureInput) {
         
+        guard session.canAddInput(input) else { return }
+        
+        session.addInput(input)
+        
+        session.commitConfiguration()
     }
     
     func requestAndCheckPermissions() {
@@ -76,7 +134,7 @@ class CJCamera: NSObject, ObservableObject {
                 
                 if authStatus {
                     DispatchQueue.main.async {
-                        self?.setUpSession()
+                        self?.setUpInitialSession()
                     }
                 }
             }
@@ -84,7 +142,7 @@ class CJCamera: NSObject, ObservableObject {
             break
         case .authorized:
             // 이미 권한 받은 경우 셋업
-            setUpSession()
+            setUpInitialSession()
         default:
             // 거절했을 경우
             print("Permession declined")
@@ -99,11 +157,11 @@ extension CJCamera {
     /// 촬영 실행
     func capturePhoto() {
         
-        if isProcessing { return }
-        
-        isProcessing = true
+        if !isCameraAvailable { return }
         
         let photoSettings = AVCapturePhotoSettings()
+        
+//        photoSettings.flashMode = self.flashMode
         
         self.output.capturePhoto(with: photoSettings, delegate: self)
     }
@@ -120,12 +178,48 @@ extension CJCamera {
         UIImageWriteToSavedPhotosAlbum(uiImage, nil, nil, nil)
     }
     
-    
+    // 화면 모드
+    func flipCamera() {
+        
+        guard state == .frontAndBack else { return }
+        
+        self.isCameraAvailable = false
+        
+        session.stopRunning()
+        session.beginConfiguration()
+
+        if currentPosition == .back {
+            
+            currentPosition = .front
+                
+            session.removeInput(backCameraInput)
+            session.addInput(frontCameraInput)
+            
+            output.connections.first?.isVideoMirrored = true
+        } else {
+            
+            currentPosition = .back
+            
+            session.removeInput(frontCameraInput)
+            session.addInput(backCameraInput)
+            
+            output.connections.first?.isVideoMirrored = false
+        }
+        
+        session.commitConfiguration()
+        
+        DispatchQueue.global().async {
+            self.session.startRunning()
+            self.isCameraAvailable = true
+        }
+    }
 }
 
 extension CJCamera: AVCapturePhotoCaptureDelegate {
     
     func photoOutput(_ output: AVCapturePhotoOutput, willBeginCaptureFor resolvedSettings: AVCaptureResolvedPhotoSettings) {
+        isCameraAvailable = false
+        session.stopRunning()
     }
     
     func photoOutput(_ output: AVCapturePhotoOutput, willCapturePhotoFor resolvedSettings: AVCaptureResolvedPhotoSettings) {
@@ -136,11 +230,14 @@ extension CJCamera: AVCapturePhotoCaptureDelegate {
     
     func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
         
-        isProcessing = false
+        isCameraAvailable = true
         
         guard let imageData = photo.fileDataRepresentation() else { return }
         
-        // TODO: 사진저장에 실패하는 경우
         try? self.saveCapturedPhoto(imageData)
+        
+        DispatchQueue.global().async {
+            self.session.startRunning()
+        }
     }
 }
