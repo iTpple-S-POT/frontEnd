@@ -41,8 +41,12 @@ let cjCameraProject = Project(
             deploymentTarget: .iOS(targetVersion: iOSTargetVersion, devices: .iphone),
             infoPlist: dempAppInfoPlist(),
             sources: ["Targets/DemoApp/Sources/**"],
+            resources: ["Targets/DemoApp/Resources/**"],
             dependencies: [
-                .target(name: "CJCamera")
+                .target(name: "CJCamera"),
+                .package(product: "DefaultExtensions"),
+                .package(product: "GlobalObjects"),
+                .package(product: "GlobalUIComponents"),
             ]
         ),
     ]

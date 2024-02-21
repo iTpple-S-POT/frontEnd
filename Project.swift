@@ -4,7 +4,7 @@ import Foundation
 private let bundleId: String = "com.itpple.spot"
 private let version: String = "0.0.1"
 private let bundleVersion: String = "1"
-private let iOSTargetVersion: String = "16.0"
+public let iOSTargetVersion: String = "16.0"
 
 // 아래의 Targets는 Tuist파일에 존재한다.
 private let basePath: String = "Targets"
@@ -17,16 +17,12 @@ private let kakaoNativeAppKey = getKakaoAppKey()
 
 let project = Project(name: "\(appName)",
                       packages: [
-                            .local(path: "\(packagePath)/ApplicationUI"),
                             .local(path: "\(packagePath)/LoginUI"),
-                            .local(path: "\(packagePath)/MainScreenUI"),
-                            .local(path: "\(packagePath)/PotDetailUI"),
-                            .local(path: "\(packagePath)/MyPageUI"),
                       ],
                       settings: Settings.settings(configurations: makeConfiguration()),
                       targets: [
                           Target(
-                              name: "SPOT_Application",
+                              name: appName,
                               platform: .iOS,
                               product: .app,
                               bundleId: bundleId,
@@ -38,11 +34,8 @@ let project = Project(name: "\(appName)",
                                 "Secrets/secret.json",
                               ],
                               dependencies: [
-                                .package(product: "ApplicationUI"),
+                                .project(target: "InitialScreenUI", path: .relativeToRoot("Modules/Presentation/InitialScreenUI")),
                                 .package(product: "LoginUI"),
-                                .package(product: "MainScreenUI"),
-                                .package(product: "PotDetailUI"),
-                                .package(product: "MyPageUI"),
                               ],
                               settings: baseSettings()
                           )

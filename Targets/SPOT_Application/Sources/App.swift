@@ -1,5 +1,5 @@
 import SwiftUI
-import ApplicationUI
+import InitialScreenUI
 import LoginUI
 
 @main
@@ -18,7 +18,8 @@ struct SPOTFEApp: App {
     }
     
     private func getKakaoAppKey() -> String {
-        let path = Bundle.main.provideFilePath(name: "secret", ext: "json")
+        
+        let path = Bundle.main.path(forResource: "secret", ofType: "json")!
         
         if let contentsOfFile = try? Data(contentsOf: URL(filePath: path)), let decodedContents = try? JSONDecoder().decode(SecretModel.self, from: contentsOfFile) {
             return decodedContents.keys.kakao_native_app_key

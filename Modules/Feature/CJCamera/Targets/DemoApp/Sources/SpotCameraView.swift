@@ -162,5 +162,5 @@ struct SpotCameraView: View {
 }
 
 #Preview {
-    SpotCameraView()
+    Image.makeImageFromBundle(bundle: .main, name: "profile_vec", ext: .png)
 }
