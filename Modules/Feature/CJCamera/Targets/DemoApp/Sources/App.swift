@@ -7,8 +7,9 @@ struct CameraApp: App {
     var body: some Scene {
         
         WindowGroup {
-            TestCameraView()
+            SpotCameraView()
         }
     }
     
 }
+

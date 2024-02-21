@@ -7,21 +7,67 @@
 
 import AVFoundation
 import SwiftUI
+import Combine
 
-class CJCameraViewModel: ObservableObject {
+public class CJCameraViewModel: ObservableObject {
     
     private let model: CJCamera
     private let session: AVCaptureSession
-    let cameraPreview: AnyView
+    public let cameraPreview: AnyView
     
-    init() {
+    // Camera options
+    @Published public var isFlashModeOn = false
+    
+    // current photo
+    @Published public var currentImage: UIImage?
+    
+    // Combine
+    private var subscriptions: Set<AnyCancellable> = []
+    
+    public init() {
+        
         self.session = AVCaptureSession()
         self.model = CJCamera(session: session)
         self.cameraPreview = AnyView(CJCameraPreviewView(captureSession: session))
+        
+        // set publisher
+        model
+            .$currentImage
+            .receive(on: DispatchQueue.main)
+            .sink { result in
+                
+                switch result {
+                case .finished:
+                    print("카메라 구독 종료")
+                case .failure(let error):
+                    preconditionFailure(error.localizedDescription)
+                }
+                
+            } receiveValue: { image in
+                
+                self.currentImage = image
+            }
+            .store(in: &subscriptions)
+
     }
     
-    func configure() {
+    public func configure() {
         model.requestAndCheckPermissions()
+    }
+    
+    public func flashSwitch() {
+        
+        
+    }
+}
+
+
+// MARK: - Action
+public extension CJCameraViewModel {
+    
+    func takePhoto() {
+        
+        model.capturePhoto()
     }
     
 }

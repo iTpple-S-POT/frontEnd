@@ -61,6 +61,7 @@ func dempAppInfoPlist() -> InfoPlist {
     
     let additionalList: [String : Plist.Value] = [
         "NSCameraUsageDescription" : "팟 업로드및 프로필 이미지촤영을 위해 사용합니다.",
+        "NSPhotoLibraryAddUsageDescription" : "촬영한 사진을 저장합니다.",
         "UILaunchScreen": [],
         "UISupportedInterfaceOrientations":
             ["UIInterfaceOrientationPortrait"],
