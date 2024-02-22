@@ -16,8 +16,8 @@ public class CJCameraViewModel: ObservableObject {
     public private(set) var cameraPreview: AnyView?
     
     // Camera options
+//    @Published public var isFlashModeOn = false
     @Published public private(set) var isCameraAvailable = false
-    @Published public var isFlashModeOn = false
     
     let hapticImpact = UIImpactFeedbackGenerator()
     
@@ -70,12 +70,12 @@ public class CJCameraViewModel: ObservableObject {
         model?.requestAndCheckPermissions()
     }
     
-    public func flashSwitch() {
-        
-        isFlashModeOn.toggle()
-        
-        model?.flashMode = isFlashModeOn ? .on : .off
-    }
+//    public func flashSwitch() {
+//        
+//        isFlashModeOn.toggle()
+//        
+//        model?.flashMode = isFlashModeOn ? .on : .off
+//    }
     
     public func positionSwitch() {
         
@@ -88,9 +88,14 @@ public class CJCameraViewModel: ObservableObject {
 public extension CJCameraViewModel {
     
     func takePhoto() {
+        
+        if !isCameraAvailable { return }
+        
+        isCameraAvailable = false
+        
         hapticImpact.impactOccurred()
             
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             self.model?.capturePhoto()
         }
     }

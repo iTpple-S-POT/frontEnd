@@ -17,6 +17,8 @@ struct ImageDetailView: View {
     
     @Environment(\.dismiss) private var dismiss
     
+    let onDismiss: () -> Void
+    
     var body: some View {
         
         VStack(spacing: 0) {
@@ -27,7 +29,10 @@ struct ImageDetailView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(height: 22)
-                    .onTapGesture(perform: { dismiss() })
+                    .onTapGesture(perform: {
+                        onDismiss()
+                        dismiss()
+                    })
                     .padding(.horizontal, 10)
                 
                 Spacer()
@@ -73,14 +78,11 @@ struct SpotCameraView: View {
     
     @StateObject private var navModel = NavigationController<CameraDestination>()
     
-    @ObservedObject private var viewModel = CJCameraViewModel()
+    @StateObject private var viewModel = CJCameraViewModel()
+    
+    @State private var captureBtnDisabled = false
     
     @Environment(\.dismiss) private var dismiss
-    
-    init() {
-        
-        viewModel.checkAuthAndExecute()
-    }
     
     var body: some View {
         
@@ -131,6 +133,8 @@ struct SpotCameraView: View {
                     
                     Button {
                         
+                        captureBtnDisabled = true
+                        
                         viewModel.takePhoto()
                         
                     } label: {
@@ -147,7 +151,7 @@ struct SpotCameraView: View {
                             .contentShape(Circle())
                             .shadow(color: .mainScreenRed, radius: 3)
                     }
-                    .disabled(!viewModel.isCameraAvailable)
+                    .disabled(captureBtnDisabled || !viewModel.isCameraAvailable)
                     
                     
                     Spacer()
@@ -155,17 +159,25 @@ struct SpotCameraView: View {
                 }
                 .frame(height: 100)
                 .background(Rectangle().fill(.white))
-                .onChange(of: viewModel.currentImage) { _ in
+                .onChange(of: viewModel.currentImage) { value in
+                    
                     navModel.addToStack(destination: .capturePreview)
                 }
             }
             .navigationDestination(for: CameraDestination.self) { value in
                 switch value {
                 case .capturePreview:
-                    ImageDetailView(cameraViewModel: viewModel)
+                    ImageDetailView(cameraViewModel: viewModel) {
+                        
+                        captureBtnDisabled = false
+                    }
                         .navigationBarBackButtonHidden()
                 }
             }
+        }
+        .onAppear {
+            
+            viewModel.checkAuthAndExecute()
         }
     }
 }

@@ -159,6 +159,8 @@ extension CJCamera {
         
         if !isCameraAvailable { return }
         
+        isCameraAvailable = false
+        
         let photoSettings = AVCapturePhotoSettings()
         
 //        photoSettings.flashMode = self.flashMode
@@ -218,7 +220,6 @@ extension CJCamera {
 extension CJCamera: AVCapturePhotoCaptureDelegate {
     
     func photoOutput(_ output: AVCapturePhotoOutput, willBeginCaptureFor resolvedSettings: AVCaptureResolvedPhotoSettings) {
-        isCameraAvailable = false
         session.stopRunning()
     }
     
@@ -231,9 +232,7 @@ extension CJCamera: AVCapturePhotoCaptureDelegate {
     func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
         
         isCameraAvailable = true
-        
-        
-        
+
         guard let imageData = photo.fileDataRepresentation() else { return }
         
         try? self.saveCapturedPhoto(imageData)
