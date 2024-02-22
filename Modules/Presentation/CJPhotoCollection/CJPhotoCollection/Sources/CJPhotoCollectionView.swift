@@ -7,16 +7,11 @@ public class Coordinator {
     
     var previousColleciton: CollectionTypeObject = .allPhoto
     
-    var selectedPhotoSub: AnyCancellable?
-    
-    var collectionListSub: AnyCancellable?
-    
-    var dismissSub: AnyCancellable?
+    var subscriptions: Set<AnyCancellable> = []
     
     deinit {
         
-        selectedPhotoSub?.cancel()
-        collectionListSub?.cancel()
+        subscriptions.removeAll()
     }
 }
 
@@ -26,13 +21,20 @@ public struct CJPhotoCollectionView: UIViewControllerRepresentable {
     
     // publisher가 퍼블리쉬시 호출되는 클로저 타입입니다.
     public var selectedPhotoCompletion: (ImageInformation?) -> ()
+    public var selectCameraCompletion: () -> ()
     public var collectionTypesCompletion: ([CollectionTypeObject]) -> ()
     public var dismissCompletion: () -> ()
     
-    public init(collectionType: Binding<CollectionTypeObject>, selectedPhotoCompletion: @escaping (ImageInformation?) -> (), collectionTypesCompletion: @escaping ([CollectionTypeObject]) -> (), dismissCompletion: @escaping () -> ()) {
+    public init(
+        collectionType: Binding<CollectionTypeObject>,
+        selectedPhotoCompletion: @escaping (ImageInformation?) -> (),
+        selectCameraCompletion: @escaping () -> Void,
+        collectionTypesCompletion: @escaping ([CollectionTypeObject]) -> (),
+        dismissCompletion: @escaping () -> ()) {
         
         self._collectionType = collectionType
         self.selectedPhotoCompletion = selectedPhotoCompletion
+        self.selectCameraCompletion = selectCameraCompletion
         self.collectionTypesCompletion = collectionTypesCompletion
         self.dismissCompletion = dismissCompletion
     }
@@ -45,7 +47,7 @@ public struct CJPhotoCollectionView: UIViewControllerRepresentable {
         
         let coordi = context.coordinator
         
-        coordi.selectedPhotoSub = collectionViewController.selectedPhotoPub.sink { _ in
+        collectionViewController.selectedPhotoPub.sink { _ in
             
             print("connecton finished")
             
@@ -69,10 +71,16 @@ public struct CJPhotoCollectionView: UIViewControllerRepresentable {
                 
                 selectedPhotoCompletion(nil)
             }
-            
         }
+        .store(in: &coordi.subscriptions)
         
-        coordi.collectionListSub = collectionViewController.collectionTypesPub.sink { _ in
+        collectionViewController.selectCameraPub.sink {
+            
+            selectCameraCompletion()
+        }
+        .store(in: &coordi.subscriptions)
+        
+        collectionViewController.collectionTypesPub.sink { _ in
             
             print("connecton finished")
             
@@ -85,12 +93,14 @@ public struct CJPhotoCollectionView: UIViewControllerRepresentable {
             }
             
         }
+        .store(in: &coordi.subscriptions)
         
-        coordi.dismissSub = collectionViewController.dismissPub.sink(receiveValue: { _ in
+        collectionViewController.dismissPub.sink(receiveValue: { _ in
             
             dismissCompletion()
             
         })
+        .store(in: &coordi.subscriptions)
         
         
         return collectionViewController

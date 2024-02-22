@@ -32,8 +32,8 @@ struct SpotNavigationBarView: View {
                 Image(systemName: "chevron.backward")
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 28, height: 28)
-                    .padding(10)
+                    .frame(height: 22)
+                    .padding(.horizontal, 10)
                     .onTapGesture(perform: { dismissAction?() })
                 
                 Spacer(minLength: 0)

@@ -27,6 +27,11 @@ class CJPhotoCell: UICollectionViewCell {
         }
     }
     
+    public override func draw(_ rect: CGRect) {
+        
+        setUp()
+    }
+    
     func setUp() {
         
         thumbNailImageView.contentMode = .scaleAspectFill

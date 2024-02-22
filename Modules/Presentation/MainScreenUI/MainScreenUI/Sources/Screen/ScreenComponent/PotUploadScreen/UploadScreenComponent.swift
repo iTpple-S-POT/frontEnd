@@ -53,7 +53,9 @@ struct UploadScreenComponent: View {
             ZStack {
                 
                 cameraView
-                    .onTapGesture { screenModelWithNav.showSelectPhotoView = true }
+                    .onTapGesture {
+                        screenModelWithNav.addToStack(destination: .photoCollection)
+                    }
                     .zIndex(0)
                 
                 if let uiImage = selectedUIImage {
@@ -84,7 +86,9 @@ struct UploadScreenComponent: View {
                                 .frame(width: 28, height: 28)
                                 .shadow(color: .black, radius: 5)
                                 .padding(10)
-                                .onTapGesture { screenModelWithNav.showSelectPhotoView = true }
+                                .onTapGesture {
+                                    screenModelWithNav.addToStack(destination: .photoCollection)
+                                }
                         }
                     }
                 }
@@ -197,11 +201,6 @@ struct UploadScreenComponent: View {
             
         }
         .ignoresSafeArea(.keyboard)
-        .fullScreenCover(isPresented: $screenModelWithNav.showSelectPhotoView) {
-            
-            SelectPhotoView()
-            
-        }
     }
 }
 

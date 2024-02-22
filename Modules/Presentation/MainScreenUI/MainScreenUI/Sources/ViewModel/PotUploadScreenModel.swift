@@ -19,7 +19,7 @@ public enum PotUploadDestination {
     case uploadScreen
     case hashTagScreen
     case finalScreen
-    
+    case photoCollection
 }
 
 public class PotUploadScreenModel: NavigationController<PotUploadDestination> {
@@ -28,8 +28,6 @@ public class PotUploadScreenModel: NavigationController<PotUploadDestination> {
     @Published var selectedCategoryId: Int64?
     
     // 이미지
-    @Published var showSelectPhotoView = false
-    
     @Published private(set) var authorizationStatus = PHPhotoLibrary.authorizationStatus(for: .readWrite)
     
     @Published private(set) var imageInfo: ImageInformation?
@@ -60,6 +58,8 @@ public class PotUploadScreenModel: NavigationController<PotUploadDestination> {
     let potUploadPublisher = PassthroughSubject<Bool, Never>()
     
     var dismiss: DismissAction?
+    
+    var subscriptions: Set<AnyCancellable> = []
     
     func checkAuthorizationStatus() {
         

@@ -15,40 +15,72 @@ struct SelectPhotoView: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var screenModel: PotUploadScreenModel
     
+    @State private var showCameraView = false
+    
     var body: some View {
         VStack(spacing: 0) {
             
-            Group {
+            ZStack {
                 
-                switch screenModel.authorizationStatus {
+                HStack(spacing: 0) {
                     
-                case .authorized:
-                    Text("모든 사진에대한 접근권한")
-                case .limited:
-                    Text("제한된 접근")
-                case .restricted:
-                    Text("사진앱에 접근 불가한 디바이스입니다.")
-                case .denied:
-                    Text("접근이 제한되었습니다.")
-                default:
-                    Text("처리되지 못한 접근권한")
+                    Spacer(minLength: 28)
+                    
+                    
+                    Menu {
+                        
+                        Picker(selection: $screenModel.selectedCollectionType) {
+                            
+                            ForEach(screenModel.collectionTypeList, id: \.self) { item in
+                                
+                                Text(item.title)
+                                
+                            }
+                            
+                        } label: { EmptyView() }
+                        
+                    } label: {
+                        
+                        HStack {
+                            
+                            Text("\(screenModel.selectedCollectionType.title)")
+                                .font(.system(size: 20, weight: .semibold))
+                            
+                            Image(systemName: "chevron.up.chevron.down")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(height: 20)
+                        }
+                        .foregroundStyle(.black)
+                    }
+                    
+                    Spacer()
+                    
+                }
+                
+                HStack(spacing: 0) {
+                    
+                    Image(systemName: "chevron.backward")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: 22)
+                        .padding(.horizontal, 10)
+                        .onTapGesture(perform: { dismiss() })
+                    
+                    Spacer(minLength: 0)
+                    
                 }
                 
             }
-            .frame(height: 100)
-            
-            Picker("앨범선택", selection: $screenModel.selectedCollectionType) {
-                
-                ForEach(screenModel.collectionTypeList, id: \.self) { item in
-                    
-                    Text(item.title)
-                    
-                }
-                
-            }
+            .padding(.horizontal, 21)
+            .frame(height: 56)
+            .background(
+                Rectangle().fill(.white)
+            )
+            .shadow(color: .gray.opacity(0.3), radius: 2.0, y: 2)
             
             if screenModel.authorizationStatus == .authorized || screenModel.authorizationStatus == .limited {
-                
+
                 CJPhotoCollectionView(collectionType: $screenModel.selectedCollectionType) {
                     
                     // 이미지 데이터 획득 성공
@@ -65,15 +97,20 @@ struct SelectPhotoView: View {
                         
                     }
                     
-                } collectionTypesCompletion: {
+                } selectCameraCompletion: {
+                    
+                    // 카메라 스크린 표시
+                    showCameraView = true
+                }
+                collectionTypesCompletion: {
                     
                     screenModel.collectionTypeList = $0
                     
                 } dismissCompletion: {
                     
                     dismiss()
-                    
                 }
+                .ignoresSafeArea(.all, edges: .bottom)
 
                 
             } else {
@@ -93,6 +130,9 @@ struct SelectPhotoView: View {
             
             Alert(title: Text(screenModel.alertTitle), message: Text(screenModel.alertMessage), dismissButton: .default(Text("닫기")))
             
+        }
+        .fullScreenCover(isPresented: $showCameraView) {
+            SpotCameraView()
         }
     }
 }

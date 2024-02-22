@@ -38,6 +38,8 @@ public class CJPhotoCollectionViewController: UICollectionViewController {
     // 선택된 셀을 전송할 퍼블리셔
     let selectedPhotoPub = PassthroughSubject<Result<ImageInformation?, SelectImageCellError>, Never>()
     
+    let selectCameraPub = PassthroughSubject<Void, Never>()
+    
     let dismissPub = PassthroughSubject<Any?, Never>()
     
     let collectionTypesPub = PassthroughSubject<[CollectionTypeObject], Never>()
@@ -212,15 +214,14 @@ public extension CJPhotoCollectionViewController {
             
             let cellIdentifier = String(describing: CJCameraCell.self)
             
-            guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellIdentifier, for: indexPath) as? CJCameraCell else {
+            guard let reusableCell = collectionView.dequeueReusableCell(withReuseIdentifier: cellIdentifier, for: indexPath) as? CJCameraCell else {
                 
-                preconditionFailure("Camera Image Cell을 생성할 수 없습니다.")
-                
+                fatalError("CJPhotoCell")
             }
+
+            reusableCell.setUp()
             
-            cell.setUp()
-            
-            return cell
+            return reusableCell
             
         }
         
@@ -231,21 +232,20 @@ public extension CJPhotoCollectionViewController {
         
         let cellIdentifier = String(describing: CJPhotoCell.self)
         
-        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellIdentifier, for: indexPath) as? CJPhotoCell else {
+        guard let reusableCell = collectionView.dequeueReusableCell(withReuseIdentifier: cellIdentifier, for: indexPath) as? CJPhotoCell else {
             
-            preconditionFailure("Iamge Cell을 생성할 수 없습니다.")
-            
+            fatalError("CJPhotoCell")
         }
         
-        cell.representedAssetId = asset.localIdentifier
+        reusableCell.representedAssetId = asset.localIdentifier
         
         imageManager.requestImage(for: asset, targetSize: thumbNailSize, contentMode: .aspectFill, options: nil) { image, _ in
             
-            if cell.representedAssetId == asset.localIdentifier {
+            if reusableCell.representedAssetId == asset.localIdentifier {
                 
                 DispatchQueue.main.async {
                     
-                    cell.thumbNailImage = image
+                    reusableCell.thumbNailImage = image
                     
                 }
                 
@@ -254,12 +254,10 @@ public extension CJPhotoCollectionViewController {
         }
         
         if asset.mediaSubtypes.contains(.photoLive) {
-            cell.livePhotoIconImage = PHLivePhotoView.livePhotoBadgeImage(options: .overContent)
+            reusableCell.livePhotoIconImage = PHLivePhotoView.livePhotoBadgeImage(options: .overContent)
         }
         
-        cell.setUp()
-        
-        return cell
+        return reusableCell
         
     }
     
@@ -457,6 +455,7 @@ public extension CJPhotoCollectionViewController {
         if let cameraCell = selectedCell as? CJCameraCell {
             
             print("카메라 선택됨")
+            selectCameraPub.send()
             
             return
         }
@@ -479,7 +478,7 @@ public extension CJPhotoCollectionViewController {
                 
                 imageManager.requestImageDataAndOrientation(for: asset, options: .none) { data, type, orientation, _ in
                     
-                    guard let imageData = data, let uiImage = UIImage(data: imageData) else {
+                    guard let imageData = data, let _ = UIImage(data: imageData) else {
                         // TODO: 데이터를 가져울 수 없는 사진
                         return self.selectedPhotoPub.send(.failure(.imageDataNotAvailable))
                     }

@@ -39,6 +39,9 @@ struct PotUploadScreen: View {
                     case .finalScreen:
                         FinalPotScreenComponent()
                             .navigationBarBackButtonHidden()
+                    case .photoCollection:
+                        SelectPhotoView()
+                            .navigationBarBackButtonHidden()
                     }
                     
                 }

@@ -232,6 +232,8 @@ extension CJCamera: AVCapturePhotoCaptureDelegate {
         
         isCameraAvailable = true
         
+        
+        
         guard let imageData = photo.fileDataRepresentation() else { return }
         
         try? self.saveCapturedPhoto(imageData)
