@@ -76,8 +76,8 @@ class PotAnnotationView: MKAnnotationView {
         self.addGestureRecognizer(tapGesture)
         
         self.addSubview(layer1)
-        self.insertSubview(layer2, aboveSubview: layer1)
-        self.insertSubview(layer3, aboveSubview: layer2)
+        self.layer1.addSubview(layer2)
+        self.layer2.addSubview(layer3)
         
         // AutoLayout
         
@@ -89,18 +89,16 @@ class PotAnnotationView: MKAnnotationView {
             
             layer1.widthAnchor.constraint(equalToConstant: self.frame.width),
             layer1.heightAnchor.constraint(equalToConstant: self.frame.height),
-            layer1.centerXAnchor.constraint(equalTo: self.centerXAnchor),
-            layer1.centerYAnchor.constraint(equalTo: self.centerYAnchor),
             
             layer2.widthAnchor.constraint(equalTo: layer1.widthAnchor, constant: -6),
             layer2.heightAnchor.constraint(equalTo: layer1.heightAnchor, constant: -6),
-            layer2.centerXAnchor.constraint(equalTo: self.centerXAnchor),
-            layer2.centerYAnchor.constraint(equalTo: self.centerYAnchor),
+            layer2.centerXAnchor.constraint(equalTo: layer1.centerXAnchor),
+            layer2.centerYAnchor.constraint(equalTo: layer1.centerYAnchor),
             
             layer3.widthAnchor.constraint(equalTo: layer2.widthAnchor, constant: -6),
             layer3.heightAnchor.constraint(equalTo: layer2.heightAnchor, constant: -6),
-            layer3.centerXAnchor.constraint(equalTo: self.centerXAnchor),
-            layer3.centerYAnchor.constraint(equalTo: self.centerYAnchor),
+            layer3.centerXAnchor.constraint(equalTo: layer2.centerXAnchor),
+            layer3.centerYAnchor.constraint(equalTo: layer2.centerYAnchor),
         ])
         
         // shadow
@@ -109,16 +107,11 @@ class PotAnnotationView: MKAnnotationView {
         self.layer.shadowOffset = CGSize(width: 0, height: 0)
         self.layer.shadowOpacity = 0.5
         self.layer.shadowRadius = 3.0
-        
     }
     
     override func draw(_ rect: CGRect) {
         
-        let height = self.bounds.height
-        
-        print(frame)
-        
-        self.frame.origin.y = sqrt(2.0) * height/2
+        layer1.frame.origin = CGPoint(x: 0, y: -sqrt(2.0) * (self.frame.height/2))
         
         layer3.layer.cornerRadius = layer3.bounds.width / 2
         
