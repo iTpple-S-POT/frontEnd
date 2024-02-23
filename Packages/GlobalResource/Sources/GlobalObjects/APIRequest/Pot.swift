@@ -250,7 +250,7 @@ public extension APIRequestGlobalObject {
         }
     }
     
-    // 팟 클릭시 팟데이터 데요청(viewCount증가 로직)
+    // 팟 클릭시 팟데이터 요청(viewCount증가 로직)
     func getPotForPotDetailAbout(potId: Int64) async throws -> PotObject {
         
         var url = try SpotAPI.getPots.getApiUrl()
@@ -259,8 +259,6 @@ public extension APIRequestGlobalObject {
         let request = try getURLRequest(url: url, method: .get, isAuth: true)
         
         let (data, response) = try await URLSession.shared.data(for: request)
-        
-        print(String(data: data, encoding: .utf8))
         
         if let httpResponse = response as? HTTPURLResponse {
             
@@ -277,6 +275,7 @@ public extension APIRequestGlobalObject {
                 expirationDate: decoded.expiredAt,
                 latitude: Double(decoded.location.lat),
                 longitude: Double(decoded.location.lon),
+                hashTagList: decoded.hashtagList,
                 viewCount: Int(decoded.viewCount)
             )
         }

@@ -232,6 +232,7 @@ public struct PotDetailView: View {
                                 
                                 
                             }
+                            .shadow(color: .black, radius: 3, y: 2)
                             
                             // 팟내용
                             Text(potModel.content)
@@ -252,6 +253,7 @@ public struct PotDetailView: View {
                                 }
                             }
                         }
+                        .shadow(color: .black, radius: 3, y: 2)
                         
                         // 댓글 좋아요등을 위한 Spacer
                         Spacer(minLength: 44)
@@ -265,29 +267,31 @@ public struct PotDetailView: View {
                 
                 ScrollView(.horizontal) {
                     
-                    LazyHStack(spacing: 8) {
+                    HStack(spacing: 8) {
                         Spacer()
                             .frame(height: 21)
                         
-//                        ForEach(, id: \.self) { tag in
-//                            
-//                            Text("#\(tag)")
-//                                .font(.system(size: 16, weight: .semibold))
-//                                .foregroundStyle(.white)
-//                                .frame(height: 32)
-//                                .padding(.horizontal, 15)
-//                                .background(
-//                                    RoundedRectangle(cornerRadius: 30)
-//                                        .strokeBorder(.white, lineWidth: 1)
-//                                )
-//                            
-//                        }
+                        ForEach(potModel.hashTagList, id: \.self) { tag in
+                            
+                            Text("#\(tag.hashtag)")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundStyle(.white)
+                                .frame(height: 32)
+                                .padding(.horizontal, 15)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 30)
+                                        .strokeBorder(.white, lineWidth: 1)
+                                )
+                            
+                        }
                         
                     }
+                    .shadow(color: .black, radius: 3, y: 2)
                     
                 }
                 .scrollIndicators(.hidden)
                 .frame(height: 32)
+                .padding(.vertical, 20)
             }
         }
         .onAppear {
@@ -297,7 +301,7 @@ public struct PotDetailView: View {
                 do {
                     
                     let potObject = try await APIRequestGlobalObject.shared.getPotForPotDetailAbout(potId: potModel.id)
-                    
+
                     let userObject = try await APIRequestGlobalObject.shared.getUserInfo(userId: Int(potObject.userId))
                     
                     // viewCount update
@@ -305,7 +309,7 @@ public struct PotDetailView: View {
                         
                         self.userInfo = userObject
                         self.potModel.viewCount = potObject.viewCount
-                        
+                        self.potModel.hashTagList = potObject.hashtagList
                     }
                 } catch {
                     print(error.localizedDescription)
@@ -333,6 +337,7 @@ public struct PotDetailView: View {
                     expirationDate: "2024-02-08T11:21:11.006112312312" ,
                     latitude: 0,
                     longitude: 0,
+                    hashTagList: [],
                     viewCount: 20
                 )
                                                         

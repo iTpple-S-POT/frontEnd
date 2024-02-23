@@ -18,9 +18,20 @@ public class PotModel: ObservableObject {
     public let latitude: Double
     public let longitude: Double
     
+    @Published public var hashTagList: [HashTagDTO]
     @Published public var viewCount: Int
     
-    public init(id: Int64, userId: Int64, categoryId: Int64, content: String, imageKey: String?, expirationDate: String, latitude: Double, longitude: Double, viewCount: Int) {
+    public init(
+        id: Int64,
+        userId: Int64,
+        categoryId: Int64,
+        content: String,
+        imageKey: String?,
+        expirationDate: String,
+        latitude: Double,
+        longitude: Double,
+        hashTagList: [HashTagDTO],
+        viewCount: Int) {
         self.id = id
         self.userId = userId
         self.categoryId = categoryId
@@ -29,6 +40,7 @@ public class PotModel: ObservableObject {
         self.expirationDate = expirationDate
         self.latitude = latitude
         self.longitude = longitude
+        self.hashTagList = hashTagList
         self.viewCount = viewCount
     }
     
@@ -47,6 +59,7 @@ public extension PotModel {
             expirationDate: potObject.expirationDate,
             latitude: potObject.latitude,
             longitude: potObject.longitude,
+            hashTagList: potObject.hashtagList,
             viewCount: potObject.viewCount
         )
     }

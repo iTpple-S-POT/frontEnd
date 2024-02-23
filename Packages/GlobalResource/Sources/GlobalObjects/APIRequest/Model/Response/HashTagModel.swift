@@ -7,8 +7,8 @@
 
 import Foundation
 
-public struct HashTagDTO: Decodable {
+public struct HashTagDTO: Decodable, Hashable {
     
     var hashtagId: Int64
-    var hashtag: String
+    public var hashtag: String
 }
