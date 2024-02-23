@@ -15,6 +15,7 @@ public enum MapViewState {
 
 public extension Notification.Name {
     static let singlePotSelection: Self = .init("singlePotSelection")
+    static let multiplePotsSelection: Self = .init("multiplePotsSelection")
 }
 
 
@@ -89,6 +90,10 @@ extension MkMapViewCoordinator: MKMapViewDelegate {
             let potAnnotationView = PotAnnotationView(annotation: potAnnot, reuseIdentifier: Self.potAnnotationViewIdentifier)
             
             potAnnotationView.clusteringIdentifier = Self.potClusterAnnotationId
+            
+            let height = PotAnnotationViewConfig.annotationSize.height
+            
+            potAnnotationView.centerOffset.y = -sqrt(2.0) * height/2
             
             return potAnnotationView
         case let potClusterAnnot as MKClusterAnnotation:

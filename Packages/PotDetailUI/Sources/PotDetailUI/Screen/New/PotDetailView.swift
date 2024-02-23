@@ -143,12 +143,12 @@ public struct PotDetailView: View {
                             
                             Text(tagObject.getKorString())
                                 .font(.system(size: 18, weight: .semibold))
-                                .shadow(color: .black, radius: 3, y: 2)
                                 .foregroundStyle(.white)
                             
                             Spacer()
                             
                         }
+                        .shadow(color: .black, radius: 3, y: 2)
                         
                         HStack(spacing: 0) {
                             

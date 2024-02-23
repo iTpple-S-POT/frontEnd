@@ -35,7 +35,7 @@ public class CJLocationManager: NSObject {
         manager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
         
         // TODO: 업데이트 거리를 몇미터로 할 것인지 정하기
-        manager.distanceFilter = 10
+        manager.distanceFilter = 1
     }
     
     /// 권한 요구 프롬프트 실행

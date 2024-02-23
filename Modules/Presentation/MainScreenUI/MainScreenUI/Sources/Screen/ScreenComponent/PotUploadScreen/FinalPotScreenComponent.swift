@@ -63,6 +63,7 @@ struct FinalPotScreenComponent: View {
                         Spacer()
                         
                     }
+                    .shadow(color: .black, radius: 3, y: 2)
                     
                     HStack(spacing: 0) {
                         
@@ -80,6 +81,7 @@ struct FinalPotScreenComponent: View {
                         Spacer(minLength: 0)
                         
                     }
+                    .shadow(color: .black, radius: 3, y: 2)
                     
                 }
                 .padding(.horizontal, 21)
@@ -114,6 +116,7 @@ struct FinalPotScreenComponent: View {
                         
                         Spacer()
                     }
+                    .shadow(color: .black, radius: 3, y: 2)
                     
                     // 팟 텍스트
                     VStack(alignment: .leading) {
@@ -127,6 +130,7 @@ struct FinalPotScreenComponent: View {
                     }
                     .frame(height: 40)
                     .padding(.top, 12)
+                    .shadow(color: .black, radius: 3, y: 2)
                     
                     ScrollView(.horizontal) {
                         
@@ -147,6 +151,7 @@ struct FinalPotScreenComponent: View {
                             }
                             
                         }
+                        .shadow(color: .black, radius: 3, y: 2)
                         
                     }
                     .scrollIndicators(.hidden)

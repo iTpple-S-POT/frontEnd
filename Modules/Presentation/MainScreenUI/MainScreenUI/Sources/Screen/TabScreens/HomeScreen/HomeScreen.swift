@@ -54,6 +54,13 @@ struct HomeScreen: View {
                 let height = geo.size.height
                 
                 Group {
+                    
+                    if homeScreenModel.presentPotsListView {
+                        
+                        PotListView(present: $homeScreenModel.presentPotsListView, models: homeScreenModel.selectedClusterModels!)
+                            .zIndex(1)
+                    }
+                    
                     if homeScreenModel.presentPotDetailView {
                         
                         PotDetailView(potModel: homeScreenModel.selectedPotModel!, dismissAction: {
@@ -65,6 +72,7 @@ struct HomeScreen: View {
                             .onAppear {
                                 mainScreenConfig.setMode(mode: .blackMode)
                             }
+                            .zIndex(2)
                     }
                 }
                 .slideTransition(
@@ -72,9 +80,8 @@ struct HomeScreen: View {
                     to: CGPoint(x: 0, y: 0)
                 )
                 .animation(.easeIn(duration: 0.3), value: homeScreenModel.presentPotDetailView)
-                
+                .animation(.easeIn(duration: 0.3), value: homeScreenModel.presentPotsListView)
             }
-            .zIndex(2)
         }
         .onAppear {
             self.presentSub = homeScreenModel.$presentPotDetailView.sink { mainScreenConfig.isPotDetailViewIsPresented = $0 }

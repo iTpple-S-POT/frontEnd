@@ -13,6 +13,11 @@ import DefaultExtensions
 import Lottie
 import Kingfisher
 
+enum PotAnnotationViewConfig {
+    static var annotationSize = CGSize(width: 52, height: 52)
+}
+
+
 class PotAnnotationView: MKAnnotationView {
     
     let layer1: PotShapeView = {
@@ -66,7 +71,7 @@ class PotAnnotationView: MKAnnotationView {
         self.collisionMode = .circle
         
         // Annotation크기 조정(collision을 위한 설정)
-        self.frame.size = CGSize(width: 52, height: 52)
+        self.frame.size = PotAnnotationViewConfig.annotationSize
         
         layer2.color = PotAnnotationType(rawValue: Int(annotation.potModel.categoryId))!.getAnnotationColor()
         
@@ -110,8 +115,6 @@ class PotAnnotationView: MKAnnotationView {
     }
     
     override func draw(_ rect: CGRect) {
-        
-        layer1.frame.origin = CGPoint(x: 0, y: -sqrt(2.0) * (self.frame.height/2))
         
         layer3.layer.cornerRadius = layer3.bounds.width / 2
         

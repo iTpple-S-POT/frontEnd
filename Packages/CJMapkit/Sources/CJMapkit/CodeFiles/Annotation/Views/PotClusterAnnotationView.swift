@@ -15,10 +15,19 @@ class PotClusterAnnotationView: MKAnnotationView {
     override init(annotation: MKAnnotation?, reuseIdentifier: String?) {
         super.init(annotation: annotation, reuseIdentifier: reuseIdentifier)
         collisionMode = .circle
+        
+        setUp()
     }
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    func setUp() {
+        
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(tapGestureCallBack))
+        
+        self.addGestureRecognizer(tapGesture)
     }
     
     override func prepareForDisplay() {
@@ -56,4 +65,25 @@ class PotClusterAnnotationView: MKAnnotationView {
         
     }
     
+}
+
+extension PotClusterAnnotationView {
+
+    @objc
+    func tapGestureCallBack() {
+        
+        if let cluster = self.annotation as? MKClusterAnnotation {
+            
+            let models = cluster.memberAnnotations.compactMap {
+                
+                if let potAnnot = ($0 as? PotAnnotation) {
+                    return potAnnot.potModel
+                    
+                }
+                return nil
+            }
+            
+            NotificationCenter.potSelection.post(name: .multiplePotsSelection, object: models)
+        }
+    }
 }
