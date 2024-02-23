@@ -74,12 +74,28 @@ struct HomeScreen: View {
                             }
                             .zIndex(2)
                     }
+                    
+                    if homeScreenModel.presentPotDetailViewWithUserInfo {
+                        
+                        PotDetailView(
+                            potModel: homeScreenModel.selectedPotModel!,
+                            userInfo: homeScreenModel.userInfo!) {
+                                
+                                homeScreenModel.presentPotDetailViewWithUserInfo = false
+                                mainScreenConfig.setMode(mode: .idleMode)
+                            }
+                            .onAppear {
+                                mainScreenConfig.setMode(mode: .blackMode)
+                            }
+                            .zIndex(2)
+                    }
                 }
                 .slideTransition(
                     from: CGPoint(x: 0, y: height/3),
                     to: CGPoint(x: 0, y: 0)
                 )
                 .animation(.easeIn(duration: 0.3), value: homeScreenModel.presentPotDetailView)
+                .animation(.easeIn(duration: 0.3), value: homeScreenModel.presentPotDetailViewWithUserInfo)
                 .animation(.easeIn(duration: 0.3), value: homeScreenModel.presentPotsListView)
             }
         }

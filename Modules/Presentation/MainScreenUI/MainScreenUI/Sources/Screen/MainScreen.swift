@@ -111,6 +111,12 @@ public struct MainScreen: View  {
                 }
             }
             .frame(height: 64)
+            .background {
+                Rectangle()
+                    .fill(.white)
+                    .shadow(color: .black.opacity(0.2), radius: 5, y: -3)
+            }
+            
         }
         .alert(screenModel.alertTitle, isPresented: $screenModel.showAlert, actions: {
             

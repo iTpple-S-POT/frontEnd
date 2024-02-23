@@ -16,6 +16,7 @@ public enum MapViewState {
 public extension Notification.Name {
     static let singlePotSelection: Self = .init("singlePotSelection")
     static let multiplePotsSelection: Self = .init("multiplePotsSelection")
+    static let potFromPotListView: Self = .init("potFromPotListView")
 }
 
 

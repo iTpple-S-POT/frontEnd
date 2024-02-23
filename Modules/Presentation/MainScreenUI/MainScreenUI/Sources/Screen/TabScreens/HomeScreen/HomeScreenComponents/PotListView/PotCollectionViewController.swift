@@ -95,6 +95,8 @@ extension PotCollectionViewController {
         
         reusableCell.model = models[indexPath.item]
         
+        reusableCell.externalSetUp()
+        
         return reusableCell
     }
 }

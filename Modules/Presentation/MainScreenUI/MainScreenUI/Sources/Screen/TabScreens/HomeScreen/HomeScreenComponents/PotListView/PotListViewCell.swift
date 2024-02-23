@@ -12,7 +12,9 @@ class PotListViewCell: UICollectionViewCell {
     
     var model: PotModel!
     
-    private var isImageInitialized = false
+    private var userInfo: UserInfoObject?
+    
+    private var isGredientAdded = false
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -37,7 +39,7 @@ class PotListViewCell: UICollectionViewCell {
         
         let view = UILabel()
         
-        view.text = "닉네임"
+        view.text = ""
         
         view.font = .systemFont(ofSize: 16, weight: .semibold)
         view.textColor = .white
@@ -54,7 +56,7 @@ class PotListViewCell: UICollectionViewCell {
         
         let view = UILabel()
         
-        view.text = "1시간 전"
+        view.text = ""
         
         view.font = .systemFont(ofSize: 14)
         view.textColor = .white
@@ -110,17 +112,46 @@ class PotListViewCell: UICollectionViewCell {
     
     override func draw(_ rect: CGRect) {
         
-        loadImageView()
+        addGredient(rect: rect)
     }
     
-    func loadImageView() {
+    func addGredient(rect: CGRect) {
         
-        guard let imageKey = model.imageKey, !isImageInitialized else {
+        if !isGredientAdded {
+            
+            isGredientAdded = true
+        }
+        
+        let gradientLayer = CAGradientLayer()
+        
+        let colors: [CGColor] = [
+            UIColor.black.withAlphaComponent(0.5).cgColor,
+            UIColor.clear.cgColor
+        ]
+        
+        gradientLayer.colors = colors
+        
+        gradientLayer.startPoint = CGPoint(x: 0.5, y: 1.0)
+        gradientLayer.endPoint = CGPoint(x: 0.5, y: 0.25)
+        
+        gradientLayer.frame = rect
+        
+        thumbNailView.layer.addSublayer(gradientLayer)
+        
+    }
+    
+    func externalSetUp() {
+        
+        loadImageView()
+        loadAdditionalData()
+    }
+    
+    private func loadImageView() {
+        
+        guard let imageKey = model.imageKey else {
             
             return;
         }
-        
-        isImageInitialized = true
         
         let url = URL(string: imageKey.getPreSignedUrlString())
         
@@ -145,11 +176,39 @@ class PotListViewCell: UICollectionViewCell {
         }
     }
     
+    private func loadAdditionalData() {
+        
+        Task {
+            
+            do {
+                
+                if let potObject = try? await APIRequestGlobalObject.shared.getPotForPotDetailAbout(potId: model.id) {
+                    
+                    model.viewCount = potObject.viewCount
+                    model.hashTagList = potObject.hashtagList
+                    
+                    timeLavel.text = getTimeText(dateString: potObject.expirationDate)
+                }
+
+                if let userObject = try? await APIRequestGlobalObject.shared.getUserInfo(userId: Int(model.userId)) {
+                    
+                    self.userInfo = userObject
+                    
+                    nickNameLabel.text = userObject.nickname
+                }
+
+            }
+            
+        }
+        
+    }
+    
     override func prepareForReuse() {
         
         thumbNailView.image = nil
         
-        isImageInitialized = false
+        timeLavel.text = ""
+        nickNameLabel.text = ""
     }
 }
 
@@ -158,6 +217,42 @@ extension PotListViewCell {
     @objc
     func tapGestureCallBack() {
         
-        NotificationCenter.potSelection.post(name: .singlePotSelection, object: model)
+        if let info = userInfo {
+            
+            let to: [String: Any] = [
+                "userInfo" : info,
+                "model" : model!
+            ]
+            
+            NotificationCenter.potSelection.post(name: .potFromPotListView, object: to)
+            
+        } else {
+            
+            NotificationCenter.potSelection.post(name: .singlePotSelection, object: model!)
+        }
+    }
+    
+    func getTimeText(dateString: String) -> String {
+        
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SS"
+        formatter.timeZone = TimeZone(identifier: "UTC")
+        
+        let expirationDate = formatter.date(from: dateString)!
+        
+        let calendar = Calendar.current
+        
+        let creationDate = calendar.date(byAdding: .hour, value: -24, to: expirationDate)!
+        
+        let timeInterval = creationDate.distance(to: Date.now)
+        
+        let hour = Int(timeInterval / (3600))
+        
+        if hour > 0 {
+            
+            return "\(hour)시간 전"
+        }
+        
+        return "방금전"
     }
 }
