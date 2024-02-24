@@ -15,7 +15,6 @@ class HomeScreenModel: ObservableObject {
     private(set) var userInfo: UserInfoObject?
     private(set) var selectedClusterModels: [PotModel]?
     @Published var presentPotDetailView = false
-    @Published var presentPotDetailViewWithUserInfo = false
     @Published var presentPotsListView = false
     
     init() {
@@ -48,7 +47,7 @@ class HomeScreenModel: ObservableObject {
             self.selectedPotModel = to["model"] as? PotModel
             self.userInfo = to["userInfo"] as? UserInfoObject
             
-            self.presentPotDetailViewWithUserInfo = true
+            self.presentPotDetailView = true
         }
     }
     

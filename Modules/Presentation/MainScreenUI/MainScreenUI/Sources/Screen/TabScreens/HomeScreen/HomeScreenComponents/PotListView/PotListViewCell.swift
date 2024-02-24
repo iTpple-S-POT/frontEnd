@@ -8,6 +8,72 @@
 import GlobalObjects
 import UIKit
 
+fileprivate class ThumbNailView: UIImageView {
+    
+    let gradientLayer = CAGradientLayer()
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        
+        setUp()
+    }
+    
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+    }
+    
+    func setUp() {
+        
+        self.contentMode = .scaleAspectFill
+    
+        let colors: [CGColor] = [
+            UIColor.black.withAlphaComponent(0.5).cgColor,
+            UIColor.clear.cgColor
+        ]
+        
+        gradientLayer.colors = colors
+        
+        gradientLayer.startPoint = CGPoint(x: 0.5, y: 1.0)
+        gradientLayer.endPoint = CGPoint(x: 0.5, y: 0.25)
+        
+        gradientLayer.shouldRasterize = false
+        gradientLayer.drawsAsynchronously = false
+        
+        self.layer.addSublayer(gradientLayer)
+    }
+    
+    func loadImageView(imageKey: String) {
+
+        let url = URL(string: imageKey.getPreSignedUrlString())
+        
+        self.kf.indicatorType = .none
+        self.kf.setImage(
+            with: url,
+            options: [
+                .scaleFactor(UIScreen.main.scale),
+                .transition(.fade(0.1)),
+                .cacheOriginalImage,
+                .backgroundDecode
+            ]
+        ) {
+            result in
+            switch result {
+            case .success(let value):
+                print("Task done for: \(value.source.url?.absoluteString ?? "")")
+            case .failure(let error):
+                print("Job failed: \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    override func layoutSubviews() {
+        
+        // 상위뷰의 layoutIfNeeded에 의해 호출됨
+        gradientLayer.frame = self.frame
+    }
+}
+
+
 class PotListViewCell: UICollectionViewCell {
     
     var model: PotModel!
@@ -26,14 +92,7 @@ class PotListViewCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-    private var thumbNailView: UIImageView = {
-        
-        let view = UIImageView()
-        
-        view.contentMode = .scaleToFill
-        
-        return view
-    }()
+    private var thumbNailView = ThumbNailView(frame: .zero)
     
     private var nickNameLabel: UILabel = {
         
@@ -85,6 +144,8 @@ class PotListViewCell: UICollectionViewCell {
         
     func setUp() {
         
+        self.clipsToBounds = true
+        
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(tapGestureCallBack))
         self.addGestureRecognizer(tapGesture)
         
@@ -112,68 +173,16 @@ class PotListViewCell: UICollectionViewCell {
     
     override func draw(_ rect: CGRect) {
         
-        addGredient(rect: rect)
-    }
-    
-    func addGredient(rect: CGRect) {
-        
-        if !isGredientAdded {
-            
-            isGredientAdded = true
-        }
-        
-        let gradientLayer = CAGradientLayer()
-        
-        let colors: [CGColor] = [
-            UIColor.black.withAlphaComponent(0.5).cgColor,
-            UIColor.clear.cgColor
-        ]
-        
-        gradientLayer.colors = colors
-        
-        gradientLayer.startPoint = CGPoint(x: 0.5, y: 1.0)
-        gradientLayer.endPoint = CGPoint(x: 0.5, y: 0.25)
-        
-        gradientLayer.frame = rect
-        
-        thumbNailView.layer.addSublayer(gradientLayer)
-        
+        thumbNailView.layer.setNeedsLayout()
     }
     
     func externalSetUp() {
         
-        loadImageView()
+        if let imageKey = model.imageKey {
+
+            thumbNailView.loadImageView(imageKey: imageKey)
+        }
         loadAdditionalData()
-    }
-    
-    private func loadImageView() {
-        
-        guard let imageKey = model.imageKey else {
-            
-            return;
-        }
-        
-        let url = URL(string: imageKey.getPreSignedUrlString())
-        
-//        let processor = DownsamplingImageProcessor(size: self.bounds.size)
-        
-        thumbNailView.kf.indicatorType = .none
-        thumbNailView.kf.setImage(
-            with: url,
-            options: [
-//                .processor(processor),
-                .scaleFactor(UIScreen.main.scale),
-                .transition(.fade(0.1)),
-                .cacheOriginalImage,
-            ]) {
-            result in
-            switch result {
-            case .success(let value):
-                print("Task done for: \(value.source.url?.absoluteString ?? "")")
-            case .failure(let error):
-                print("Job failed: \(error.localizedDescription)")
-            }
-        }
     }
     
     private func loadAdditionalData() {

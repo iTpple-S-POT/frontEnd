@@ -19,8 +19,6 @@ struct HomeScreen: View {
     
     @StateObject private var homeScreenModel = HomeScreenModel()
     
-    @State private var presentSub: AnyCancellable?
-    
     var body: some View {
         ZStack {
             
@@ -63,30 +61,23 @@ struct HomeScreen: View {
                     
                     if homeScreenModel.presentPotDetailView {
                         
-                        PotDetailView(potModel: homeScreenModel.selectedPotModel!, dismissAction: {
-                            
-                            homeScreenModel.presentPotDetailView = false
-                            mainScreenConfig.setMode(mode: .idleMode)
-                            
-                        })
-                            .onAppear {
-                                mainScreenConfig.setMode(mode: .blackMode)
-                            }
-                            .zIndex(2)
-                    }
-                    
-                    if homeScreenModel.presentPotDetailViewWithUserInfo {
-                        
                         PotDetailView(
                             potModel: homeScreenModel.selectedPotModel!,
-                            userInfo: homeScreenModel.userInfo!) {
+                            userInfo: homeScreenModel.userInfo) {
                                 
-                                homeScreenModel.presentPotDetailViewWithUserInfo = false
+                                homeScreenModel.presentPotDetailView = false
+                                
                                 mainScreenConfig.setMode(mode: .idleMode)
+                                mainScreenConfig.isPotDetailViewIsPresented = false
                             }
-                            .onAppear {
-                                mainScreenConfig.setMode(mode: .blackMode)
-                            }
+                            .onAppear(perform: {
+                                
+                                if !mainScreenConfig.isPotDetailViewIsPresented {
+                                    
+                                    mainScreenConfig.setMode(mode: .blackMode)
+                                    mainScreenConfig.isPotDetailViewIsPresented = true
+                                }
+                            })
                             .zIndex(2)
                     }
                 }
@@ -95,12 +86,8 @@ struct HomeScreen: View {
                     to: CGPoint(x: 0, y: 0)
                 )
                 .animation(.easeIn(duration: 0.3), value: homeScreenModel.presentPotDetailView)
-                .animation(.easeIn(duration: 0.3), value: homeScreenModel.presentPotDetailViewWithUserInfo)
                 .animation(.easeIn(duration: 0.3), value: homeScreenModel.presentPotsListView)
             }
-        }
-        .onAppear {
-            self.presentSub = homeScreenModel.$presentPotDetailView.sink { mainScreenConfig.isPotDetailViewIsPresented = $0 }
         }
     }
 }

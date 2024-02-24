@@ -24,22 +24,20 @@ public struct PotDetailView: View {
     
     let dismissAction: () -> Void
     
-    public init(potModel: PotModel, dismissAction: @escaping () -> Void) {
-        
-        self._potModel = StateObject(wrappedValue: potModel)
-        self.dismissAction = dismissAction
-    }
-    
     public init(
         potModel: PotModel,
-        userInfo: UserInfoObject,
+        userInfo: UserInfoObject?,
         dismissAction: @escaping () -> Void) {
         
         self._potModel = StateObject(wrappedValue: potModel)
         self._userInfo = State(wrappedValue: userInfo)
         self.dismissAction = dismissAction
             
-        isDataFetched = true;
+            
+        if userInfo != nil {
+                
+            isDataFetched = true;
+        }
     }
     
     private var timeIntervalString: String {
@@ -78,6 +76,7 @@ public struct PotDetailView: View {
                 KFImage(URL(string: potModel.imageKey?.getPreSignedUrlString() ?? "")!)
                     .resizable()
                     .fade(duration: 0.5)
+                    .backgroundDecode()
                     .aspectRatio(contentMode: .fill)
                     .frame(width: geo.size.width, height: geo.size.height+geo.safeAreaInsets.top)
                     .position(x: geo.size.width/2, y: (geo.size.height+geo.safeAreaInsets.top)/2)
@@ -358,7 +357,8 @@ public struct PotDetailView: View {
                 )
                                                         
                 return potModel
-            }()
+            }(),
+            userInfo: nil
         ) {
             
         }

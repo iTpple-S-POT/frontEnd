@@ -94,8 +94,13 @@ public struct MainScreen: View  {
                                 // 팟업로드를 제외한 경우(탭 전환)
                                 if item != .potUpload {
                                     
-                                    // 다른 탭으로 전환시 탭 테마 변경
-                                    mainScreenConfig.onTabTransition(nextState: item, prevState: screenModel.selectedTabItem)
+                                    if item == .home && mainScreenConfig.isPotDetailViewIsPresented {
+                                        
+                                        mainScreenConfig.setMode(mode: .blackMode)
+                                    } else {
+                                        
+                                        mainScreenConfig.setMode(mode: .idleMode)
+                                    }
                                     
                                     screenModel.selectedTabItem = item
                                     

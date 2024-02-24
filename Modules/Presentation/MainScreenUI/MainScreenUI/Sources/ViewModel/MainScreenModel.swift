@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 import GlobalObjects
 import DefaultExtensions
 
@@ -32,6 +33,8 @@ class MainScreenModel: ObservableObject {
         .information : false,
         .party : false
     ]
+    
+    var subscriptions: Set<AnyCancellable> = []
     
     // 현재활성화 되어있는 테그의 수를 추적합니다.
     var activeTagCount: Int = 1

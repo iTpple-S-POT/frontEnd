@@ -6,24 +6,17 @@
 //
 
 import SwiftUI
+import Combine
 
 class MainScreenConfig: ObservableObject {
     
-    @Published var isPotDetailViewIsPresented = false
+    var isPotDetailViewIsPresented = false
     @Published private(set) var tabViewMode: TabViewMode = .idleMode
     
-    @MainActor
+    private var subscriptions: Set<AnyCancellable> = []
+    
     func setMode(mode: TabViewMode) {
         tabViewMode = mode
-    }
-    
-    @MainActor
-    func onTabTransition(nextState: SpotTapItemSample, prevState: SpotTapItemSample) {
-        
-        if nextState == prevState { return }
-        
-        if nextState == .home, isPotDetailViewIsPresented { setMode(mode: .blackMode) }
-        else { setMode(mode: .idleMode) }
     }
 }
 
