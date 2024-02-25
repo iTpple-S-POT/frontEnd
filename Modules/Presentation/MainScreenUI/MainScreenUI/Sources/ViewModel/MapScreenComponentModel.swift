@@ -11,6 +11,10 @@ import Combine
 import CJMapkit
 import GlobalObjects
 
+extension Notification.Name {
+    static let potUpload: Self = .init("potUpload")
+}
+
 enum SpotLocationError: Error {
     
     case unAuthorized
@@ -48,6 +52,30 @@ class MapScreenComponentModel: ObservableObject {
     var userLocationSubscriber: AnyCancellable?
     
     private var isFirstUpdate = true
+    
+    init() {
+        
+        NotificationCenter.potSelection.addObserver(self, selector: #selector(potUploadAction(_:)), name: .potUpload, object: nil)
+    }
+    
+    @objc
+    func potUploadAction(_ notification: Notification) {
+        
+        if let objects = notification.object as? [String: Any] {
+            
+            let categoryId = objects["categoryId"] as! Int64
+            let content = objects["content"] as! String
+            let hashtagList = objects["hashtagList"] as! [String]
+            let imageInfo = objects["imageInfo"] as! ImageInformation
+            
+            self.uploadPot(
+                categoryId: categoryId,
+                content: content,
+                hashtagList: hashtagList,
+                imageInfo: imageInfo
+            )
+        }
+    }
     
     func registerLocationSubscriber() {
         

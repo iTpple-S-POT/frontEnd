@@ -61,7 +61,9 @@ public struct PotDetailView: View {
             return "\(hour)시간 전"
         }
         
-        return "방금전"
+        let minute = Int(timeInterval) % 3600 / 60
+        
+        return "\(minute)분 전"
     }
     
     private var tagObject: TagCases { TagCases[potModel.categoryId ] }
@@ -69,7 +71,9 @@ public struct PotDetailView: View {
     public var body: some View {
         ZStack {
             
-            Color.black.ignoresSafeArea(.container, edges: .top)
+            Color
+                .lowBlack
+                .ignoresSafeArea()
             
             GeometryReader { geo in
                 

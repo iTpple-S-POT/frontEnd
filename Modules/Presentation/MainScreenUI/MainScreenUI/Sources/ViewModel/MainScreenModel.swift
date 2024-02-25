@@ -34,6 +34,12 @@ class MainScreenModel: ObservableObject {
         .party : false
     ]
     
+    // PotDetailView관련
+    private(set) var selectedPotModel: PotModel?
+    private(set) var userInfo: UserInfoObject?
+    
+    @Published var presentPotDetailView = false
+    
     var subscriptions: Set<AnyCancellable> = []
     
     // 현재활성화 되어있는 테그의 수를 추적합니다.
@@ -54,6 +60,24 @@ class MainScreenModel: ObservableObject {
         alertMessage = "팟을 업로드하지 못했습니다."
     }
     
+    init() {
+        
+        NotificationCenter.potSelection.addObserver(self, selector: #selector(singlePotSelected(_:)), name: .singlePotSelection, object: nil)
+    }
+    
+    @objc
+    func singlePotSelected(_ notification: Notification) {
+        
+        objectWillChange.send()
+        
+        if let to = notification.object as? [String: Any?] {
+            
+            self.selectedPotModel = to["model"] as? PotModel
+            self.userInfo = to["userInfo"] as? UserInfoObject
+            
+            self.presentPotDetailView = true
+        }
+    }
 }
 
 

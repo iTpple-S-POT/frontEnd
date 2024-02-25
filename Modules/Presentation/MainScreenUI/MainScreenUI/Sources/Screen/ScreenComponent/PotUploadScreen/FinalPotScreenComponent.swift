@@ -16,8 +16,6 @@ struct FinalPotScreenComponent: View {
     
     @EnvironmentObject var screenModelWithNav: PotUploadScreenModel
     
-    @EnvironmentObject var mapScreenComponentModel: MapScreenComponentModel
-    
     var tagObject: TagCases { TagCases[screenModelWithNav.selectedCategoryId ?? 1] }
     
     var body: some View {
@@ -166,11 +164,14 @@ struct FinalPotScreenComponent: View {
                     screenModelWithNav.dismiss?()
                     
                     // 팟 업로드
-                    mapScreenComponentModel.uploadPot(
-                        categoryId: screenModelWithNav.selectedCategoryId!,
-                        content: screenModelWithNav.potText,
-                        hashtagList: screenModelWithNav.potHashTags,
-                        imageInfo: screenModelWithNav.imageInfo!
+                    NotificationCenter.potSelection.post(
+                        name: .potUpload,
+                        object: [
+                            "categoryId" : screenModelWithNav.selectedCategoryId!,
+                            "content" : screenModelWithNav.potText,
+                            "hashtagList" : screenModelWithNav.potHashTags,
+                            "imageInfo" : screenModelWithNav.imageInfo!
+                        ]
                     )
                 }
                 .padding(.horizontal, 21)

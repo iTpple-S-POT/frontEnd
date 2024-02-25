@@ -110,23 +110,6 @@ struct MapScreenComponent: View {
             }
             
         }
-        .fullScreenCover(isPresented: $mainScreenModel.showPotUploadScreen, content: {
-            PotUploadScreen { result in
-                
-                // TODO: 추후 수정
-                DispatchQueue.main.async {
-                    if result {
-                        
-                        mainScreenModel.showPotUploadSuccess()
-                        
-                    } else {
-                        
-                        mainScreenModel.showPotUploadFailed()
-                    }
-                }
-            }
-        })
-        .environmentObject(screenModel)
     }
 }
 

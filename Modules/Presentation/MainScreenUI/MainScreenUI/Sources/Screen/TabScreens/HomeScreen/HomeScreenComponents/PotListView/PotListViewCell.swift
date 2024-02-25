@@ -226,19 +226,12 @@ extension PotListViewCell {
     @objc
     func tapGestureCallBack() {
         
-        if let info = userInfo {
-            
-            let to: [String: Any] = [
-                "userInfo" : info,
-                "model" : model!
-            ]
-            
-            NotificationCenter.potSelection.post(name: .potFromPotListView, object: to)
-            
-        } else {
-            
-            NotificationCenter.potSelection.post(name: .singlePotSelection, object: model!)
-        }
+        let to: [String: Any?] = [
+            "userInfo" : userInfo,
+            "model" : model!
+        ]
+        
+        NotificationCenter.potSelection.post(name: .singlePotSelection, object: to)
     }
     
     func getTimeText(dateString: String) -> String {

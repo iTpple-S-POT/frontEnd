@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import PotDetailUI
 
 public struct MainScreen: View  {
     
@@ -94,14 +95,6 @@ public struct MainScreen: View  {
                                 // 팟업로드를 제외한 경우(탭 전환)
                                 if item != .potUpload {
                                     
-                                    if item == .home && mainScreenConfig.isPotDetailViewIsPresented {
-                                        
-                                        mainScreenConfig.setMode(mode: .blackMode)
-                                    } else {
-                                        
-                                        mainScreenConfig.setMode(mode: .idleMode)
-                                    }
-                                    
                                     screenModel.selectedTabItem = item
                                     
                                 } else {
@@ -130,11 +123,46 @@ public struct MainScreen: View  {
         }, message: {
             Text(screenModel.alertMessage)
         })
+        .fullScreenCover(isPresented: $screenModel.showPotUploadScreen, content: {
+            PotUploadScreen { result in
+                
+                // TODO: 추후 수정
+                DispatchQueue.main.async {
+                    if result {
+                        
+                        screenModel.showPotUploadSuccess()
+                        
+                    } else {
+                        
+                        screenModel.showPotUploadFailed()
+                    }
+                }
+            }
+        })
+        .fullScreenCover(isPresented: $screenModel.presentPotDetailView, content: {
+            
+            PotDetailView(
+                potModel: screenModel.selectedPotModel!,
+                userInfo: screenModel.userInfo) {
+                    
+                    screenModel.presentPotDetailView = false
+                    
+                    mainScreenConfig.setMode(mode: .idleMode)
+                    mainScreenConfig.isPotDetailViewIsPresented = false
+                }
+                .onAppear(perform: {
+                    
+                    if !mainScreenConfig.isPotDetailViewIsPresented {
+                        
+                        mainScreenConfig.setMode(mode: .blackMode)
+                        mainScreenConfig.isPotDetailViewIsPresented = true
+                    }
+                })
+        })
         .environmentObject(screenModel)
         .environment(\.mainScreenConfig, mainScreenConfig)
     }
 }
-
 
 // MARK: - 탭 버튼
 fileprivate struct SpotTabItem: View {

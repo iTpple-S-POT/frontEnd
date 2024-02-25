@@ -171,7 +171,11 @@ extension PotAnnotationView {
         
         let potModel = (annotation as! PotAnnotation).potModel
         
-        NotificationCenter.potSelection.post(name: .singlePotSelection, object: potModel)
+        let to: [String: Any?] = [
+            "model" : potModel
+        ]
+        
+        NotificationCenter.potSelection.post(name: .singlePotSelection, object: to)
     }
 }
 
