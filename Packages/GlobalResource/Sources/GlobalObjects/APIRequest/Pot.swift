@@ -282,4 +282,81 @@ public extension APIRequestGlobalObject {
         
         throw SpotNetworkError.unknownError(function: #function)
     }
+    
+    // 최근본 팟
+    func getRecentlyViewedPot() async throws -> [PotObject] {
+        
+        let url = try SpotAPI.recentlyViewed.getApiUrl()
+        
+        let request = try getURLRequest(url: url, method: .get, isAuth: true)
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        if let httpResponse = response as? HTTPURLResponse {
+            
+            try defaultCheckStatusCode(response: httpResponse, functionName: #function, data: data)
+            
+            let decoded: [PotsResponseModel] = try jsonDecoder.decode([PotsResponseModel].self, from: data)
+            
+            print("최근본 팟수(from 서버) \(decoded.count)")
+            
+            let potObjects = decoded.map { model in
+                
+                print(model)
+                
+                return PotObject(
+                    id: model.id,
+                    userId: model.userId,
+                    categoryId: model.categoryId.first!,
+                    content: model.content ?? "",
+                    imageKey: model.imageKey.isEmpty ? nil : model.imageKey,
+                    expirationDate: model.expiredAt,
+                    latitude: Double(model.location.lat),
+                    longitude: Double(model.location.lon),
+                    viewCount: Int(model.viewCount)
+                )
+            }
+            
+            return potObjects
+        } else {
+            
+            throw SpotNetworkError.unknownError(function: #function)
+        }
+    }
+    
+    func getMyPot() async throws -> [PotObject] {
+        
+        let url = try SpotAPI.myPot.getApiUrl()
+        
+        let request = try getURLRequest(url: url, method: .get, isAuth: true)
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        if let httpResponse = response as? HTTPURLResponse {
+            
+            try defaultCheckStatusCode(response: httpResponse, functionName: #function, data: data)
+            
+            let decoded: [PotsResponseModel] = try jsonDecoder.decode([PotsResponseModel].self, from: data)
+            
+            let potObjects = decoded.map { model in
+                
+                return PotObject(
+                    id: model.id,
+                    userId: model.userId,
+                    categoryId: model.categoryId.first!,
+                    content: model.content ?? "",
+                    imageKey: model.imageKey.isEmpty ? nil : model.imageKey,
+                    expirationDate: model.expiredAt,
+                    latitude: Double(model.location.lat),
+                    longitude: Double(model.location.lon),
+                    viewCount: Int(model.viewCount)
+                )
+            }
+            
+            return potObjects
+        } else {
+            
+            throw SpotNetworkError.unknownError(function: #function)
+        }
+    }
 }

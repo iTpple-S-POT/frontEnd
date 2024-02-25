@@ -9,14 +9,61 @@ import SwiftUI
 import GlobalUIComponents
 import GlobalObjects
 
+class MyPageScreenModel: ObservableObject {
+    
+    @Published private(set) var recentlyViewedPotModels: [PotModel] = []
+    
+    init() {
+        
+        NotificationCenter.potSelection.addObserver(self, selector: #selector(refreshRecentlyViewedPot(_:)), name: .singlePotSelection, object: nil)
+        
+        Task {
+            await getRecentlyViewedPots()
+        }
+    }
+    
+    @objc
+    func refreshRecentlyViewedPot(_ notification: Notification) {
+        
+        Task {
+            await getRecentlyViewedPots()
+        }
+    }
+    
+    func getRecentlyViewedPots() async {
+        
+        do {
+            
+            let potObjects = try await APIRequestGlobalObject.shared.getRecentlyViewedPot()
+            
+            let models = potObjects.map { PotModel.makePotModelFrom(potObject: $0) }
+            
+            DispatchQueue.main.async {
+                self.recentlyViewedPotModels = models
+            }
+            
+        } catch {
+            
+            print("최근 본 팟 불러오기 실패")
+        }
+    }
+}
+
+
 struct MyPageScreen: View {
     @FetchRequest(sortDescriptors: [])
     private var currentUserInfo: FetchedResults<SpotUser>
     
     private var userInfo: SpotUser { currentUserInfo.first! }
     
+    @StateObject private var screenModel = MyPageScreenModel()
 
     @State private var showProfileDetail = false
+    
+    var itemSize: CGSize {
+        
+        CGSize(width: 120, height: 160)
+    }
     
     var body: some View {
         NavigationView {
@@ -24,31 +71,40 @@ struct MyPageScreen: View {
                 
                 Color.white.ignoresSafeArea(.all, edges: .top)
                 
+                VStack {
+                    HStack {
+                        
+                        Text("마이페이지")
+                            .font(.system(size: 20, weight: .semibold))
+                        
+                        Spacer()
+                        
+                        Button {
+                             
+                            // TODO: 설정
+                            
+                        } label: {
+                            Image.makeImageFromBundle(bundle: .module, name: "gear_icon", ext: .png)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 28)
+                        }
+                        
+                    }
+                    .frame(height: 56)
+                    .padding(.horizontal, 21)
+                    .background(
+                        Rectangle().fill(.white)
+                            .shadow(color: .gray.opacity(0.3), radius: 2.0, y: 2)
+                    )
+                    
+                    Spacer()
+                }
+                .zIndex(1.0)
+                
                 ScrollView {
                     
                     VStack(spacing: 0) {
-                        
-                        HStack {
-                            
-                            Text("마이페이지")
-                                .font(.system(size: 20, weight: .semibold))
-                            
-                            Spacer()
-                            
-                            Button {
-                                 
-                                // TODO: 설정
-                                
-                            } label: {
-                                Image.makeImageFromBundle(bundle: .module, name: "gear_icon", ext: .png)
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 28)
-                            }
-                            
-                        }
-                        .frame(height: 56)
-                        .padding(.horizontal, 21)
                         
                         ProfileShortCapView(
                             nickName: userInfo.nickName ?? "비지정 닉네임",
@@ -89,11 +145,49 @@ struct MyPageScreen: View {
                         }
                         
                         // TODO: 최근 본 팟
-                            
-                        Spacer()
                         
+                        Rectangle()
+                            .fill(.light_gray)
+                            .frame(height: 8)
+                            .padding(.vertical, 30)
+                        
+                        // 최근본 팟
+                        HStack {
+                            
+                            Text("최근 본 POT")
+                                .font(.system(size: 18, weight: .semibold))
+                            
+                            Spacer()
+                        }
+                        .padding(.horizontal, 21)
+                        
+                        
+                        ScrollView(.horizontal) {
+                            
+                            LazyHStack(spacing: 12) {
+                                
+                                Spacer(minLength: 9)
+                                    .frame(width: 9)
+                                
+                                
+                                ForEach(screenModel.recentlyViewedPotModels, id: \.id) { model in
+                                    
+                                    PotListCell(potModel: model, itemSize: itemSize)
+                                        .frame(
+                                            width: itemSize.width,
+                                            height: itemSize.height
+                                        )
+                                        .clipShape(RoundedRectangle(cornerRadius: 20))
+                                }
+                            }
+                            .frame(height: itemSize.height)
+                            .padding(.top, 8)
+                        }
+                        .scrollIndicators(.hidden)
                     }
                 }
+                .padding(.top, 56)
+                .zIndex(0.0)
             }
         }
     }
@@ -107,35 +201,52 @@ fileprivate struct ProfileDetailView: View {
     
     var body: some View {
         
-        VStack(spacing: 0) {
+        ZStack {
             
-            ZStack {
+            VStack {
                 
-                Color.white
-                
-                Text("내 프로필")
-                    .font(.system(size: 20, weight: .semibold))
-                
-                HStack {
+                ZStack {
                     
-                    Image(systemName: "chevron.left")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 22, height: 22)
-                        .contentShape(Rectangle())
-                        .onTapGesture {
-                            dismiss()
-                        }
+                    Color.white
                     
-                    Spacer()
+                    Text("내 프로필")
+                        .font(.system(size: 20, weight: .semibold))
+                    
+                    HStack {
+                        
+                        Image(systemName: "chevron.left")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 22, height: 22)
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                dismiss()
+                            }
+                        
+                        Spacer()
+                        
+                    }
+                    .padding(.horizontal, 21)
                     
                 }
-                .padding(.horizontal, 21)
+                .frame(height: 56)
+                .background(
+                    Rectangle().fill(.white)
+                        .shadow(color: .gray.opacity(0.3), radius: 2.0, y: 2)
+                )
                 
+                Spacer()
             }
-            .frame(height: 56)
+            .zIndex(1.0)
             
-            SpotProfileDetailView(userInfo: userInfo)
+            VStack(spacing: 0) {
+                
+                SpotProfileDetailView(userInfo: userInfo)
+                    .padding(.top, 56)
+                
+                Spacer()
+            }
+            .zIndex(0.0)
         }
     }
 }

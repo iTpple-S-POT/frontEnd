@@ -259,6 +259,13 @@ extension MapScreenComponentModel {
                 
                 let uploadedPotObject = try await APIRequestGlobalObject.shared.executePotUpload(imageInfo: imageInfo, uploadObject: potDTO)
                 
+                // 업로드 성공
+                let object: [String: Any] = [
+                    "model" : PotModel.makePotModelFrom(potObject: uploadedPotObject)
+                ]
+                
+                NotificationCenter.potSelection.post(name: .potUploadSuccess, object: object)
+                
                 await self.addPot(object: uploadedPotObject)
                 
             } catch {

@@ -96,7 +96,3 @@ struct CustomSilde: ViewModifier {
     }
     
 }
-
-#Preview {
-    MainScreen()
-}

@@ -20,6 +20,15 @@ struct PotListView: View {
             
             Color.white.ignoresSafeArea(.all, edges: .top)
             
+            VStack {
+                
+                PotCollectionView(models: models)
+                    .padding(.top, 56)
+                
+                Spacer()
+            }
+            .zIndex(0.0)
+            
             VStack(spacing: 0) {
                 
                 SpotNavigationBarView(title: "주변 팟") {
@@ -29,8 +38,9 @@ struct PotListView: View {
                     }
                 }
                 
-                PotCollectionView(models: models)
+                Spacer()
             }
+            .zIndex(1.0)
         }
     }
 }

@@ -45,7 +45,7 @@ struct SpotNavigationBarView: View {
         .frame(height: 56)
         .background(
             Rectangle().fill(.white)
+                
         )
-        .shadow(color: .gray.opacity(0.3), radius: 2.0, y: 2)
     }
 }
