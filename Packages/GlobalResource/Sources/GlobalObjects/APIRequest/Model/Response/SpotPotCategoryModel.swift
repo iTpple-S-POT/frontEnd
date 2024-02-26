@@ -30,5 +30,4 @@ public struct CategoryObject: Codable, Hashable {
         self.name = name
         self.description = description
     }
-    
 }

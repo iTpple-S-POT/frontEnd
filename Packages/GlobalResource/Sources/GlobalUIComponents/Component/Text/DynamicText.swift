@@ -24,7 +24,16 @@ public struct DynamicText: View {
     var textAlignment: NSTextAlignment
     
     public init(_ content: String, textColor: UIColor = .black, weight: UIFont.Weight = .regular, lineCount: Int = 1, kern: CGFloat = 0, linespacing: CGFloat = 5, textAlignment: NSTextAlignment = .left) {
-        self.content = content
+        
+        let trimmed = content.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        self.content = trimmed.reduce("") { partialResult, char in
+            if char == "\n" {
+                return partialResult + " "
+            } else {
+                return partialResult + String(char)
+            }
+        }
         self.textColor = textColor
         self.weight = weight
         self.lineCount = lineCount
@@ -88,6 +97,9 @@ private extension DynamicText {
             textView.textContainer.lineBreakMode = .byCharWrapping
             textView.textContainerInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
             textView.textContainer.lineFragmentPadding = 0
+            textView.isUserInteractionEnabled = false
+            textView.isSelectable = false
+            textView.isEditable = false
             
             return textView
         }()

@@ -172,7 +172,6 @@ public struct PotDetailView: View {
                             .foregroundStyle(.white)
                     }
                     .frame(height: 50)
-                    .shadow(color: .black, radius: 3, y: 2)
                     
                     Spacer()
                     
@@ -205,7 +204,7 @@ public struct PotDetailView: View {
                             Spacer()
                             
                         }
-                        .shadow(color: .black, radius: 3, y: 2)
+                        .commonShadow()
                         
                         HStack(spacing: 0) {
                             
@@ -213,7 +212,7 @@ public struct PotDetailView: View {
                                 .resizable()
                                 .scaledToFit()
                                 .foregroundStyle(.white)
-                                .shadow(color: .black, radius: 3, y: 2)
+                                .shadow(color: .black.opacity(0.3), radius: 4)
                                 .frame(width: 20, height: 20)
                                 .padding(10)
                                 .onTapGesture {
@@ -254,7 +253,7 @@ public struct PotDetailView: View {
                         }
                         .frame(height: 24)
                     }
-                    .shadow(color: .black, radius: 3, y: 2)
+                    .commonShadow()
                     .foregroundStyle(.white)
                     .padding(.top, 12)
                     
@@ -422,6 +421,3 @@ public struct PotDetailView: View {
         
     }
 }
-
-
-

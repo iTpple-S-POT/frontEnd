@@ -7,6 +7,7 @@
 
 import SwiftUI
 import GlobalObjects
+import GlobalUIComponents
 
 struct CategoryBox: View {
     
@@ -20,31 +21,45 @@ struct CategoryBox: View {
         
         HStack(spacing: 0) {
             
-            
-            ZStack(alignment: .leading) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(object.name)
+                    .font(.system(size: 20, weight: .semibold))
+                    .frame(height: 20)
                 
-                Color.clear
-                
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(object.name)
-                        .font(.system(size: 20, weight: .semibold))
+                GeometryReader { geo in
                     
-                    Text(object.description)
-                        .font(.system(size: 12))
-                        .lineSpacing(5)
+                    let descriptions = object.description.split(separator: "\n").map { String($0) }
+                    
+                    let lineSpacing = 5.0
+                    
+                    let count = CGFloat(descriptions.count)
+                    
+                    let height = (geo.size.height-lineSpacing*(count-1)) / count
+                    
+                    VStack(spacing: lineSpacing) {
+                        
+                        ForEach(descriptions, id: \.self) {
+                            
+                            DynamicText(
+                                $0,
+                                textColor: .black,
+                                lineCount: 1
+                            )
+                            .frame(width: geo.size.width, height: height)
+                        }
+                    }
                 }
-                
             }
-            
-            Spacer(minLength: 0)
+            .padding(.leading, 24)
+            .padding(.vertical, 18)
             
             TagCases[object.id].getIllust()
                 .resizable()
                 .scaledToFit()
+                .padding(10)
+                .padding(.trailing, 16)
         }
-        .padding(.leading, 24)
-        .padding(.trailing, 16)
-        .padding(10)
+        .frame(height: 100)
         .background{
             
             ZStack {
@@ -61,7 +76,6 @@ struct CategoryBox: View {
                 
             }
         }
-        .frame(height: 100)
         .contentShape(RoundedRectangle(cornerRadius: 10))
         .onTapGesture {
             selected = object.id

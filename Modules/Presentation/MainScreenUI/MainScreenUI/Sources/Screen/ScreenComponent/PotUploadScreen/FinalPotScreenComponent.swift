@@ -39,6 +39,23 @@ struct FinalPotScreenComponent: View {
                 }
             }
             
+            // Gradient
+            VStack {
+                
+                Spacer()
+                
+                LinearGradient(
+                    stops: [
+                        Gradient.Stop(color: .lowBlack, location: 0),
+                        Gradient.Stop(color: .lowBlack.opacity(0.54), location: 0.65),
+                        Gradient.Stop(color: .lowBlack.opacity(0), location: 1.0),
+                    ],
+                    startPoint: .bottom,
+                    endPoint: .top
+                )
+                .ignoresSafeArea(.all, edges: .bottom)
+                .frame(height: 240)
+            }
             
             // 기타 데이터
             VStack {
@@ -61,7 +78,7 @@ struct FinalPotScreenComponent: View {
                         Spacer()
                         
                     }
-                    .shadow(color: .black, radius: 3, y: 2)
+                    .commonShadow()
                     
                     HStack(spacing: 0) {
                         
@@ -79,7 +96,7 @@ struct FinalPotScreenComponent: View {
                         Spacer(minLength: 0)
                         
                     }
-                    .shadow(color: .black, radius: 3, y: 2)
+                    .commonShadow()
                     
                 }
                 .padding(.horizontal, 21)
@@ -114,7 +131,7 @@ struct FinalPotScreenComponent: View {
                         
                         Spacer()
                     }
-                    .shadow(color: .black, radius: 3, y: 2)
+                    .commonShadow()
                     
                     // 팟 텍스트
                     VStack(alignment: .leading) {
@@ -128,7 +145,7 @@ struct FinalPotScreenComponent: View {
                     }
                     .frame(height: 40)
                     .padding(.top, 12)
-                    .shadow(color: .black, radius: 3, y: 2)
+                    .commonShadow()
                     
                     ScrollView(.horizontal) {
                         
@@ -149,7 +166,6 @@ struct FinalPotScreenComponent: View {
                             }
                             
                         }
-                        .shadow(color: .black, radius: 3, y: 2)
                         
                     }
                     .scrollIndicators(.hidden)

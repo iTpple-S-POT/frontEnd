@@ -160,7 +160,6 @@ struct UploadScreenComponent: View {
             Rectangle()
                 .fill(.btn_light_grey)
                 .frame(height: 1)
-                .padding(.top, 10)
             
             // 텍스트
             TextField("", text: $screenModelWithNav.potText, axis: .vertical)
