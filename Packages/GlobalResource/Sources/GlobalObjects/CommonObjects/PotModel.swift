@@ -75,3 +75,18 @@ extension PotModel: Hashable, Equatable {
         hasher.combine(self.id)
     }
 }
+
+public extension PotModel {
+    
+    func sendReaction(reactionType: String) async throws {
+        
+        do {
+            
+            let _ = try await APIRequestGlobalObject.shared.sendReaction(potId: self.id, reactionString: reactionType)
+            
+        } catch {
+            
+            throw error
+        }
+    }
+}

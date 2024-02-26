@@ -11,7 +11,7 @@ import Alamofire
 // MARK: - API공통
 
 // 네트워크통신 에러
-public enum SpotNetworkError: Error {
+public enum SpotNetworkError: Error, Equatable {
 
     case kakaoServerError(function: String)
     case serverError(function: String)
@@ -22,6 +22,7 @@ public enum SpotNetworkError: Error {
     case unProcessedStatusCode(function: String)
     case unknownError(function: String)
     case authorizationError(function: String)
+    case duplicatedReaction
     
 }
 
@@ -65,6 +66,9 @@ public extension APIRequestGlobalObject {
         case userInfo
         case userNickNameCheck
         
+        // Reaction
+        case reaction
+        
         static let baseUrl = "http://15.164.165.156"
         
         public func getApiUrl() throws -> URL {
@@ -92,6 +96,8 @@ public extension APIRequestGlobalObject {
                 additinalUrl = "/api/v1/user"
             case .userNickNameCheck:
                 additinalUrl = "/api/v1/user/nickname/check"
+            case .reaction:
+                additinalUrl = "/api/v1/reaction"
             @unknown default:
                 throw SpotApiRequestError.apiUrlError(discription: "주소가 지정되지 않은 API가 있습니다.")
             }

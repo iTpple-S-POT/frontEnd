@@ -11,8 +11,47 @@ import DefaultExtensions
 import Kingfisher
 import GlobalUIComponents
 
+enum PotDetailViewError: Error {
+    case reactionRequestFailed
+}
+
+class PotDetailViewModel: ObservableObject {
+    
+    @Published var presentReactionView = false
+    
+    @Published var selectedReactionModel: ReactionModel?
+    
+    @Published var showAlert = false
+    var alertTitle = ""
+    var alertContent = ""
+    
+    let animTime = 0.25
+    
+    func onDissmissReaction() {
+        
+        presentReactionView = false
+        selectedReactionModel = nil
+    }
+    
+    func showSendingReactionFailed() {
+        
+        showAlert = true
+        alertTitle = "반응 실패"
+        alertContent = "다시 시도해 주세요"
+    }
+    
+    func showDuplicationFailed() {
+        
+        showAlert = true
+        alertTitle = "반응 실패"
+        alertContent = "이미 반응한 팟이에요"
+    }
+}
+
 
 public struct PotDetailView: View {
+    
+    @StateObject private var viewModel = PotDetailViewModel()
     
     @StateObject var potModel: PotModel
     
@@ -124,7 +163,8 @@ public struct PotDetailView: View {
                             .frame(width: 32, height: 32)
                             .contentShape(Circle())
                             .onTapGesture {
-                                // TODO: 감정 전달
+                                
+                                viewModel.presentReactionView = true
                             }
                         
                         Text("")
@@ -249,7 +289,6 @@ public struct PotDetailView: View {
                                 
                                 
                             }
-                            .shadow(color: .black, radius: 3, y: 2)
                             
                             // 팟내용
                             Text(potModel.content)
@@ -270,7 +309,6 @@ public struct PotDetailView: View {
                                 }
                             }
                         }
-                        .shadow(color: .black, radius: 3, y: 2)
                         
                         // 댓글 좋아요등을 위한 Spacer
                         Spacer(minLength: 44)
@@ -310,7 +348,13 @@ public struct PotDetailView: View {
                 .frame(height: 32)
                 .padding(.vertical, 20)
             }
+            
+            if viewModel.presentReactionView {
+                
+                ReactionView()
+            }
         }
+        .animation(.easeInOut(duration: viewModel.animTime), value: viewModel.presentReactionView)
         .onAppear {
             
             if isDataFetched { return }
@@ -336,6 +380,13 @@ public struct PotDetailView: View {
                 }
             }
         }
+        .alert(viewModel.alertTitle, isPresented: $viewModel.showAlert, actions: {
+            Button("확인") { }
+        }, message: {
+            Text(viewModel.alertContent)
+        })
+        .environmentObject(viewModel)
+        .environmentObject(potModel)
     }
 }
 

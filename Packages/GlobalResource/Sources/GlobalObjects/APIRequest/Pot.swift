@@ -302,8 +302,6 @@ public extension APIRequestGlobalObject {
             
             let potObjects = decoded.map { model in
                 
-                print(model)
-                
                 return PotObject(
                     id: model.id,
                     userId: model.userId,
@@ -319,6 +317,8 @@ public extension APIRequestGlobalObject {
             
             return potObjects
         } else {
+            
+            
             
             throw SpotNetworkError.unknownError(function: #function)
         }

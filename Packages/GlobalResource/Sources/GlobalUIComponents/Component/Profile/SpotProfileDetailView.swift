@@ -32,7 +32,7 @@ public struct SpotProfileDetailView: View {
                 }()
             ]),
             ProfileTuple(key: "MBTI", values: [userInfo.mbti ?? "입력되지 않은 정보"]),
-            ProfileTuple(key: "취미와", values: userInfo.interests)
+            ProfileTuple(key: "취미와 관심사", values: userInfo.interests)
         ]
     }
     
