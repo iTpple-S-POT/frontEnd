@@ -74,6 +74,21 @@ public extension SpotStorageManager {
         try context.save()
     }
     
+    
+    
+    /// 현재 유저를 삭제한다.
+    func deleteCurrentUser() throws {
+        
+        guard let currentUser = try context.fetch(SpotUser.fetchRequest()).first else {
+            
+            throw SpotStorageError.userUnavailable
+        }
+        
+        context.delete(currentUser)
+        
+        try context.save()
+    }
+    
     /// 로컬에 존재하는 경우에만 업데이트
     func updateUserInfo(newUserInfo: UserInfoObject) throws {
         

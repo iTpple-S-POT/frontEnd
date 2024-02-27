@@ -80,9 +80,10 @@ struct MyPageScreen: View {
                         
                         Spacer()
                         
-                        Button {
+                        NavigationLink {
                              
-                            // TODO: 설정
+                            SettingView()
+                                .navigationBarBackButtonHidden()
                             
                         } label: {
                             Image.makeImageFromBundle(bundle: .module, name: "gear_icon", ext: .png)

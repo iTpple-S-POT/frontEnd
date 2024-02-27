@@ -123,18 +123,19 @@ enum UserInterestType: String, CaseIterable, Identifiable {
     type8 = "독서",
     type9 = "뜨개질",
     type10 = "자동차",
-    type11 = "와국어",
+    type11 = "외국어",
     type12 = "콘서트",
     type13 = "패션",
     type14 = "커리어",
-    type15 = "식집자",
+    type15 = "식집사",
     type16 = "블로그",
     type17 = "미디어",
     type18 = "개발",
     type19 = "디자인",
     type20 = "기획",
     type21 = "베이킹",
-    type22 = "피아노"
+    type22 = "피아노",
+    type23 = "클라이밍"
 }
 
 // MARK: - 표시될 태그뷰들의 속성들 & 필요 매서드들을 저장한 extension입니다.

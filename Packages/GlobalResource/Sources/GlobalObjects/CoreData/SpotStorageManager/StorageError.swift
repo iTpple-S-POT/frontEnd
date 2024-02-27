@@ -10,4 +10,5 @@ import SwiftUI
 public enum SpotStorageError: Error {
     
     case imageKeyDoentExist
+    case userUnavailable
 }
