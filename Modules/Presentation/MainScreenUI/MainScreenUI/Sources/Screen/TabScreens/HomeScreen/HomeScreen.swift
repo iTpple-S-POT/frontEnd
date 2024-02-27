@@ -25,7 +25,6 @@ struct HomeScreen: View {
             VStack(spacing: 0) {
                 
                 TopMostScreenComponent()
-                    .frame(height: 56)
                 
                 ZStack {
                     

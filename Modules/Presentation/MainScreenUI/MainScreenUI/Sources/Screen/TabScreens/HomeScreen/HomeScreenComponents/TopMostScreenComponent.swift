@@ -10,7 +10,7 @@ import DefaultExtensions
 import PotDetailUI
 
 struct TopMostScreenComponent: View {
-    @State private var isShowingSearchScreen = false
+//    @State private var isShowingSearchScreen = false
     
     var body: some View {
         
@@ -27,22 +27,24 @@ struct TopMostScreenComponent: View {
                 
                 Spacer(minLength: 0)
                 
-                Button {
-                    isShowingSearchScreen = true
-                } label: {
-                    Image.makeImageFromBundle(bundle: Bundle.module, name: "main_bell", ext: .png)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 32)
-                }
-                .fullScreenCover(isPresented: $isShowingSearchScreen, content: {
-                    SearchScreen()
-                })
+//                Button {
+//                    isShowingSearchScreen = true
+//                } label: {
+//                    Image.makeImageFromBundle(bundle: Bundle.module, name: "main_bell", ext: .png)
+//                        .resizable()
+//                        .scaledToFit()
+//                        .frame(width: 32)
+//                }
+//                .fullScreenCover(isPresented: $isShowingSearchScreen, content: {
+//                    SearchScreen()
+//                })
                 
             }
             .padding(.horizontal, 21)
             
         }
+        .frame(height: 56)
+        .shadow(color: .gray.opacity(0.3), radius: 2.0, y: 2)
     }
 }
 

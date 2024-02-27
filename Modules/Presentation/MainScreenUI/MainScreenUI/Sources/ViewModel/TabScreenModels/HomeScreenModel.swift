@@ -18,8 +18,6 @@ class HomeScreenModel: ObservableObject {
         NotificationCenter.potSelection.addObserver(self, selector: #selector(multiplePotsSelected(_:)), name: .multiplePotsSelection, object: nil)
     }
     
-    
-    
     @objc
     func multiplePotsSelected(_ notification: Notification) {
         
