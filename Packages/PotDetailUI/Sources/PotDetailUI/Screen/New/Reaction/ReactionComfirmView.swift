@@ -54,6 +54,31 @@ struct ReactionComfirmView: View {
                         do {
                             
                             try await potModel.sendReaction(reactionType: reactionModel.reactionType)
+                            
+                            var check = false
+                            
+                            for (index, element) in potModel.reactionTypeCounts.enumerated() {
+                                
+                                if element.reactionType == reactionModel.reactionType {
+                                    
+                                    potModel.reactionTypeCounts[index].count += 1
+                                    check = true
+                                    
+                                    break
+                                }
+
+                            }
+                            
+                            if !check {
+                                
+                                potModel.reactionTypeCounts.append(
+                                    ReactionCountDTO(
+                                        count: 1,
+                                        reactionType: reactionModel.reactionType
+                                    )
+                                )
+                            }
+                            
                         } catch {
 
                             DispatchQueue.main.async {

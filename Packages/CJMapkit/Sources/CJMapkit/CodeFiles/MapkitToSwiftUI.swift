@@ -186,7 +186,7 @@ public struct MapkitViewRepresentable: UIViewRepresentable {
         let center = CJLocationManager.getUserLocationFromLocal()
         
         mapView.setRegion(coordinator.regionWith(center: center), animated: false)
-        mapView.userTrackingMode = .followWithHeading
+        mapView.userTrackingMode = .follow
         
         return mapView
     }
@@ -227,7 +227,7 @@ public struct MapkitViewRepresentable: UIViewRepresentable {
         
         let newPotModels: Set<PotModel> = Set(newPotObjects.map {PotModel.makePotModelFrom(potObject: $0)})
         
-        var oldPotModels: Set<PotModel> = Set(mapView.annotations.compactMap {
+        let oldPotModels: Set<PotModel> = Set(mapView.annotations.compactMap {
             
             guard let potAnnot = $0 as? PotAnnotation else { return nil }
             

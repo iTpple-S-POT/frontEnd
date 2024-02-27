@@ -13,6 +13,8 @@ import GlobalUIComponents
 struct PotListView: View {
     @Binding var present: Bool
     
+    var title: String
+    
     var models: [PotModel]
     
     var body: some View {
@@ -21,18 +23,9 @@ struct PotListView: View {
             
             Color.white.ignoresSafeArea(.all, edges: .top)
             
-            VStack {
-                
-                PotCollectionView(models: models)
-                    .padding(.top, 56)
-                
-                Spacer()
-            }
-            .zIndex(0.0)
-            
             VStack(spacing: 0) {
                 
-                SpotNavigationBarView(title: "주변 팟") {
+                SpotNavigationBarView(title: title) {
                     
                     withAnimation {
                         present = false;
@@ -42,6 +35,33 @@ struct PotListView: View {
                 Spacer()
             }
             .zIndex(1.0)
+            
+            VStack {
+                
+                HStack {
+                    
+                    (
+                        Text("검색결과 ")
+                        
+                        +
+                        
+                        Text("\(models.count)건")
+                            .fontWeight(.semibold)
+                    )
+                    .font(.system(size: 16))
+                    
+                    Spacer()
+                    
+                }
+                .frame(height: 56)
+                .padding(.leading, 21)
+                
+                PotCollectionView(models: models)
+                
+                Spacer()
+            }
+            .padding(.top, 56)
+            .zIndex(0.0)
         }
     }
 }

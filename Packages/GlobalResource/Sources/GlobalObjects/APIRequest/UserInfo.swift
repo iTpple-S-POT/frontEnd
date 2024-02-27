@@ -28,7 +28,20 @@ public extension APIRequestGlobalObject {
             // status code 정상
             let decoded = try jsonDecoder.decode(UserInfoResponseModel.self, from: data)
             
-            return UserInfoObject(id: decoded.id, loginType: decoded.loginType, role: decoded.role, profileImageUrl: decoded.profileImageUrl, name: decoded.name, nickname: decoded.nickname, phoneNumber: decoded.phoneNumber, birthDay: decoded.birthDay, gender: decoded.gender, mbti: decoded.mbti, interests: decoded.interests, status: decoded.status)
+            return UserInfoObject(
+                id: decoded.id, 
+                loginType: decoded.loginType,
+                role: decoded.role,
+                profileImageUrl: decoded.profileImageUrl,
+                name: decoded.name,
+                nickname: decoded.nickname,
+                phoneNumber: decoded.phoneNumber,
+                birthDay: decoded.birthDay,
+                gender: decoded.gender,
+                mbti: decoded.mbti,
+                interests: decoded.interests,
+                status: decoded.status
+            )
             
         } else {
             
@@ -166,6 +179,23 @@ public extension APIRequestGlobalObject {
                 interests: decoded.interests,
                 status: decoded.status
             )
+        } else {
+            
+            throw SpotNetworkError.unknownError(function: #function)
+        }
+    }
+    
+    func deleteUserInfo() async throws {
+        
+        let url = try SpotAPI.userInfo.getApiUrl()
+        
+        let request = try getURLRequest(url: url, method: .delete, isAuth: true)
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        if let httpResponse = response as? HTTPURLResponse {
+            
+            try defaultCheckStatusCode(response: httpResponse, functionName: #function, data: data)
         } else {
             
             throw SpotNetworkError.unknownError(function: #function)

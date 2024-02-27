@@ -17,6 +17,18 @@ struct PotsResponseModel: Decodable {
     let imageKey, expiredAt: String
     let hashtagList: [HashTagDTO]
     let viewCount: Int64
+    let reactionTypeCounts: [ReactionCountDTO]?
+}
+
+public struct ReactionCountDTO: Decodable {
+    
+    public var count: Int32
+    public let reactionType: String
+    
+    public init(count: Int32, reactionType: String) {
+        self.count = count
+        self.reactionType = reactionType
+    }
 }
 
 public struct PotObject: Hashable {
@@ -33,6 +45,7 @@ public struct PotObject: Hashable {
     public let longitude: Double
     public let hashtagList: [HashTagDTO]
     public var viewCount: Int
+    public let reactionTypeCounts: [ReactionCountDTO]
     
     public init(
         id: Int64,
@@ -43,8 +56,9 @@ public struct PotObject: Hashable {
         expirationDate: String,
         latitude: Double,
         longitude: Double,
-        hashTagList: [HashTagDTO] = [],
-        viewCount: Int=0) {
+        hashTagList: [HashTagDTO]=[],
+        viewCount: Int=0,
+        reactionTypeCounts: [ReactionCountDTO]=[]) {
         self.id = id
         self.userId = userId
         self.categoryId = categoryId
@@ -55,6 +69,7 @@ public struct PotObject: Hashable {
         self.longitude = longitude
         self.hashtagList = hashTagList
         self.viewCount = viewCount
+        self.reactionTypeCounts = reactionTypeCounts
     }
     
     public static func ==(lhs: Self, rhs: Self) -> Bool {

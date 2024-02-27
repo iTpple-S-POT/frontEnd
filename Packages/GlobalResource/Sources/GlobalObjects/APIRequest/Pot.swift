@@ -96,6 +96,37 @@ public extension APIRequestGlobalObject {
         }
     }
     
+    func getHashTagFrom(string: String) async throws -> HashTagDTO {
+        
+        let url = try SpotAPI.potHashtag.getApiUrl()
+        
+        let queries: [String: String] = [
+            "keyword" : string,
+        ]
+        
+        var components = URLComponents(url: url, resolvingAgainstBaseURL: true)!
+        
+        components.queryItems = queries.map({ URLQueryItem(name: $0, value: $1) })
+        
+        let urlWithQuery = components.url!
+        
+        let request = try getURLRequest(url: urlWithQuery, method: .get, isAuth: true)
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        if let httpResponse = response as? HTTPURLResponse {
+            
+            try defaultCheckStatusCode(response: httpResponse, functionName: #function, data: data)
+            
+            // status code 정상
+            return try jsonDecoder.decode(HashTagDTO.self, from: data)
+            
+        } else {
+            
+            throw SpotNetworkError.unknownError(function: #function)
+        }
+    }
+    
     // PreSignedUrl획득
     private func getPreSignedUrl(
         imageInfo: ImageInformation) async throws -> PreSignedUrlObject {
@@ -190,7 +221,7 @@ public extension APIRequestGlobalObject {
     }
     
     // 팟 불러오기
-    func getPots(latitude lat: Double, longitude lon: Double, diameter: Double, categoryId: Int64? = nil) async throws -> [PotObject] {
+    func getPots(latitude lat: Double, longitude lon: Double, diameter: Double, categoryId: Int64? = nil, hashTagId: Int? = nil) async throws -> [PotObject] {
         let searchType = "CIRCLE"
         
         let url = try SpotAPI.getPots.getApiUrl()
@@ -204,6 +235,10 @@ public extension APIRequestGlobalObject {
         // 따로 id가 없는 경우 전체 불러오기
         if let id = categoryId {
             queries["categoryId"] = String(id)
+        }
+        
+        if let id = hashTagId {
+            queries["hashtagId"] = String(id)
         }
         
         queries["diameterInMeters"] = String(diameter)
@@ -239,7 +274,8 @@ public extension APIRequestGlobalObject {
                     expirationDate: model.expiredAt,
                     latitude: Double(model.location.lat),
                     longitude: Double(model.location.lon),
-                    viewCount: Int(model.viewCount)
+                    viewCount: Int(model.viewCount),
+                    reactionTypeCounts: model.reactionTypeCounts ?? []
                 )
             }
             
@@ -276,7 +312,8 @@ public extension APIRequestGlobalObject {
                 latitude: Double(decoded.location.lat),
                 longitude: Double(decoded.location.lon),
                 hashTagList: decoded.hashtagList,
-                viewCount: Int(decoded.viewCount)
+                viewCount: Int(decoded.viewCount),
+                reactionTypeCounts: decoded.reactionTypeCounts ?? []
             )
         }
         
@@ -311,7 +348,8 @@ public extension APIRequestGlobalObject {
                     expirationDate: model.expiredAt,
                     latitude: Double(model.location.lat),
                     longitude: Double(model.location.lon),
-                    viewCount: Int(model.viewCount)
+                    viewCount: Int(model.viewCount),
+                    reactionTypeCounts: model.reactionTypeCounts ?? []
                 )
             }
             
@@ -349,7 +387,8 @@ public extension APIRequestGlobalObject {
                     expirationDate: model.expiredAt,
                     latitude: Double(model.location.lat),
                     longitude: Double(model.location.lon),
-                    viewCount: Int(model.viewCount)
+                    viewCount: Int(model.viewCount),
+                    reactionTypeCounts: model.reactionTypeCounts ?? []
                 )
             }
             

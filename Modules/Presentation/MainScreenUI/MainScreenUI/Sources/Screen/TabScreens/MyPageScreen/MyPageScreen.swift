@@ -116,9 +116,9 @@ struct MyPageScreen: View {
                                 }
                                 
                                 switch loginType {
-                                case "Kakao":
+                                case "KAKAO":
                                     return "카카오톡 회원"
-                                case "Apple":
+                                case "APPLE":
                                     return "애플회원"
                                 default:
                                     fatalError("처리되지 못한 플랫폼 형식")

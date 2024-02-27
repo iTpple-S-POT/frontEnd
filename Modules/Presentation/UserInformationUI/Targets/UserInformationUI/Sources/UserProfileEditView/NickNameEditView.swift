@@ -19,6 +19,8 @@ struct NickNameEditView: View {
     
     @Environment(\.dismiss) var dismiss
     
+    @FocusState private var focusState
+    
     private let prevNickName: String
     
     @State private var showAlert = false
@@ -91,6 +93,7 @@ struct NickNameEditView: View {
                     .padding(.top, 30)
                     .padding(.leading, 8)
                     .ignoresSafeArea(.keyboard)
+                    .focused($focusState)
                 
                 Rectangle()
                     .fill(.gray)
@@ -101,6 +104,7 @@ struct NickNameEditView: View {
             .padding(.horizontal, 21)
             .padding(.top, 56)
         }
+        .onAppear(perform: { focusState = true })
         .alert(alertTitle, isPresented: $showAlert) {
             Button("닫기") { }
         } message: {

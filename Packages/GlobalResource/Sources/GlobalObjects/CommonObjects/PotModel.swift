@@ -20,6 +20,7 @@ public class PotModel: ObservableObject {
     
     @Published public var hashTagList: [HashTagDTO]
     @Published public var viewCount: Int
+    @Published public var reactionTypeCounts: [ReactionCountDTO]
     
     public init(
         id: Int64,
@@ -31,7 +32,8 @@ public class PotModel: ObservableObject {
         latitude: Double,
         longitude: Double,
         hashTagList: [HashTagDTO],
-        viewCount: Int) {
+        viewCount: Int,
+        reactionTypeCounts: [ReactionCountDTO]) {
         self.id = id
         self.userId = userId
         self.categoryId = categoryId
@@ -42,6 +44,7 @@ public class PotModel: ObservableObject {
         self.longitude = longitude
         self.hashTagList = hashTagList
         self.viewCount = viewCount
+        self.reactionTypeCounts = reactionTypeCounts
     }
     
 }
@@ -60,7 +63,8 @@ public extension PotModel {
             latitude: potObject.latitude,
             longitude: potObject.longitude,
             hashTagList: potObject.hashtagList,
-            viewCount: potObject.viewCount
+            viewCount: potObject.viewCount,
+            reactionTypeCounts: potObject.reactionTypeCounts
         )
     }
 }

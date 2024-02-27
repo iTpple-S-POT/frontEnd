@@ -9,32 +9,45 @@ import SwiftUI
 import GlobalUIComponents
 import GlobalObjects
 
+enum SettingFailed: Error {
+    
+    case logoutFailed
+    case deleteFailed
+}
+
 class SettingViewModel: ObservableObject {
     
-    @Published var showAlert = false
+    @Published var showErrorAlert = false
+    
+    @Published var showComfirmAlert = false
     private(set) var alertTitle = ""
     private(set) var alertContent = ""
-    private(set) var alertAction: (() -> Void)?
+    private(set) var alertAction: (() async throws -> Void)?
     
     func showLogoutComfirmation() {
         
-        showAlert = true
+        showComfirmAlert = true
         alertTitle = "로그아웃"
         alertContent = "로그아웃 하시겠습니까?"
-        alertAction = {
-            
-            self.removeCurrentToken()
-        }
+        alertAction = { }
     }
     
     func showDeleteAccountComfirmation() {
         
-        showAlert = true
+        showComfirmAlert = true
         alertTitle = "회원틸퇴"
         alertContent = "회원틸퇴 하시겠습니까?"
         alertAction = {
             
-            self.removeCurrentToken()
+            do {
+                
+                try await APIRequestGlobalObject.shared.deleteUserInfo()
+            } catch {
+                
+                self.alertTitle = "회원탈퇴 실패"
+                
+                throw SettingFailed.deleteFailed
+            }
         }
     }
     
@@ -89,20 +102,36 @@ struct SettingView: View {
             }
             .padding(.top, 56)
         }
-        .alert(viewModel.alertTitle, isPresented: $viewModel.showAlert) {
+        .alert(viewModel.alertTitle, isPresented: $viewModel.showComfirmAlert) {
             
             Button("취소") { }
             
             Button("확인") {
                 
-                viewModel.alertAction?()
-                
-                mainNavigation.presentScreen(destination: .loginScreen)
+                Task {
+                    
+                    do {
+                        try await viewModel.alertAction!()
+                        
+                        DispatchQueue.main.async {
+                            
+                            viewModel.removeCurrentToken()
+                            mainNavigation.presentScreen(destination: .loginScreen)
+                        }
+                    } catch {
+                        
+                        viewModel.showErrorAlert = true
+                    }
+                }
             }
             
         } message: {
             
             Text(viewModel.alertContent)
+        }
+        .alert(viewModel.alertTitle, isPresented: $viewModel.showErrorAlert) {
+            
+            Button("확인") { }
         }
 
     }

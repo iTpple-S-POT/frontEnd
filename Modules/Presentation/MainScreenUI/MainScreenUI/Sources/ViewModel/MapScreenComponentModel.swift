@@ -162,8 +162,6 @@ class MapScreenComponentModel: ObservableObject {
     
     func fetchPots(location: CLLocationCoordinate2D) {
         
-        let functionName = #function
-        
         Task.detached {
             
             do {

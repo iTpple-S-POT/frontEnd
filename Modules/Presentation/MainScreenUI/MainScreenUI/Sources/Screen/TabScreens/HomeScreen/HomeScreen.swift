@@ -54,7 +54,10 @@ struct HomeScreen: View {
                     
                     if homeScreenModel.presentPotsListView {
                         
-                        PotListView(present: $homeScreenModel.presentPotsListView, models: homeScreenModel.selectedClusterModels!)
+                        PotListView(
+                            present: $homeScreenModel.presentPotsListView,
+                            title: "주변 팟",
+                            models: homeScreenModel.selectedClusterModels!)
                             .zIndex(1)
                     }
                     

@@ -108,6 +108,14 @@ public struct PotDetailView: View {
         return "\(minute)분 전"
     }
     
+    private var reactionCount: Int {
+        
+        potModel.reactionTypeCounts.reduce(0) { partial, reaction in
+            
+            Int(partial) + Int(reaction.count)
+        }
+    }
+    
     private var tagObject: TagCases { TagCases[potModel.categoryId ] }
     
     public var body: some View {
@@ -159,7 +167,7 @@ public struct PotDetailView: View {
                     Spacer()
                     
                     // 좋아요 아이템
-                    VStack {
+                    VStack(spacing: 5) {
                         Image.makeImageFromBundle(bundle: .module, name: "emotion_Btn", ext: .png)
                             .resizable()
                             .scaledToFit()
@@ -173,8 +181,8 @@ public struct PotDetailView: View {
                                 }
                             }
                         
-                        Text("")
-                            .font(.system(size: 12))
+                        Text("\(reactionCount)")
+                            .font(.system(size: 12, weight: .semibold))
                             .foregroundStyle(.white)
                     }
                     .frame(height: 50)
@@ -425,7 +433,8 @@ public struct PotDetailView: View {
                     latitude: 0,
                     longitude: 0,
                     hashTagList: [],
-                    viewCount: 20
+                    viewCount: 20,
+                    reactionTypeCounts: []
                 )
                                                         
                 return potModel
