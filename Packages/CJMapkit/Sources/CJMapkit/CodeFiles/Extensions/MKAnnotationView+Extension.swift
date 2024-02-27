@@ -66,7 +66,7 @@ extension MKAnnotationView {
         isHidden = true
     }
     
-    private func hasAnnotationChanged() -> Bool {
+    func hasAnnotationChanged() -> Bool {
         return !(self.savedAnnotation?.title == self.annotation?.title && self.savedAnnotation?.subtitle == self.annotation?.subtitle)
     }
     
@@ -103,5 +103,61 @@ extension MKAnnotationView {
         collisionMode = savedCollision ?? .rectangle
         alpha = 1
         isHidden = false
+    }
+}
+
+// Show hot mark
+extension PotAnnotationView {
+    
+    func showHotMarkAnimated(withDuration: Double = 0.2 , delay: Double = 0, completion: (() -> Void)? = nil) {
+        savedAnnotation = self.annotation
+        collisionMode = savedCollision ?? .rectangle
+        
+        let dispGroup = DispatchGroup()
+        dispGroup.enter()
+        DispatchQueue.main.async(group: dispGroup) {
+            // small delay is needed to make the collisons recalculate
+            UIView.animate(withDuration: withDuration, delay: delay, options: .curveEaseInOut,
+                           animations: { self.hotMarkView.alpha = 1.0 },
+                           completion: { _ in dispGroup.leave() }
+            )
+        }
+        
+        dispGroup.notify(queue: .main) {
+            // don't complete the animation if the annotation has changed meanwhile
+            if self.hasAnnotationChanged() {
+                completion?()
+                return
+            } else {
+                self.hotMarkView.alpha = 1.0
+                completion?()
+            }
+        }
+    }
+    
+    func hideHotMarkAnimated(withDuration: Double = 0.2 , delay: Double = 0, completion: (() -> Void)? = nil) {
+        savedAnnotation = self.annotation
+        collisionMode = savedCollision ?? .rectangle
+        
+        let dispGroup = DispatchGroup()
+        dispGroup.enter()
+        DispatchQueue.main.async(group: dispGroup) {
+            // small delay is needed to make the collisons recalculate
+            UIView.animate(withDuration: withDuration, delay: delay, options: .curveEaseInOut,
+                           animations: { self.hotMarkView.alpha = 0.0 },
+                           completion: { _ in dispGroup.leave() }
+            )
+        }
+        
+        dispGroup.notify(queue: .main) {
+            // don't complete the animation if the annotation has changed meanwhile
+            if self.hasAnnotationChanged() {
+                completion?()
+                return
+            } else {
+                self.hotMarkView.alpha = 0.0
+                completion?()
+            }
+        }
     }
 }

@@ -186,6 +186,7 @@ public struct MapkitViewRepresentable: UIViewRepresentable {
         let center = CJLocationManager.getUserLocationFromLocal()
         
         mapView.setRegion(coordinator.regionWith(center: center), animated: false)
+        mapView.userTrackingMode = .followWithHeading
         
         return mapView
     }
@@ -199,15 +200,13 @@ public struct MapkitViewRepresentable: UIViewRepresentable {
         // 카테고리 필터링
         let coordinator = context.coordinator
         
-        let activeCategoryDict = self.activeCategoryDict
-        
-        if coordinator.currentActiveCategoryDict != activeCategoryDict {
+        if coordinator.currentActiveCategoryDict != self.activeCategoryDict {
             
-            coordinator.currentActiveCategoryDict = activeCategoryDict
+            // 값 업데이트
+            coordinator.currentActiveCategoryDict = self.activeCategoryDict
             
             filterAnnotations(mapView: uiView)
         }
-        
         
         // Annotation적용
         makePotAnnotationsFrom(mapView: uiView, potObjects: potObjects)
@@ -302,21 +301,39 @@ public struct MapkitViewRepresentable: UIViewRepresentable {
         
         let dict = self.activeCategoryDict
         
-        if dict[.all]! {
-            
-            mapView.unhideAnnotations(mapView.annotations)
-            return
+        var potAnnots = mapView.annotations.compactMap { annot in
+            annot as? PotAnnotation
         }
         
         if dict[.hot]! {
             
-            // TODO: 팟인기순 정렬
+            let hotCount = 3
+            
+            potAnnots.sort { lhs, rhs in
+                lhs.potModel.viewCount < rhs.potModel.viewCount
+            }
+            
+            if potAnnots.count > hotCount {
+                
+                potAnnots = Array(potAnnots[0...2])
+            }
+            
+            mapView.showHotMarks(potAnnots)
+            
+            return
+        } else {
+            
+            mapView.hideHotMarks(potAnnots, withDuration: 0)
+        }
+        
+        if dict[.all]! {
+            
+            mapView.unhideAnnotations(potAnnots)
+            return
         }
         
         var willDisplayAnnotations: [MKAnnotation] = []
         var wiilHideAnnotations: [MKAnnotation] = []
-        
-        let activeCategoryIds: [Int] = dict.compactMap { $1 ? $0.id : nil }
         
         mapView.annotations.forEach { annotation in
             
@@ -324,7 +341,7 @@ public struct MapkitViewRepresentable: UIViewRepresentable {
                 
                 let annotationCatId = potAnot.potModel.categoryId
                 
-                if activeCategoryIds.contains(Int(annotationCatId)) {
+                if dict[TagCases(rawValue: Int(annotationCatId))!]! {
                     
                     willDisplayAnnotations.append(potAnot)
                 } else {

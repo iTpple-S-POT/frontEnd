@@ -14,11 +14,25 @@ import Lottie
 import Kingfisher
 
 enum PotAnnotationViewConfig {
-    static var annotationSize = CGSize(width: 52, height: 52)
+    static var annotationSize = CGSize(width: 54, height: 54)
 }
 
 
 class PotAnnotationView: MKAnnotationView {
+    
+    let hotMarkView: UIImageView = {
+        
+        let view = UIImageView()
+        
+        let path = Bundle.module.provideFilePath(name: "hot_mark", ext: "png")
+        
+        view.contentMode = .scaleAspectFit
+        
+        view.image = UIImage(named: path)
+        view.alpha = 0.0
+        
+        return view
+    }()
     
     let layer1: PotShapeView = {
         
@@ -64,6 +78,7 @@ class PotAnnotationView: MKAnnotationView {
     override func prepareForReuse() {
         self.alpha = 1.0
         self.isHidden = false
+        self.hotMarkView.alpha = 0.0
     }
     
     func setUp(annotation: PotAnnotation) {
@@ -83,6 +98,7 @@ class PotAnnotationView: MKAnnotationView {
         self.addSubview(layer1)
         self.layer1.addSubview(layer2)
         self.layer2.addSubview(layer3)
+        self.addSubview(hotMarkView)
         
         // AutoLayout
         
@@ -115,6 +131,8 @@ class PotAnnotationView: MKAnnotationView {
     }
     
     override func draw(_ rect: CGRect) {
+        
+        hotMarkView.frame = CGRect(x: 35, y: -4, width: 24, height: 24)
         
         layer3.layer.cornerRadius = layer3.bounds.width / 2
         
