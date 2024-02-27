@@ -22,6 +22,9 @@ class PotDetailViewModel: ObservableObject {
     @Published var selectedReactionModel: ReactionModel?
     
     @Published var showAlert = false
+    
+    @Published var presentUploaderProfile = false
+    
     var alertTitle = ""
     var alertContent = ""
     
@@ -164,7 +167,10 @@ public struct PotDetailView: View {
                             .contentShape(Circle())
                             .onTapGesture {
                                 
-                                viewModel.presentReactionView = true
+                                if userInfo != nil {
+                                        
+                                    viewModel.presentReactionView = true
+                                }
                             }
                         
                         Text("")
@@ -265,19 +271,27 @@ public struct PotDetailView: View {
                             
                             // 유저 프로필
                             HStack(spacing: 12) {
-
-                                if let imageUrl = userInfo?.profileImageUrl, let url = URL(string: imageUrl), let data = try? Data(contentsOf: url), let uiImage = UIImage(data: data) {
-                                    Image(uiImage: uiImage)
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(width: 40)
+                                
+                                Group {
                                     
-                                } else {
-                                   Image(systemName: "person.crop.circle")
-                                        .resizable()
-                                        .scaledToFit()
-                                        .foregroundStyle(.white)
-                                        .frame(width: 40)
+                                    if let imageUrl = userInfo?.profileImageUrl, let url = URL(string: imageUrl), let data = try? Data(contentsOf: url), let uiImage = UIImage(data: data) {
+                                        Image(uiImage: uiImage)
+                                            .resizable()
+                                            .scaledToFit()
+                                            .frame(width: 40)
+                                        
+                                    } else {
+                                       Image(systemName: "person.crop.circle")
+                                            .resizable()
+                                            .scaledToFit()
+                                            .foregroundStyle(.white)
+                                            .frame(width: 40)
+                                    }
+                                    
+                                }
+                                .contentShape(Circle())
+                                .onTapGesture {
+                                    viewModel.presentUploaderProfile = true
                                 }
                                 
                                 Text(userInfo?.nickname ?? "비지정 닉네임")
@@ -378,6 +392,10 @@ public struct PotDetailView: View {
                     print("single pot데이터 가져오기 실패")
                 }
             }
+        }
+        .fullScreenCover(isPresented: $viewModel.presentUploaderProfile) {
+            
+            UploaderProfileView(userInfo: userInfo!)
         }
         .alert(viewModel.alertTitle, isPresented: $viewModel.showAlert, actions: {
             Button("확인") { }
