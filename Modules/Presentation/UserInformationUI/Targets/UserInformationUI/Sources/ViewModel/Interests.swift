@@ -110,37 +110,32 @@ extension ConfigurationScreenModel {
 
 
 // MARK: - UserInterestType타입을 정의한 extension입니다.
-extension ConfigurationScreenModel {
-    enum UserInterestType: String, CaseIterable, Identifiable {
-        var id: Self { self }
-        
-        case type1 = "영화",
-        type2 = "자전거",
-        type3 = "글쓰기",
-        type4 = "갓생살기",
-        type5 = "애니메이션",
-        type6 = "산책",
-        type7 = "다꾸",
-        type8 = "독서",
-        type9 = "뜨개질",
-        type10 = "자동차",
-        type11 = "와국어",
-        type12 = "콘서트",
-        type13 = "패션",
-        type14 = "커리어",
-        type15 = "식집자",
-        type16 = "블로그",
-        type17 = "미디어",
-        type18 = "개발",
-        type19 = "디자인",
-        type20 = "기획",
-        type21 = "베이킹",
-        type22 = "피아노"
-    }
+enum UserInterestType: String, CaseIterable, Identifiable {
+    var id: Self { self }
+    
+    case type1 = "영화",
+    type2 = "자전거",
+    type3 = "글쓰기",
+    type4 = "갓생살기",
+    type5 = "애니메이션",
+    type6 = "산책",
+    type7 = "다꾸",
+    type8 = "독서",
+    type9 = "뜨개질",
+    type10 = "자동차",
+    type11 = "와국어",
+    type12 = "콘서트",
+    type13 = "패션",
+    type14 = "커리어",
+    type15 = "식집자",
+    type16 = "블로그",
+    type17 = "미디어",
+    type18 = "개발",
+    type19 = "디자인",
+    type20 = "기획",
+    type21 = "베이킹",
+    type22 = "피아노"
 }
-
-
-
 
 // MARK: - 표시될 태그뷰들의 속성들 & 필요 매서드들을 저장한 extension입니다.
 extension ConfigurationScreenModel {

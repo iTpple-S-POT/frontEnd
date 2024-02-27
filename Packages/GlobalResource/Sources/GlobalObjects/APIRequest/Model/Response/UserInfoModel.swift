@@ -68,4 +68,18 @@ public struct UserInfoObject {
         self.status = status
     }
     
+    public static let testUser = UserInfoObject(
+        id: 208,
+        loginType: "KAKAO",
+        role: nil,
+        profileImageUrl: nil,
+        name: "최준영",
+        nickname: "잇플최준영",
+        phoneNumber: nil,
+        birthDay: "2015-02-18",
+        gender: "MALE",
+        mbti: "ISFJ",
+        interests: ["영화","피아노","커리어","글쓰기"],
+        status: "COMPLETED"
+    )
 }

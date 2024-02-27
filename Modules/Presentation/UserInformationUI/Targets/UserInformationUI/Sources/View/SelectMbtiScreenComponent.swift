@@ -38,25 +38,7 @@ struct SelectMbtiScreenComponent: View {
             }
             
             // Select Mbti
-            LazyVGrid(columns: columns, spacing: 16.5) {
-                ForEach(mbtiList, id: \.self) { element in
-                    
-                    GeometryReader { geo in
-                        
-                        SpotStateButton(innerView: AnyView(Text(element.rawValue).font(.suite(type: .SUITE_Regular, size: 18))), idleColor: .spotLightGray, activeColor: .spotRed, frame: geo.size, radius: 20) {
-                            
-                            screenModel.userMBTI.setState(mbti: element)
-                            
-                        } activation: {
-                            
-                            return screenModel.userMBTI.isStateMatch(mbti: element)
-                            
-                        }
-                        
-                    }
-                    .frame(height: 56)
-                }
-            }
+            MbtiSelectUI(configureModel: screenModel)
             .padding(.top, 42)
         
             

@@ -116,3 +116,60 @@ public extension APIRequestGlobalObject {
         }
     }
 }
+
+
+public struct UpdateUserDTO: Codable {
+    
+    public let nickname: String
+    public let birthDay: String
+    public let gender: String
+    public let mbti: String
+    public let interests: [String]
+    
+    public init(nickname: String, birthDay: String, gender: String, mbti: String, interests: [String]) {
+        self.nickname = nickname
+        self.birthDay = birthDay
+        self.gender = gender
+        self.mbti = mbti
+        self.interests = interests
+    }
+}
+
+public extension APIRequestGlobalObject {
+    
+    func updateUserInfo(dto: UpdateUserDTO) async throws -> UserInfoObject {
+        
+        let url = try SpotAPI.userInfo.getApiUrl()
+        
+        var request = try getURLRequest(url: url, method: .put, isAuth: true)
+        
+        request.httpBody = try jsonEncoder.encode(dto)
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        if let httpResponse = response as? HTTPURLResponse {
+            
+            try defaultCheckStatusCode(response: httpResponse, functionName: #function, data: data)
+            
+            let decoded = try jsonDecoder.decode(UserInfoResponseModel.self, from: data)
+            
+            return UserInfoObject(
+                id: decoded.id,
+                loginType: decoded.loginType,
+                role: decoded.role,
+                profileImageUrl: decoded.profileImageUrl,
+                name: decoded.name, nickname: decoded.nickname,
+                phoneNumber: decoded.phoneNumber,
+                birthDay: decoded.birthDay,
+                gender: decoded.gender,
+                mbti: decoded.mbti,
+                interests: decoded.interests,
+                status: decoded.status
+            )
+        } else {
+            
+            throw SpotNetworkError.unknownError(function: #function)
+        }
+    }
+    
+}

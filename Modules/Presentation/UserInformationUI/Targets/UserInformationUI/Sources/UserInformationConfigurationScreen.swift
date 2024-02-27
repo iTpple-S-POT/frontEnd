@@ -211,4 +211,5 @@ extension UserInformationConfigurationScreen {
 
 #Preview {
     UserInformationConfigurationScreen()
+        .environmentObject(MainNavigation())
 }

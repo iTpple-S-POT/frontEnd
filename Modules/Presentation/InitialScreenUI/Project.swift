@@ -14,7 +14,7 @@ let project = Project(name: "InitialScreenUI",
                         .local(path: .relativeToRoot("Packages/SplashUI")),
                         .local(path: .relativeToRoot("Packages/LoginUI")),
                         .local(path: .relativeToRoot("Packages/GlobalResource")),
-                        .local(path: .relativeToRoot("Packages/UserInformationUI")),
+                        .local(path: .relativeToRoot("\(packagePath)/DefaultExtensions")),
                       ],
                       targets: [
                           Target(
@@ -31,8 +31,9 @@ let project = Project(name: "InitialScreenUI",
                                 .package(product: "SplashUI"),
                                 .package(product: "LoginUI"),
                                 .package(product: "GlobalObjects"),
-                                .package(product: "UserInformationUI"),
-                                .project(target: "MainScreenUI", path: .relativeToRoot("Modules/Presentation/MainScreenUI"))
+                                .package(product: "DefaultExtensions"),
+                                .project(target: "MainScreenUI", path: .relativeToRoot("Modules/Presentation/MainScreenUI")),
+                                .project(target: "UserInformationUI", path: .relativeToRoot("Modules/Presentation/UserInformationUI")),
                               ]
                           )
                       ])

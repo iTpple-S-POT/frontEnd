@@ -80,7 +80,7 @@ struct CategoryBox: View {
         .onTapGesture {
             selected = object.id
         }
-        
+   
     }
     
 }

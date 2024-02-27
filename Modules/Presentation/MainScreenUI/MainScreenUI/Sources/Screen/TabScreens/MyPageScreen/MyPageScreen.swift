@@ -8,6 +8,7 @@
 import SwiftUI
 import GlobalUIComponents
 import GlobalObjects
+import UserInformationUI
 
 class MyPageScreenModel: ObservableObject {
     
@@ -128,7 +129,7 @@ struct MyPageScreen: View {
                         // 내프로필 보기
                         NavigationLink {
                             
-                            ProfileDetailView(userInfo: userInfo)
+                            ProfileDetailView()
                                 .navigationBarBackButtonHidden()
                             
                         } label: {
@@ -193,11 +194,20 @@ struct MyPageScreen: View {
     }
 }
 
-fileprivate struct ProfileDetailView: View {
+struct ProfileDetailView: View {
     
     @Environment(\.dismiss) private var dismiss
     
-    var userInfo: SpotUser
+    @FetchRequest(sortDescriptors: [])
+    private var currentUserInfo: FetchedResults<SpotUser>
+    
+    private var userInfo: SpotUser { currentUserInfo.first! }
+    
+    @State private var showView = false
+    
+    @State private var showAlert = false
+    private var alertTitle = "업데이트 실패"
+    @State private var alertContent = "정보변경을 실패했습니다"
     
     var body: some View {
         
@@ -225,6 +235,19 @@ fileprivate struct ProfileDetailView: View {
                         
                         Spacer()
                         
+                        Button {
+                            
+                            showView = true
+                            
+                        } label: {
+                            
+                            Image.makeImageFromBundle(bundle: .module, name: "edit_icon", ext: .png)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 32, height: 32)
+                                .contentShape(Rectangle())
+                        }
+                        
                     }
                     .padding(.horizontal, 21)
                     
@@ -247,6 +270,18 @@ fileprivate struct ProfileDetailView: View {
                 Spacer()
             }
             .zIndex(0.0)
+        }
+        .alert(alertTitle, isPresented: $showAlert) {
+            Button("닫기") { }
+        } message: {
+            Text(alertContent)
+        }
+        .fullScreenCover(isPresented: $showView) {
+            
+            ProfileEditView(userInfo: userInfo) { result in
+
+                showAlert = !result
+            }
         }
     }
 }

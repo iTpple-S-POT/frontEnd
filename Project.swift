@@ -4,7 +4,7 @@ import Foundation
 private let bundleId: String = "com.itpple.spot"
 private let version: String = "0.0.1"
 private let bundleVersion: String = "1"
-public let iOSTargetVersion: String = "16.0"
+private let iOSTargetVersion: String = "16.0"
 
 // 아래의 Targets는 Tuist파일에 존재한다.
 private let basePath: String = "Targets"
@@ -28,7 +28,9 @@ let project = Project(name: "\(appName)",
                               bundleId: bundleId,
                               deploymentTarget: .iOS(targetVersion: iOSTargetVersion, devices: .iphone),
                               infoPlist: makeInfoPlist(),
-                              sources: ["\(basePath)/SPOT_Application/Sources/**"],
+                              sources: [
+                                "\(basePath)/SPOT_Application/Sources/**"
+                              ],
                               resources: [
                                 "\(basePath)/SPOT_Application/Resources/**",
                                 "Secrets/secret.json",

@@ -10,7 +10,6 @@ import DefaultExtensions
 import KakaoSDKAuth
 import GlobalFonts
 import GlobalObjects
-import UserInformationUI
 import Alamofire
 import AuthenticationServices
 

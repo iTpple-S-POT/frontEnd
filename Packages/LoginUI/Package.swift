@@ -15,7 +15,6 @@ let package = Package(
     dependencies: [
         .package(name: "DefaultExtensions", path: "../DefaultExtensions"),
         .package(name: "GlobalResource", path: "../GlobalResource"),
-        .package(path: "../UserInformationUI"),
         .package(url: "https://github.com/kakao/kakao-ios-sdk", .upToNextMajor(from: "2.18.2")),
     ],
     targets: [
@@ -27,7 +26,6 @@ let package = Package(
                 .product(name: "DefaultExtensions", package: "DefaultExtensions"),
                 .product(name: "GlobalFonts", package: "GlobalResource"),
                 .product(name: "GlobalObjects", package: "GlobalResource"),
-                .product(name: "UserInformationUI", package: "UserInformationUI"),
                 .product(name: "KakaoSDK", package: "kakao-ios-sdk"),
             ],
             resources: [

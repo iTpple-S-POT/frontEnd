@@ -8,6 +8,7 @@
 import SwiftUI
 import GlobalObjects
 import Kingfisher
+import GlobalUIComponents
 
 struct PotListView: View {
     @Binding var present: Bool
