@@ -34,11 +34,11 @@ enum ImageDownloadError: Error {
 
 public enum PotAnnotationType: Int, CaseIterable {
     
-    case hot
-    case life
-    case question
-    case information
-    case party
+    case hot = 11
+    case life = 1
+    case information = 2
+    case question = 3
+    case party = 4
     
     func getAnnotationColor() -> UIColor {
         

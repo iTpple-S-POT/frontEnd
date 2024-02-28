@@ -61,11 +61,14 @@ struct SelectCategoryScreenComponent: View {
                     
                     VStack(spacing: 16) {
                         
-                        ForEach(categories, id: \.self) {
+                        ForEach(categories, id: \.self) { cat in
                             
-                            let object = CategoryObject(id: $0.id, name: $0.name ?? "", description: $0.content ?? "")
+                            let object = CategoryObject(id: cat.id, name: cat.name ?? "", description: cat.content ?? "")
                             
                             CategoryBox(selected: $screenModelWithNav.selectedCategoryId, object: object)
+                                .onAppear {
+                                    print(cat.id, cat.name)
+                                }
                             
                         }
                         

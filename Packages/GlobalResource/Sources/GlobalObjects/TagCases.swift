@@ -27,8 +27,8 @@ public enum TagCases: Int, Identifiable, CaseIterable {
     case all = 10
     case hot = 11
     case life = 1
-    case question = 2
-    case information = 3
+    case information = 2
+    case question = 3
     case party = 4
     
     public var id: Int { self.rawValue }
