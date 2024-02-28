@@ -108,8 +108,8 @@ struct MyPotScreen: View {
             ScrollView {
                 
                 VStack(spacing: 0) {
-        
-                    LazyVGrid(columns: columns, spacing: 1.0) {
+                    
+                    LazyVGrid(columns: columns, spacing: itemSpacing) {
                         
                         ForEach(screenModel.myPotModels, id: \.id) { model in
                             

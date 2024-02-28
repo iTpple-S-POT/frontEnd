@@ -250,11 +250,24 @@ extension PotListViewCell {
         
         let hour = Int(timeInterval / (3600))
         
-        if hour > 0 {
+        if hour > 24 {
+            
+            return "\(Int(hour / 24))일 전"
+        } else if hour < 24 {
             
             return "\(hour)시간 전"
         }
-        
-        return "방금전"
+        else {
+            
+            let minute = Int(timeInterval) % 3600 / 60
+            
+            if minute >= 1 {
+                
+                return "\(minute)분 전"
+            } else {
+                
+                return "방금 전"
+            }
+        }
     }
 }
