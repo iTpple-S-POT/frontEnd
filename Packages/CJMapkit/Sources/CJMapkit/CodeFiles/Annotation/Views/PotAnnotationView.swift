@@ -88,8 +88,6 @@ class PotAnnotationView: MKAnnotationView {
         // Annotation크기 조정(collision을 위한 설정)
         self.frame.size = PotAnnotationViewConfig.annotationSize
         
-        layer2.color = PotAnnotationType(rawValue: Int(annotation.potModel.categoryId))!.getAnnotationColor()
-        
         // TapGesture
         // MapView를 거치지 않고 이벤트를 바로호출하는 경우가 훨씬 빠르다.
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(tapGestureCallBack))
@@ -135,6 +133,11 @@ class PotAnnotationView: MKAnnotationView {
         hotMarkView.frame = CGRect(x: 35, y: -4, width: 24, height: 24)
         
         layer3.layer.cornerRadius = layer3.bounds.width / 2
+        
+        if let potAnnot = annotation as? PotAnnotation {
+            
+            layer2.color = PotAnnotationType(rawValue: Int(potAnnot.potModel.categoryId))!.getAnnotationColor()
+        }
         
         if let potAnot = annotation as? PotAnnotation, let imageKey = potAnot.potModel.imageKey {
             loadImageView(imageKey: imageKey)
