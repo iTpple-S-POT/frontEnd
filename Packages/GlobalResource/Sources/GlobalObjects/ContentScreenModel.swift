@@ -159,7 +159,7 @@ public extension ContentScreenModel {
             
             print(#function, error.localizedDescription)
             
-            throw InitialTaskError.dataTaskFailed
+            throw InitialTaskError.refreshFailed
         }
     }
 }

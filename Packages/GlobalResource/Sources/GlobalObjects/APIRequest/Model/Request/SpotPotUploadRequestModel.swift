@@ -26,11 +26,11 @@ public struct SpotPotUploadObject {
     
     let category: Int64
     let text: String
-    let hashtagList: [String]
+    let hashtagList: [Int64]
     let latitude: Double
     let longitude: Double
     
-    public init(category: Int64, text: String, hashtagList: [String] = [], latitude: Double, longitude: Double) {
+    public init(category: Int64, text: String, hashtagList: [Int64] = [], latitude: Double, longitude: Double) {
         self.category = category
         self.text = text
         self.hashtagList = hashtagList

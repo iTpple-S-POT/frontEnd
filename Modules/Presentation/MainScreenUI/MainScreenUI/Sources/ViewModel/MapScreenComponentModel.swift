@@ -65,7 +65,7 @@ class MapScreenComponentModel: ObservableObject {
             
             let categoryId = objects["categoryId"] as! Int64
             let content = objects["content"] as! String
-            let hashtagList = objects["hashtagList"] as! [String]
+            let hashtagList = objects["hashtagList"] as! [Int64]
             let imageInfo = objects["imageInfo"] as! ImageInformation
             
             self.uploadPot(
@@ -166,7 +166,7 @@ class MapScreenComponentModel: ObservableObject {
             
             do {
                 // 서버로부터 팟을 가져옴
-                let potObjects = try await APIRequestGlobalObject.shared.getPots(latitude: location.latitude, longitude: location.longitude, diameter: 500)
+                let potObjects = try await APIRequestGlobalObject.shared.getPots(latitude: location.latitude, longitude: location.longitude, diameter: 1000)
                 
                 await MainActor.run {
                     
@@ -232,7 +232,7 @@ extension MapScreenComponentModel {
     func uploadPot(
         categoryId: Int64,
         content: String,
-        hashtagList: [String],
+        hashtagList: [Int64],
         imageInfo: ImageInformation
     ) {
          

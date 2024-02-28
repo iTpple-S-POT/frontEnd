@@ -13,6 +13,7 @@ struct MapScreenComponent: View {
     var body: some View {
         
         ZStack {
+            
             MapkitViewRepresentable(
                 isLastestCenterAndMapEqual: $screenModel.isLastestCenterAndMapEqual,
                 activeCategoryDict: $mainScreenModel.selectedTagDict,
@@ -23,6 +24,7 @@ struct MapScreenComponent: View {
                 
                 screenModel.currentCenterPositionOfMap = mapCenter
             }
+            .zIndex(0)
             
             VStack {
                 
@@ -55,6 +57,7 @@ struct MapScreenComponent: View {
                 .padding(.bottom, 56)
                 
             }
+            .zIndex(1)
             
             VStack {
                 
@@ -91,6 +94,7 @@ struct MapScreenComponent: View {
                 .padding(.bottom, 12)
                 
             }
+            .zIndex(1)
             
         }
         .onAppear {

@@ -42,10 +42,8 @@ public class PotUploadScreenModel: NavigationController<PotUploadDestination> {
     ]
     
     // 해쉬 테그
-    typealias HashTag = String
-    
     @Published var temporalHashTagString = ""
-    @Published private(set) var potHashTags: [HashTag] = []
+    @Published private(set) var potHashTags: Set<HashTagDTO> = []
     
     // 팟 텍스트
     @Published var potText: String = ""
@@ -57,9 +55,24 @@ public class PotUploadScreenModel: NavigationController<PotUploadDestination> {
     
     let potUploadPublisher = PassthroughSubject<Bool, Never>()
     
+    let hashTagInsertPublisher = PassthroughSubject<HashTagDTO, Never>()
+    
     var dismiss: DismissAction?
     
     var subscriptions: Set<AnyCancellable> = []
+    
+    public override init() {
+        
+        super.init()
+        
+        hashTagInsertPublisher
+            .receive(on: DispatchQueue.main)
+            .sink {
+                self.potHashTags.insert($0)
+            }
+            .store(in: &subscriptions)
+    }
+    
     
     func checkAuthorizationStatus() {
         
@@ -71,9 +84,7 @@ public class PotUploadScreenModel: NavigationController<PotUploadDestination> {
                 DispatchQueue.main.async { self.authorizationStatus = newStatus }
                 
             }
-            
         }
-        
     }
     
     func photoInformationUpdated(imageInfo: ImageInformation) {
@@ -144,43 +155,11 @@ extension PotUploadScreenModel {
 }
 
 
-// MARK: - HashTag
+// MARK: - Hash tag
 extension PotUploadScreenModel {
     
-    func submitHashTag() {
+    func deleteHashTag(hashTag: HashTagDTO) {
         
-        if !temporalHashTagString.isEmpty {
-                
-            let hashTagStr = temporalHashTagString
-            
-            if !checkTagAlreadyExists(element: hashTagStr) {
-                
-                // 해쉬테그 삽입
-                insertHashTag(element: hashTagStr)
-                
-                // 문자열 초기화
-                temporalHashTagString = ""
-            } else {
-                
-                showDuplicateHashTag()
-                
-            }
-        }
+        potHashTags.remove(hashTag)
     }
-    
-    func checkTagAlreadyExists(element: HashTag) -> Bool {
-        
-        potHashTags.contains(element)
-    }
-    
-    func removeHashTag(index: Int) {
-        
-        potHashTags.remove(at: index)
-    }
-    
-    func insertHashTag(element: HashTag) {
-        
-        potHashTags.append(element)
-    }
-    
 }

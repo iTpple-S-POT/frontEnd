@@ -9,6 +9,10 @@ import Foundation
 
 public struct HashTagDTO: Decodable, Hashable {
     
-    var hashtagId: Int64
+    public var hashtagId: Int64
     public var hashtag: String
+    
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(hashtagId)
+    }
 }

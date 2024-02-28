@@ -8,6 +8,7 @@
 import SwiftUI
 import GlobalObjects
 import GlobalUIComponents
+import Combine
 
 struct HashTagScreenComponent: View {
     
@@ -54,21 +55,6 @@ struct HashTagScreenComponent: View {
                         })
                         .font(.system(size: 16, weight: .semibold))
                         .focused($focusState)
-                        .toolbar {
-                            ToolbarItem(placement: .keyboard) {
-                                HStack {
-                                    
-                                    Spacer()
-                                    
-                                    Button("해시 태그 생성") {
-                                        
-                                        screenModelWithNav.submitHashTag()
-                                    }
-                                    .disabled(screenModelWithNav.temporalHashTagString.isEmpty)
-                                    .padding(.trailing, 10)
-                                }
-                            }
-                        }
                         .padding(.leading, 4)
                         .submitLabel(.done)
                     
@@ -90,12 +76,13 @@ struct HashTagScreenComponent: View {
                         
                         LazyHStack {
                             
-                            ForEach(Array(screenModelWithNav.potHashTags.enumerated()), id: \.element) { index, tag in
+                            ForEach(Array(screenModelWithNav.potHashTags), id: \.hashtagId) { hashTag in
                                 
-                                HashTagBox(name: tag) {
-                                    screenModelWithNav.removeHashTag(index: index)
+                                HashTagBox(name: hashTag.hashtag) {
+                                    
+                                    screenModelWithNav.deleteHashTag(hashTag: hashTag)
                                 }
-                                .id(tag)
+                                .id(hashTag.hashtagId)
                                
                             }
                         }
@@ -103,24 +90,18 @@ struct HashTagScreenComponent: View {
                         
                     }
                     .scrollIndicators(.hidden)
-                    .onChange(of: screenModelWithNav.potHashTags, perform: { strs in
-                        
-                        let lastStr = strs.last;
-                        
-                        withAnimation(.linear) {
-                            proxy.scrollTo(lastStr)
-                        }
-                        
-                    })
-                    
                 }
                 .frame(height: 40)
                 .padding(.top, 20)
                 
-                
+                // 자동완성
+                HashTagAutoCompletionView(
+                    inputString: $screenModelWithNav.temporalHashTagString,
+                    pub: screenModelWithNav.hashTagInsertPublisher
+                )
+                .padding(.horizontal, 21)
             }
-            
-            
+
             Spacer(minLength: 0)
             
         }
@@ -149,6 +130,113 @@ struct HashTagScreenComponent: View {
     }
 }
 
+struct HashTagAutoCompletionView: View {
+    
+    @Binding var inputString: String
+    
+    let pub: PassthroughSubject<HashTagDTO, Never>
+    
+    @State private var showingList: [HashTagDTO] = []
+    
+    var body: some View {
+        
+        Group {
+            
+            if !showingList.isEmpty {
+                
+                ScrollView {
+                    
+                    VStack(spacing: 0) {
+                        
+                        ForEach(showingList, id: \.hashtagId) { element in
+                            
+                            VStack(spacing: 0) {
+                                
+                                HStack {
+                                    
+                                    Text(element.hashtag)
+                                        .font(.system(size: 16))
+                                        .padding(.leading, 16)
+                                    
+                                    Spacer()
+                                    
+                                    Text("선택")
+                                        .font(.system(size: 16))
+                                        .foregroundStyle(.gray)
+                                        .padding(.trailing, 16)
+                                }
+                                .frame(height: 56)
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    
+                                    pub.send(element)
+                                }
+                                
+                                Rectangle()
+                                    .fill(.light_gray)
+                                    .frame(height: 1)
+                            }
+                        }
+                    }
+                }
+            }
+            
+            if showingList.isEmpty, !inputString.isEmpty {
+                    
+                HStack {
+                    
+                    Text(inputString)
+                        .font(.system(size: 16))
+                        .padding(.leading, 16)
+                    
+                    Spacer()
+                    
+                    Text("선택")
+                        .font(.system(size: 16))
+                        .foregroundStyle(.light_gray)
+                        .padding(.trailing, 16)
+                }
+                .frame(height: 56)
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    
+                    Task {
+                        
+                        do {
+                            
+                            if let newHashTag = try await APIRequestGlobalObject.shared.postHashtags(hashtags: [inputString]).first {
+                                
+                                pub.send(newHashTag)
+                            }
+                        } catch {
+                            
+                            print("새로운 해쉬태그 생성 실패")
+                        }
+                    }
+                }
+            }
+        }
+        .onChange(of: inputString) { newStr in
+            
+            Task {
+                
+                do {
+                    
+                    let newList = try await APIRequestGlobalObject.shared.getHashTagFrom(string: newStr)
+                    
+                    DispatchQueue.main.async {
+                        
+                        self.showingList = newList
+                    }
+                    
+                } catch {
+                    
+                    print("해시태그 검색결과 불러오기 실패")
+                }
+            }
+        }
+    }
+}
 
 #Preview {
     HashTagScreenComponent()

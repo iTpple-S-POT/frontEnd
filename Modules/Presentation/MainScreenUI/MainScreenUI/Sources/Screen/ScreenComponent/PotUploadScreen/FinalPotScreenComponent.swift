@@ -151,9 +151,9 @@ struct FinalPotScreenComponent: View {
                         
                         LazyHStack(spacing: 8) {
                             
-                            ForEach(screenModelWithNav.potHashTags, id: \.self) { tag in
+                            ForEach(Array(screenModelWithNav.potHashTags), id: \.hashtagId) { tag in
                                 
-                                Text("#\(tag)")
+                                Text("#\(tag.hashtag)")
                                     .font(.system(size: 16, weight: .semibold))
                                     .foregroundStyle(.white)
                                     .frame(height: 32)
@@ -179,13 +179,15 @@ struct FinalPotScreenComponent: View {
                     // 화면 끔
                     screenModelWithNav.dismiss?()
                     
+                    let hashTagIdList = screenModelWithNav.potHashTags.map { $0.hashtagId }
+                    
                     // 팟 업로드
                     NotificationCenter.potSelection.post(
                         name: .potUpload,
                         object: [
                             "categoryId" : screenModelWithNav.selectedCategoryId!,
                             "content" : screenModelWithNav.potText,
-                            "hashtagList" : screenModelWithNav.potHashTags,
+                            "hashtagList" : hashTagIdList,
                             "imageInfo" : screenModelWithNav.imageInfo!
                         ]
                     )

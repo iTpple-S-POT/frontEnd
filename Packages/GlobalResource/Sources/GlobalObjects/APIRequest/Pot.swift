@@ -47,19 +47,13 @@ public extension APIRequestGlobalObject {
         
         print("S3 업로드 성공", s3Object.fileKey)
         
-        let hashtagList = try await postHashtags(hashtags: uploadObject.hashtagList)
-        
-        print(hashtagList)
-        
-        print("해쉬테그 id로 변환 성공")
-        
         let object = SpotPotUploadRequestModel(
             categoryId: uploadObject.category,
             imageKey: s3Object.fileKey,
             type: "IMAGE",
             location: Location(lat: uploadObject.latitude, lon: uploadObject.longitude),
             content: uploadObject.text,
-            hashtagIdList: hashtagList.map { $0.hashtagId }
+            hashtagIdList: uploadObject.hashtagList
         )
         
         let uploadedObject = try await uploadPotData(object: object)
@@ -69,7 +63,7 @@ public extension APIRequestGlobalObject {
         return uploadedObject
     }
     
-    private func postHashtags(hashtags: [String]) async throws -> [HashTagDTO] {
+    func postHashtags(hashtags: [String]) async throws -> [HashTagDTO] {
         
         if hashtags.isEmpty { return [] }
         
@@ -96,7 +90,7 @@ public extension APIRequestGlobalObject {
         }
     }
     
-    func getHashTagFrom(string: String) async throws -> HashTagDTO {
+    func getHashTagFrom(string: String) async throws -> [HashTagDTO] {
         
         let url = try SpotAPI.potHashtag.getApiUrl()
         
@@ -119,7 +113,7 @@ public extension APIRequestGlobalObject {
             try defaultCheckStatusCode(response: httpResponse, functionName: #function, data: data)
             
             // status code 정상
-            return try jsonDecoder.decode(HashTagDTO.self, from: data)
+            return try jsonDecoder.decode([HashTagDTO].self, from: data)
             
         } else {
             

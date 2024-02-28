@@ -378,8 +378,6 @@ public struct PotDetailView: View {
         .animation(.easeInOut(duration: viewModel.animTime), value: viewModel.presentReactionView)
         .onAppear {
             
-            if isDataFetched { return }
-            
             Task.detached {
              
                 do {
@@ -394,6 +392,7 @@ public struct PotDetailView: View {
                         self.userInfo = userObject
                         self.potModel.viewCount = potObject.viewCount
                         self.potModel.hashTagList = potObject.hashtagList
+                        self.potModel.reactionTypeCounts = potObject.reactionTypeCounts
                     }
                 } catch {
                     print(error.localizedDescription)

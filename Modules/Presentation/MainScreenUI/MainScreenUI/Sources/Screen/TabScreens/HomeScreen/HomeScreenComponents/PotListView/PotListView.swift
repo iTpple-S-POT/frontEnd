@@ -15,7 +15,7 @@ struct PotListView: View {
     
     var title: String
     
-    var models: [PotModel]
+    @State var models: [PotModel]
     
     var body: some View {
         
@@ -38,25 +38,7 @@ struct PotListView: View {
             
             VStack {
                 
-                HStack {
-                    
-                    (
-                        Text("검색결과 ")
-                        
-                        +
-                        
-                        Text("\(models.count)건")
-                            .fontWeight(.semibold)
-                    )
-                    .font(.system(size: 16))
-                    
-                    Spacer()
-                    
-                }
-                .frame(height: 56)
-                .padding(.leading, 21)
-                
-                PotCollectionView(models: models)
+                PotCollectionView(models: $models)
                 
                 Spacer()
             }
@@ -68,7 +50,7 @@ struct PotListView: View {
 
 struct PotCollectionView: UIViewControllerRepresentable {
     
-    var models: [PotModel]
+    @Binding var models: [PotModel]
     
     func makeUIViewController(context: Context) -> PotCollectionViewController {
         
@@ -79,7 +61,9 @@ struct PotCollectionView: UIViewControllerRepresentable {
     
     func updateUIViewController(_ uiViewController: PotCollectionViewController, context: Context) {
         
+        uiViewController.models = models
         
+        uiViewController.collectionView.reloadData()
     }
     
     typealias UIViewControllerType = PotCollectionViewController

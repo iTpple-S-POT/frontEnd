@@ -110,12 +110,13 @@ struct UploadScreenComponent: View {
                         
                         LazyHStack {
                             
-                            ForEach(Array(screenModelWithNav.potHashTags.enumerated()), id: \.element) { index, tag in
+                            ForEach(Array(screenModelWithNav.potHashTags), id: \.hashtagId) { hashTag in
                                 
-                                HashTagBox(name: tag) {
-                                    screenModelWithNav.removeHashTag(index: index)
+                                HashTagBox(name: hashTag.hashtag) {
+                                    
+                                    screenModelWithNav.deleteHashTag(hashTag: hashTag)
                                 }
-                                .id(tag)
+                                .id(hashTag)
                                 
                             }
                         }
@@ -123,15 +124,6 @@ struct UploadScreenComponent: View {
                         .padding(.leading, 21)
                         
                     }
-                    .onChange(of: screenModelWithNav.potHashTags, perform: { strs in
-                        
-                        let lastStr = strs.last;
-                        
-                        withAnimation(.linear) {
-                            proxy.scrollTo(lastStr)
-                        }
-                        
-                    })
                     
                 }
                 .frame(height: 56)

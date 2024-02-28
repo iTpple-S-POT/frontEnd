@@ -27,22 +27,9 @@ public struct MainScreen: View  {
         
         return tabs[screenModel.selectedTabItem]!
     }
-    
-    
-    // TODO: 구현예정
-    var placHolderView: some View {
-        
-        ZStack {
-            
-            Color.white
-            
-            Text("not implemented")
-            
-        }
-    }
 
     public var body: some View {
-        VStack(spacing: 0) {
+        ZStack {
             
             // 스크린
             GeometryReader { geo in
@@ -50,13 +37,12 @@ public struct MainScreen: View  {
                 ZStack {
                     
                     Group {
-                        
                         // home
                         HomeScreen()
                             .zIndex(screenModel.selectedTabItem == .home ? 1 : 0)
                         
                         // search
-                        placHolderView
+                        PotSearchScreen()
                             .zIndex(screenModel.selectedTabItem == .search ? 1 : 0)
                         
                         // myPot
@@ -73,48 +59,54 @@ public struct MainScreen: View  {
                     
                 }
             }
+            .padding(.bottom, 64)
             
-            // 탭
-            ZStack {
-
-                //여기를 조작하여 원하는 백그라운드를 설정할 수 있다.
-                Color(uiColor: mainScreenConfig.tabViewMode.getColorSet().tabViewBackgroundColor)
-                    .ignoresSafeArea(.all, edges: .bottom)
+            VStack {
                 
-                GeometryReader { geo in
+                Spacer()
+                
+                // 탭
+                ZStack {
+
+                    //여기를 조작하여 원하는 백그라운드를 설정할 수 있다.
+                    Color(uiColor: mainScreenConfig.tabViewMode.getColorSet().tabViewBackgroundColor)
+                        .ignoresSafeArea(.container, edges: .bottom)
                     
-                    let cellWidth = geo.size.width / 5
-                    let cellHeight = geo.size.height
-                    
-                    HStack(spacing: 0) {
+                    GeometryReader { geo in
                         
-                        ForEach(SpotTapItemSample.allCases) { item in
+                        let cellWidth = geo.size.width / 5
+                        let cellHeight = geo.size.height
+                        
+                        HStack(spacing: 0) {
                             
-                            SpotTabItem(activeSample: screenModel.selectedTabItem, identitiy: item) {
+                            ForEach(SpotTapItemSample.allCases) { item in
                                 
-                                // 팟업로드를 제외한 경우(탭 전환)
-                                if item != .potUpload {
+                                SpotTabItem(activeSample: screenModel.selectedTabItem, identitiy: item) {
                                     
-                                    screenModel.selectedTabItem = item
-                                    
-                                } else {
-                                    
-                                    // 팟업로드 화면 표시
-                                    screenModel.showPotUploadScreen = true
+                                    // 팟업로드를 제외한 경우(탭 전환)
+                                    if item != .potUpload {
+                                        
+                                        screenModel.selectedTabItem = item
+                                        
+                                    } else {
+                                        
+                                        // 팟업로드 화면 표시
+                                        screenModel.showPotUploadScreen = true
+                                    }
                                 }
+                                .frame(width: cellWidth, height: cellHeight)
                             }
-                            .frame(width: cellWidth, height: cellHeight)
                         }
                     }
                 }
+                .frame(height: 64)
+                .background {
+                    Rectangle()
+                        .fill(.white)
+                        .shadow(color: .black.opacity(0.2), radius: 5, y: -3)
+                }
             }
-            .frame(height: 64)
-            .background {
-                Rectangle()
-                    .fill(.white)
-                    .shadow(color: .black.opacity(0.2), radius: 5, y: -3)
-            }
-            
+            .ignoresSafeArea(.keyboard, edges: .bottom)
         }
         .alert(screenModel.alertTitle, isPresented: $screenModel.showAlert, actions: {
             

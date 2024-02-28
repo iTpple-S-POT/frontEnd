@@ -186,7 +186,6 @@ public struct MapkitViewRepresentable: UIViewRepresentable {
         let center = CJLocationManager.getUserLocationFromLocal()
         
         mapView.setRegion(coordinator.regionWith(center: center), animated: false)
-        mapView.userTrackingMode = .follow
         
         return mapView
     }

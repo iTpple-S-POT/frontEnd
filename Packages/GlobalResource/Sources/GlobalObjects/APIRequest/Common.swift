@@ -23,7 +23,7 @@ public enum SpotNetworkError: Error, Equatable {
     case unknownError(function: String)
     case authorizationError(function: String)
     case duplicatedReaction
-    
+    case duplicatedHashTag
 }
 
 
@@ -127,6 +127,8 @@ extension APIRequestGlobalObject {
             
             if let error = try? jsonDecoder.decode(SpotErrorMessageModel.self, from: data) {
                 print("\(functionName) 에러코드: \(error.code) 메세지: \(error.message)")
+                
+                throw SpotNetworkError.duplicatedHashTag
             }
             
             switch statusCode {
