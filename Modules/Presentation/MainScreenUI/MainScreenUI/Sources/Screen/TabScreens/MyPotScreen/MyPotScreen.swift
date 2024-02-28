@@ -75,7 +75,7 @@ struct MyPotScreen: View {
         
         let screenWidth = UIScreen.main.bounds.width
         
-        let itemWidth = (screenWidth-itemSpacing)/2
+        let itemWidth = (screenWidth-itemSpacing) / 2.0
         
         return CGSize(width: itemWidth, height: itemWidth * 1.33)
     }

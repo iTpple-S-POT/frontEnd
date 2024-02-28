@@ -193,7 +193,7 @@ struct HashTagAutoCompletionView: View {
                     
                     Text("선택")
                         .font(.system(size: 16))
-                        .foregroundStyle(.light_gray)
+                        .foregroundStyle(.gray)
                         .padding(.trailing, 16)
                 }
                 .frame(height: 56)

@@ -30,36 +30,91 @@ public struct FrameToFitTextField: TextFieldStyle {
     }
 }
 
+extension View {
+    func hideKeyboard() {
+        let resign = #selector(UIResponder.resignFirstResponder)
+        UIApplication.shared.sendAction(resign, to: nil, from: nil, for: nil)
+    }
+}
+
+extension View {
+  var keyboardPublisher: AnyPublisher<Bool, Never> {
+    Publishers
+      .Merge(
+        NotificationCenter
+          .default
+          .publisher(for: UIResponder.keyboardWillShowNotification)
+          .map { _ in true },
+        NotificationCenter
+          .default
+          .publisher(for: UIResponder.keyboardWillHideNotification)
+          .map { _ in false })
+      .debounce(for: .seconds(0.1), scheduler: RunLoop.main)
+      .eraseToAnyPublisher()
+  }
+}
+
 class PotSearchScreenModel: ObservableObject {
     
     @Published var presentResultView = false
     
-    var onPresentResultView: (() -> Void)?
+    @Published var potModels: [PotModel] = []
 
     let hashTagSelectPublisher = PassthroughSubject<HashTagDTO, Never>()
     
-    var selectedHashTagId: Int64?
-    
     var subscriptions: Set<AnyCancellable> = []
+    
+    @Published var showAlert = false
+    var alertTitle = ""
+    var alertMessage = ""
+    var alertAction: (() -> Void)?
     
     init() {
         
         hashTagSelectPublisher
             .receive(on: DispatchQueue.main)
             .sink { hashTag in
-                
-                self.selectedHashTagId = hashTag.hashtagId
-
-                self.presentResultViewFunc()
+    
+                Task {
+                    
+                    do {
+                        
+                        self.potModels = try await self.getPotFromHashTag(hashTagId: hashTag.hashtagId)
+                        
+                        self.presentResultView = true
+                    } catch {
+                        
+                        self.showSearchFailed()
+                    }
+                }
             }
             .store(in: &subscriptions)
     }
     
-    func presentResultViewFunc() {
+    func getPotFromHashTag(hashTagId: Int64) async throws -> [PotModel] {
         
-        onPresentResultView?()
+        let models = try await self.requestPotFromHashTag(hashTagId: hashTagId)
         
-        presentResultView = true
+        return models
+    }
+    
+    func requestPotFromHashTag(hashTagId: Int64) async throws -> [PotModel] {
+        
+        guard let location = CJLocationManager.shared.currentUserLocation else {
+            
+            throw PotUploadPrepareError.cantGetUserLocation(function: #function)
+        }
+        
+        let potObjects = try await APIRequestGlobalObject.shared.getPots(latitude: location.latitude, longitude: location.longitude, diameter: 1000, hashTagId: Int(hashTagId))
+        
+        return potObjects.map { PotModel.makePotModelFrom(potObject: $0) }
+    }
+    
+    func showSearchFailed() {
+        
+        showAlert = true
+        alertTitle = "검색 실패"
+        alertMessage = "잠시후 다시시도해주세요"
     }
 }
 
@@ -67,9 +122,9 @@ struct PotSearchScreen: View {
     
     @State private var searchString: String = ""
     
-    @StateObject private var viewModel = PotSearchScreenModel()
+    @State private var isKeyboardPresented = false
     
-    @FocusState private var focusState
+    @StateObject private var viewModel = PotSearchScreenModel()
     
     var body: some View {
         ZStack {
@@ -115,8 +170,8 @@ struct PotSearchScreen: View {
                         .autocorrectionDisabled()
                         .textInputAutocapitalization(.never)
                         .submitLabel(.done)
-                        .focused($focusState)
                         
+                    
                     Spacer(minLength: 0)
                 }
                 .padding(.leading, 12)
@@ -128,12 +183,12 @@ struct PotSearchScreen: View {
                 
                 HashTagAutoForamtListView(
                     inputString: $searchString,
-                    pub: viewModel.hashTagSelectPublisher
+                    pub: viewModel.hashTagSelectPublisher,
+                    isTouchEnable: !isKeyboardPresented
                 )
                 .padding(.horizontal, 21)
                 
                 Spacer()
-                    
                 
             }
             .padding(.top, 56)
@@ -151,26 +206,34 @@ struct PotSearchScreen: View {
                         PotListViewWithHashTag(
                             present: $viewModel.presentResultView,
                             title: "해시태그 검색",
-                            hashTagId: viewModel.selectedHashTagId!
-                        )
-                        .zIndex(3)
-                        .slideTransition(
-                            from: CGPoint(x: 0, y: height/3),
-                            to: CGPoint(x: 0, y: 0)
-                        )
+                            models: viewModel.potModels)
                     }
                 }
+                .slideTransition(
+                    from: CGPoint(x: 0, y: height/3),
+                    to: CGPoint(x: 0, y: 0)
+                )
                 .animation(.easeIn(duration: 0.3), value: viewModel.presentResultView)
             }
             .zIndex(3)
         }
         .ignoresSafeArea(.keyboard, edges: .bottom)
-        .onAppear {
+        .alert(viewModel.alertTitle, isPresented: $viewModel.showAlert) {
             
-            viewModel.onPresentResultView = {
-                
-                focusState = false
+            Button("확인") {
+                viewModel.alertAction?()
             }
+            
+        } message: {
+            
+            Text(viewModel.alertMessage)
+        }
+        .onTapGesture {
+            hideKeyboard()
+        }
+        .onReceive(keyboardPublisher) { value in
+            
+            isKeyboardPresented = value
         }
     }
 }
@@ -180,6 +243,8 @@ struct HashTagAutoForamtListView: View {
     @Binding var inputString: String
     
     let pub: PassthroughSubject<HashTagDTO, Never>
+    
+    var isTouchEnable: Bool
     
     @State private var showingList: [HashTagDTO] = []
     
@@ -212,6 +277,7 @@ struct HashTagAutoForamtListView: View {
                             
                             pub.send(element)
                         }
+                        .allowsHitTesting(isTouchEnable)
                         
                         Rectangle()
                             .fill(.light_gray)
@@ -222,21 +288,30 @@ struct HashTagAutoForamtListView: View {
         }
         .onChange(of: inputString) { newStr in
             
-            Task {
+            getAutoStrings(str: newStr)
+        }
+        .onAppear {
+            
+            getAutoStrings(str: inputString)
+        }
+    }
+    
+    func getAutoStrings(str: String) {
+        
+        Task {
+            
+            do {
                 
-                do {
+                let newList = try await APIRequestGlobalObject.shared.getHashTagFrom(string: str)
+                
+                DispatchQueue.main.async {
                     
-                    let newList = try await APIRequestGlobalObject.shared.getHashTagFrom(string: newStr)
-                    
-                    DispatchQueue.main.async {
-                        
-                        self.showingList = newList
-                    }
-                    
-                } catch {
-                    
-                    print("해시태그 검색결과 불러오기 실패")
+                    self.showingList = newList
                 }
+                
+            } catch {
+                
+                print("해시태그 검색결과 불러오기 실패")
             }
         }
     }
@@ -248,14 +323,7 @@ struct PotListViewWithHashTag: View {
     
     var title: String
     
-    var hashTagId: Int64
-    
-    @State private var models: [PotModel] = []
-    
-    @State var showAlert = false
-    @State var alertTitle = ""
-    @State var alertMessage = ""
-    @State var alertAction: (() -> Void)?
+    @State var models: [PotModel]
     
     var body: some View {
         
@@ -296,66 +364,20 @@ struct PotListViewWithHashTag: View {
                 .frame(height: 56)
                 .padding(.leading, 21)
                 
-                PotCollectionView(models: $models)
-                
                 Spacer()
             }
             .padding(.top, 56)
             .zIndex(0.0)
-        }
-        .onAppear {
             
-            Task.detached {
+            VStack {
                 
-                do {
-                    
-                    let models = try await self.requestPotFromHashTag(hashTagId: hashTagId)
-                    
-                    DispatchQueue.main.asyncAfter(deadline: .now()+0.3) {
-                        
-                        self.models = models
-                    }
-                } catch {
-                    
-                    print("검색실패")
-                    
-                    DispatchQueue.main.async {
-                        
-                        self.showSearchFailed()
-                    }
-                }
-            }
-        }
-        .alert(alertTitle, isPresented: $showAlert) {
+                PotCollectionView(models: $models)
                 
-            Button("확인") {
-                alertAction?()
+                Spacer()
             }
-            
-        } message: {
-            
-            Text(alertMessage)
+            .padding(.top, 112)
+            .zIndex(0.0)
         }
-    }
-    
-    func requestPotFromHashTag(hashTagId: Int64) async throws -> [PotModel] {
-        
-        guard let location = CJLocationManager.shared.currentUserLocation else {
-            
-            throw PotUploadPrepareError.cantGetUserLocation(function: #function)
-        }
-        
-        let potObjects = try await APIRequestGlobalObject.shared.getPots(latitude: location.latitude, longitude: location.longitude, diameter: 1000, hashTagId: Int(hashTagId))
-        
-        return potObjects.map { PotModel.makePotModelFrom(potObject: $0) }
-    }
-    
-    func showSearchFailed() {
-        
-        showAlert = true
-        alertTitle = "검색 실패"
-        alertMessage = "잠시후 다시시도해주세요"
-        alertAction = { present = false }
     }
 }
 
