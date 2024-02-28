@@ -303,23 +303,26 @@ struct PotListViewWithHashTag: View {
             .padding(.top, 56)
             .zIndex(0.0)
         }
-        .task {
+        .onAppear {
             
-            do {
+            Task.detached {
                 
-                let models = try await self.requestPotFromHashTag(hashTagId: hashTagId)
-                
-                DispatchQueue.main.async {
+                do {
                     
-                    self.models = models
-                }
-            } catch {
-                
-                print("검색실패")
-                
-                DispatchQueue.main.async {
+                    let models = try await self.requestPotFromHashTag(hashTagId: hashTagId)
                     
-                    self.showSearchFailed()
+                    DispatchQueue.main.asyncAfter(deadline: .now()+0.3) {
+                        
+                        self.models = models
+                    }
+                } catch {
+                    
+                    print("검색실패")
+                    
+                    DispatchQueue.main.async {
+                        
+                        self.showSearchFailed()
+                    }
                 }
             }
         }
