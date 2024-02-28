@@ -69,6 +69,7 @@ private func makeInfoPlist(merging other: [String: Plist.Value] = [:]) -> InfoPl
         "NSPhotoLibraryUsageDescription": "팟에 사용되는 사진을 선택합니다.",
         "NSCameraUsageDescription" : "팟에 사용될 이미지를 촬영합니다.",
         "NSPhotoLibraryAddUsageDescription" : "촬영한 사진을 저장합니다.",
+        "UIUserInterfaceStyle" : "Light",
     ]
     other.forEach { (key: String, value: Plist.Value) in
         extendedPlist[key] = value
