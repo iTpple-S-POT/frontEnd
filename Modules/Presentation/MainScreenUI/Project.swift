@@ -34,6 +34,7 @@ let project = Project(name: "MainScreenUI",
                                 .project(target: "CJCamera", path: .relativeToRoot("Modules/Feature/CJCamera")),
                                 .project(target: "CJPhotoCollection", path: .relativeToRoot("Modules/Presentation/CJPhotoCollection")),
                                 .project(target: "UserInformationUI", path: .relativeToRoot("Modules/Presentation/UserInformationUI")),
+                                .project(target: "OnBoardingUI", path: .relativeToRoot("Modules/Presentation/OnBoardingUI")),
                               ]
                           )
                       ])

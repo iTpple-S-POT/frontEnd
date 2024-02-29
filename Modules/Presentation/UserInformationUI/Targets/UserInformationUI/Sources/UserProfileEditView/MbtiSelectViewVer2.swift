@@ -7,6 +7,7 @@
 
 import SwiftUI
 import DefaultExtensions
+import OnBoardingUI
 
 struct MbtiSelectViewVer2: View {
     
@@ -56,6 +57,8 @@ struct MbtiSelectUI: View {
     
     @ObservedObject var configureModel: ConfigurationScreenModel
     
+    @State private var showGuide = false
+    
     var body: some View {
         
         VStack(spacing: 32) {
@@ -82,11 +85,15 @@ struct MbtiSelectUI: View {
             .contentShape(Rectangle())
             .onTapGesture {
                 
-                // OnBoarding
+                showGuide = true
             }
         }
         .scrollIndicators(.hidden)
         .padding(.horizontal, 21)
+        .transparentFullScreenCover(isPresented: $showGuide) {
+            
+            MbtiOnBoarding(present: $showGuide)
+        }
     }
 }
 
@@ -165,3 +172,25 @@ struct MBTISelectOne: View {
     }
 }
 
+extension View {
+    func transparentFullScreenCover<Content: View>(isPresented: Binding<Bool>, content: @escaping () -> Content) -> some View {
+        fullScreenCover(isPresented: isPresented) {
+            ZStack {
+                content()
+            }
+            .background(TransparentBackground())
+        }
+    }
+}
+
+struct TransparentBackground: UIViewRepresentable {
+    func makeUIView(context: Context) -> UIView {
+        let view = UIView()
+        DispatchQueue.main.async {
+            view.superview?.superview?.backgroundColor = .clear
+        }
+        return view
+    }
+
+    func updateUIView(_ uiView: UIView, context: Context) {}
+}

@@ -20,7 +20,7 @@ public class UserDefaultsManager: ObservableObject {
     // UserDefaults key
     static let kAccessTokenKey = "spotAccessToken"
     static let kRefreshTokenKey = "spotRefreshToken"
-    
+    static let potUploadOnboarding = "potUploadOnboarding"
 }
 
 // MARK: - 토큰
@@ -57,4 +57,19 @@ public extension UserDefaultsManager {
         throw LocalDataError.dataNotFoundInLocal(name: "Token")
     }
 
+}
+
+public extension UserDefaultsManager {
+    
+    static func checkIsPotUploadOnBoardingBefore() -> Bool {
+        
+        let result = UserDefaults.standard.bool(forKey: self.potUploadOnboarding)
+        
+        if !result {
+            
+            UserDefaults.standard.setValue(true, forKey: self.potUploadOnboarding)
+        }
+        
+        return result
+    }
 }
