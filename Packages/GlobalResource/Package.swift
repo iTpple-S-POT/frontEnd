@@ -9,16 +9,26 @@ let package = Package(
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
-            name: "AllGlobalResource",
+            name: "GlobalResource",
             targets: [
                 "GlobalFonts",
+                "GlobalObjects",
+                "GlobalUIComponents",
             ]),
         
         // Fonts only
-        .library(name: "GlobalFonts", targets: ["GlobalFonts"])
+        .library(name: "GlobalFonts", targets: ["GlobalFonts"]),
+        
+        // UIComponents only
+        .library(name: "GlobalUIComponents", targets: ["GlobalUIComponents"]),
+        
+        // Object only
+        .library(name: "GlobalObjects", targets: ["GlobalObjects"]),
     ],
     dependencies: [
         .package(path: "../DefaultExtensions"),
+        .package(path: "../Persistence"),
+        .package(url: "https://github.com/Alamofire/Alamofire.git", exact: .init(5, 7, 1)),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -30,6 +40,36 @@ let package = Package(
             ],
             resources: [
                 .process("Resources/SUITE")
+            ]
+        ),
+        .target(
+            name: "GlobalUIComponents",
+            dependencies: [
+                .product(name: "DefaultExtensions", package: "DefaultExtensions"),
+                "GlobalFonts",
+                "GlobalObjects",
+            ],
+            resources: [
+                .process("Resources")
+            ]
+        ),
+        .target(
+            name: "GlobalObjects",
+            dependencies: [
+                .product(name: "DefaultExtensions", package: "DefaultExtensions"),
+                .product(name: "Alamofire", package: "Alamofire"),
+                .product(name: "Persistence", package: "Persistence"),
+            ],
+            resources: [
+                .process("Resources")
+            ]
+        ),
+        
+        //test
+        .testTarget(
+            name: "GlobalResourceTests",
+            dependencies: [
+                "GlobalObjects"
             ]
         )
     ]

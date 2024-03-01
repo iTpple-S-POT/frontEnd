@@ -1,4 +1,5 @@
 import SwiftUI
+import InitialScreenUI
 import LoginUI
 
 @main
@@ -10,15 +11,15 @@ struct SPOTFEApp: App {
     
     var body: some Scene {
         WindowGroup {
-            LoginScreen()
-                .onOpenURL { url in
-                    KakaoLoginManager.shared.completeSocialLogin(url: url)
-                }
+        
+            ContentScreen()
+            
         }
     }
     
     private func getKakaoAppKey() -> String {
-        let path = Bundle.main.provideFilePath(name: "secret", ext: "json")
+        
+        let path = Bundle.main.path(forResource: "secret", ofType: "json")!
         
         if let contentsOfFile = try? Data(contentsOf: URL(filePath: path)), let decodedContents = try? JSONDecoder().decode(SecretModel.self, from: contentsOfFile) {
             return decodedContents.keys.kakao_native_app_key

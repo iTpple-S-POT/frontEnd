@@ -1,7 +1,7 @@
 import ProjectDescription
 import Foundation
 
-private let bundleId: String = "com.spot"
+private let bundleId: String = "com.itpple.spot"
 private let version: String = "0.0.1"
 private let bundleVersion: String = "1"
 private let iOSTargetVersion: String = "16.0"
@@ -17,39 +17,41 @@ private let kakaoNativeAppKey = getKakaoAppKey()
 
 let project = Project(name: "\(appName)",
                       packages: [
-                            .local(path: "\(packagePath)/SplashUI"),
                             .local(path: "\(packagePath)/LoginUI"),
-                            .local(path: "\(packagePath)/UserInformationUI")
                       ],
                       settings: Settings.settings(configurations: makeConfiguration()),
                       targets: [
                           Target(
-                              name: "SPOT_Application",
+                              name: appName,
                               platform: .iOS,
                               product: .app,
                               bundleId: bundleId,
                               deploymentTarget: .iOS(targetVersion: iOSTargetVersion, devices: .iphone),
                               infoPlist: makeInfoPlist(),
-                              sources: ["\(basePath)/SPOT_Application/Sources/**"],
+                              sources: [
+                                "\(basePath)/SPOT_Application/Sources/**"
+                              ],
                               resources: [
                                 "\(basePath)/SPOT_Application/Resources/**",
                                 "Secrets/secret.json",
                               ],
                               dependencies: [
-                                .package(product: "SplashUI"),
+                                .project(target: "InitialScreenUI", path: .relativeToRoot("Modules/Presentation/InitialScreenUI")),
                                 .package(product: "LoginUI"),
-                                .package(product: "UserInformationUI"),
                               ],
                               settings: baseSettings()
                           )
                       ],
                       additionalFiles: [
                           "README.md"
-                      ])
+                      ]
+)
 /// Create extended plist for iOS
 /// - Returns: InfoPlist
 private func makeInfoPlist(merging other: [String: Plist.Value] = [:]) -> InfoPlist {
     var extendedPlist: [String: Plist.Value] = [
+        "NSAppTransportSecurity": ["NSAllowsArbitraryLoads": true],
+        "localization native development region" : "Korea",
         "UIApplicationSceneManifest": ["UIApplicationSupportsMultipleScenes": true],
         "UILaunchScreen": [],
         "UISupportedInterfaceOrientations":
@@ -59,11 +61,16 @@ private func makeInfoPlist(merging other: [String: Plist.Value] = [:]) -> InfoPl
         "CFBundleShortVersionString": "\(version)",
         "CFBundleVersion": "\(bundleVersion)",
         "CFBundleDisplayName": "$(APP_DISPLAY_NAME)",
-        "Privacy - Location When In Use Usage Description": "앱을 사용하는 동안 사용자의 위치를 특정합니다.",
+        "NSLocationWhenInUseUsageDescription": "앱을 사용하는 동안 사용자의 위치를 특정합니다.",
         "LSApplicationQueriesSchemes": ["kakaokompassauth", "kakaolink", "kakaoplus"],
-        "CFBundleURLTypes" : [
+        "CFBundleURLTypes": [
             ["CFBundleURLSchemes" : ["kakao\(kakaoNativeAppKey)"]]
-        ]
+        ],
+        "NSPhotoLibraryUsageDescription": "팟에 사용되는 사진을 선택합니다.",
+        "NSCameraUsageDescription" : "팟에 사용될 이미지를 촬영합니다.",
+        "NSPhotoLibraryAddUsageDescription" : "촬영한 사진을 저장합니다.",
+        "UIUserInterfaceStyle" : "Light",
+        "ITSAppUsesNonExemptEncryption" : "NO",
     ]
     other.forEach { (key: String, value: Plist.Value) in
         extendedPlist[key] = value

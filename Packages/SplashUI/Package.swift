@@ -15,6 +15,7 @@ let package = Package(
     ],
     dependencies: [
         .package(name: "DefaultExtensions", path: "../DefaultExtensions"),
+        .package(name: "GlobalResource", path: "../GlobalResource"),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -23,13 +24,11 @@ let package = Package(
             name: "SplashUI",
             dependencies: [
                 .byNameItem(name: "DefaultExtensions", condition: .none),
+                .product(name: "GlobalResource", package: "GlobalResource")
             ],
             resources: [
-                .process("Resources/splash_logo.png")
+                .process("Resources")
             ]
-        ),
-        .testTarget(
-            name: "SplashUITests",
-            dependencies: ["SplashUI"]),
+        )
     ]
 )

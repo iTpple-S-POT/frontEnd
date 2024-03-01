@@ -25,10 +25,11 @@ let package = Package(
             dependencies: [
                 .product(name: "DefaultExtensions", package: "DefaultExtensions"),
                 .product(name: "GlobalFonts", package: "GlobalResource"),
+                .product(name: "GlobalObjects", package: "GlobalResource"),
                 .product(name: "KakaoSDK", package: "kakao-ios-sdk"),
             ],
             resources: [
-                .process("Resources/kakao_button_image.png")
+                .process("Resources")
             ]
         ),
         .testTarget(
