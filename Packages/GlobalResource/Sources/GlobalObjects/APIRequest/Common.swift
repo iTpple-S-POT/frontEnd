@@ -69,7 +69,7 @@ public extension APIRequestGlobalObject {
         // Reaction
         case reaction
         
-        static let baseUrl = "http://15.164.165.156"
+        public static let baseUrl = "http://15.164.165.156"
         
         public func getApiUrl() throws -> URL {
             
@@ -151,7 +151,7 @@ extension APIRequestGlobalObject {
 // MARK: - Request
 public extension APIRequestGlobalObject {
     
-    internal func getURLRequest(url: URL, method: HTTPMethod, isAuth: Bool = true) throws -> URLRequest {
+    func getURLRequest(url: URL, method: HTTPMethod, isAuth: Bool = true) throws -> URLRequest {
         
         var request = try URLRequest(url: url, method: method)
         

@@ -8,6 +8,8 @@
 import SwiftUI
 import DefaultExtensions
 import GlobalUIComponents
+import GlobalObjects
+import Combine
 
 extension ShapeStyle where Self == Color {
     
@@ -24,64 +26,47 @@ extension UIColor {
     static var medium_gray: UIColor { UIColor(hex: "C7C7C7") }
 }
 
-enum ReportTypeModel: CaseIterable {
-    
-    case type1
-    case type2
-    case type3
-    case type4
-    case type5
-    case type6
-    
-    var koreanString: String {
-        
-        switch self {
-        case .type1:
-            "음란물 / 불법 촬영물 유통"
-        case .type2:
-            "유출 /사칭 / 사기"
-        case .type3:
-            "욕설 / 비하"
-        case .type4:
-            "게시물 도배 / 속임수"
-        case .type5:
-            "부적절한 카테고리"
-        case .type6:
-            "기타 사항"
-        }
-    }
-    
-    var getRequestType: String {
-        
-        switch self {
-        case .type1:
-            "INAPPROPRIATE"
-        case .type2:
-            "SPAM"
-        case .type3:
-            "INAPPROPRIATE"
-        case .type4:
-            "SPAM"
-        case .type5:
-            "INAPPROPRIATE"
-        case .type6:
-            "OTHER"
-        }
-    }
-    
-    
+enum PotReportViewState {
+    case makingReport
+    case waitingResponse
+    case checkSuccess
 }
 
 struct PotReportView: View {
     
+    @Binding var present: Bool
+    
+    var potId: Int
+    
+    @StateObject private var reportViewModel = ReportViewModel(apiRequester: APIRequestGlobalObject.shared)
+    
     @State private var showReportTypeScrollView = false
     
-    @State private var reportDescription = ""
+    @State private var showReportView = true
     
+    @State private var viewState: PotReportViewState = .makingReport
+    
+    @State private var showAlert = false
+    
+    @State private var alertMessage = ""
+    
+    @FocusState var focusState
     
     private var viewHeight: CGFloat {
         
         UIScreen.main.bounds.height * 0.7
+    }
+    
+    private var isPostable: Bool {
+        
+        reportViewModel.reportType != nil
+    }
+    
+    init(present: Binding<Bool>, potId: Int) {
+        
+        self._present = present
+        
+        self.potId = potId
     }
     
     var body: some View {
@@ -90,194 +75,317 @@ struct PotReportView: View {
             Color.floatingBackColor.opacity(0.7)
                 .ignoresSafeArea(.all)
             
-            VStack {
-                
-                Spacer()
-                
-                // 신고내역 작성뷰
-                VStack(spacing: 0) {
+            switch viewState {
+            case .makingReport:
+                VStack {
                     
-                    ZStack {
+                    Spacer()
+                    
+                    // 신고내역 작성뷰
+                    VStack(spacing: 0) {
                         
-                        RoundedCorners(tl: 10, tr: 10, bl: 0, br: 0)
-                            .fill(.white)
-                        
-                        VStack(alignment: .leading) {
+                        ZStack {
                             
-                            // X버튼
+                            RoundedCorners(tl: 10, tr: 10, bl: 0, br: 0)
+                                .fill(.white)
                             
-                            HStack {
+                            VStack(alignment: .leading) {
                                 
-                                Spacer()
+                                // X버튼
                                 
-                                Image(systemName: "xmark")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .foregroundStyle(.basicUiColor)
-                                    .frame(width: 20)
-                                    .contentShape(Circle())
-                                    .onTapGesture {
-                                        
-                                        // Exit
-                                    }
-                            }
-                            .frame(height: 32)
-                            
-                            Text("신고 사유")
-                            
-                            HStack {
-                                
-                                Text("신고 사유를 선택해 주세요")
-                                    .padding(.leading, 16)
+                                HStack {
                                     
-                                Spacer()
-                                
-                                Image(systemName: "chevron.down")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .foregroundStyle(.basicUiColor)
-                                    .frame(width: 22, height: 22)
-                                    .padding(10)
-                                    .contentShape(Rectangle())
-                                    .onTapGesture {
-                                        
-                                        showReportTypeScrollView = true
-                                    }
-                                
-                            }
-                            .frame(height: 56)
-                            .background(
-                                RoundedRectangle(cornerRadius: 10)
-                                    .stroke(.gray, lineWidth: 1.0)
-                            )
-                            .overlay {
-                                
-                                if showReportTypeScrollView {
+                                    Spacer()
                                     
-                                    GeometryReader { _ in
+                                    Image(systemName: "xmark")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .foregroundStyle(.basicUiColor)
+                                        .frame(width: 20)
+                                        .contentShape(Circle())
+                                        .onTapGesture {
+                                            
+                                            present = false
+                                        }
+                                }
+                                .frame(height: 32)
+                                
+                                Text("신고 사유")
+                                
+                                HStack {
+                                    
+                                    Text(reportViewModel.reportType?.koreanString ?? "신고 사유를 선택해 주세요")
+                                        .padding(.leading, 16)
                                         
-                                        VStack(spacing: 0) {
-                                            HStack {
-                                                
-                                                Text("신고 사유를 선택해 주세요")
-                                                    .padding(.leading, 16)
+                                    Spacer()
+                                    
+                                    Image(systemName: "chevron.down")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .foregroundStyle(.basicUiColor)
+                                        .frame(width: 22, height: 22)
+                                        .padding(10)
+                                        .contentShape(Rectangle())
+                                        .onTapGesture {
+                                            
+                                            showReportTypeScrollView = true
+                                        }
+                                    
+                                }
+                                .frame(height: 56)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .strokeBorder(.gray, lineWidth: 1.0)
+                                )
+                                .overlay {
+                                    
+                                    if showReportTypeScrollView {
+                                        
+                                        GeometryReader { _ in
+                                            
+                                            VStack(spacing: 0) {
+                                                HStack {
                                                     
-                                                Spacer()
+                                                    Text("신고 사유를 선택해 주세요")
+                                                        .padding(.leading, 16)
+                                                        
+                                                    Spacer()
+                                                    
+                                                    Image(systemName: "chevron.up")
+                                                        .resizable()
+                                                        .scaledToFit()
+                                                        .foregroundStyle(.basicUiColor)
+                                                        .frame(width: 22, height: 22)
+                                                        .padding(10)
+                                                        .contentShape(Rectangle())
+                                                        .onTapGesture {
+                                                            
+                                                            showReportTypeScrollView = false
+                                                        }
+                                                }
+                                                .frame(height: 56)
                                                 
-                                                Image(systemName: "chevron.up")
-                                                    .resizable()
-                                                    .scaledToFit()
-                                                    .foregroundStyle(.basicUiColor)
-                                                    .frame(width: 22, height: 22)
-                                                    .padding(10)
+                                                ForEach(ReportTypeModel.allCases, id: \.self) { type in
+                                                    
+                                                    HStack {
+                                                        
+                                                        Text(type.koreanString)
+                                                            .font(.system(size: 16))
+                                                            .padding(.leading, 16)
+                                                            
+                                                        Spacer()
+                                                    }
+                                                    .frame(height: 56)
                                                     .contentShape(Rectangle())
                                                     .onTapGesture {
                                                         
                                                         showReportTypeScrollView = false
+                                                        reportViewModel.reportType = type
                                                     }
+                                                    .overlay {
+                                                        VStack {
+                                                            
+                                                            Spacer()
+                                                            
+                                                            Rectangle()
+                                                                .fill(.light_gray)
+                                                                .frame(height: 1.0)
+
+                                                        }
+                                                    }
+                                                }
                                             }
-                                            .frame(height: 56)
-                                            
-                                            ForEach(ReportTypeModel.allCases, id: \.self) { type in
+                                            .background {
                                                 
+                                                RoundedRectangle(cornerRadius: 10)
+                                                    .fill(.white)
+                                            }
+                                            .overlay {
+                                                
+                                                RoundedRectangle(cornerRadius: 10)
+                                                    .strokeBorder(.gray, lineWidth: 1.0)
+                                            }
+                                        }
+                                    }
+                                }
+                                .zIndex(1.0)
+                                
+                                Spacer()
+                                
+                                Text("신고 내용")
+                                
+                                VStack {
+                                    
+                                    TextField("", text: $reportViewModel.reportDetailString, axis: .vertical)
+                                        .textFieldStyle(TappableTextFieldStyle(verPadding: 12, horPadding: 12))
+                                        .placeholder(when: reportViewModel.reportDetailString.isEmpty, placeholder: {
+                                            DynamicText(
+                                                "신고 내용을 작성해 주세요 (250자 이내)",
+                                                textColor: .medium_gray,
+                                                weight: .semibold,
+                                                textAlignment: .left
+                                            )
+                                            .padding(.horizontal, 12)
+                                                .foregroundStyle(.gray)
+                                                .frame(height: 20)
+                                        })
+                                        .autocorrectionDisabled()
+                                        .textInputAutocapitalization(.never)
+                                        .font(.system(size: 16, weight: .semibold))
+                                        .foregroundStyle(.black)
+                                        .focused($focusState)
+                                        .toolbar {
+                                            ToolbarItem(placement: .keyboard) {
                                                 HStack {
                                                     
-                                                    Text(type.koreanString)
-                                                        .font(.system(size: 16))
-                                                        .padding(.leading, 16)
-                                                        
                                                     Spacer()
-                                                }
-                                                .frame(height: 56)
-                                                .overlay {
-                                                    VStack {
-                                                        
-                                                        Spacer()
-                                                        
-                                                        Rectangle()
-                                                            .fill(.light_gray)
-                                                            .frame(height: 1.0)
-
-                                                    }
+                                                    
+                                                    Button("입력 완료") {  focusState = false }
+                                                        .padding(.trailing, 10)
                                                 }
                                             }
                                         }
-                                        .background(
-                                            RoundedRectangle(cornerRadius: 10)
-                                                .fill(.white)
-                                                .overlay {
-                                                    
-                                                    RoundedRectangle(cornerRadius: 10)
-                                                        .stroke(.gray, lineWidth: 1.0)
-                                                }
-                                        )
-                                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                                    }
+                                        .onReceive(Just(reportViewModel.reportDetailString)) { _ in limitText(250) }
+                                        .ignoresSafeArea(.keyboard, edges: .bottom)
+                                    
+                                    Spacer()
                                 }
-                            }
-                            .zIndex(1.0)
-                            
-                            
-                            Text("신고 내용")
-                                .padding(.top, 40)
-                            
-                            VStack {
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 10)
+                                            .strokeBorder(.gray, lineWidth: 1.0)
+                                    )
+                                    
                                 
-                                TextField("", text: $reportDescription, axis: .vertical)
-                                    .textFieldStyle(TappableTextFieldStyle(verPadding: 12, horPadding: 12))
-                                    .placeholder(when: reportDescription.isEmpty, placeholder: {
-                                        DynamicText(
-                                            "신고 내용을 작성해 주세요 (250자 이내)",
-                                            textColor: .medium_gray,
-                                            weight: .semibold,
-                                            textAlignment: .left
-                                        )
-                                        .padding(.horizontal, 12)
-                                            .foregroundStyle(.gray)
-                                            .frame(height: 20)
-                                    })
-                                    .autocorrectionDisabled()
-                                    .textInputAutocapitalization(.never)
-                                    .font(.system(size: 16, weight: .semibold))
-                                    .foregroundStyle(.black)
-                                
-                                Spacer()
+                                Spacer(minLength: 65)
                             }
-                                .background(
-                                    RoundedRectangle(cornerRadius: 10)
-                                        .stroke(.gray, lineWidth: 1.0)
-                                )
+                            .font(.system(size: 18, weight: .semibold))
+                            .padding(21)
                             
-                            Spacer(minLength: 65)
                         }
-                        .font(.system(size: 18, weight: .semibold))
-                        .padding(21)
+                        .zIndex(1.0)
+                        
+                        // 신고하기 버튼
+                        Button {
+                            
+                            focusState = false
+                            
+                            reportViewModel.postReportRequest(potId: potId)
+                            
+                            viewState = .waitingResponse
+                            
+                        } label: {
+                            
+                            RoundedCorners(tl: 0, tr: 0, bl: 10, br: 10)
+                                .fill(.red)
+                                .frame(height: 56)
+                                .overlay {
+                                    
+                                    Text("신고하기")
+                                        .font(.system(size: 18, weight: .semibold))
+                                        .foregroundStyle(.white)
+                                }
+                        }
+                        .disabled(!isPostable)
+                    }
+                    .frame(height: viewHeight)
+                    
+                    Spacer()
+                }
+                .padding(.horizontal, 21)
+                .ignoresSafeArea(.keyboard, edges: .bottom)
+                
+            case .waitingResponse:
+                EmptyView()
+            case .checkSuccess:
+                VStack(spacing: 0) {
+                    
+                    ZStack {
+                        
+                        Color.white
+                        
+                        VStack {
+                            
+                            Spacer()
+                            
+                            VStack(spacing: 5) {
+                                
+                                Text("팟 신고가")
+                            
+                                Text("완료되었습니다!")
+                            }
+                            .font(.system(size: 20, weight: .semibold))
+                            
+                            Spacer()
+                            
+                            Text("더욱 좋은 서비스로 보답하겠습니다.")
+                                .font(.system(size: 16))
+                                .foregroundStyle(.gray)
+                            
+                            Spacer()
+                            
+                        }
                         
                     }
-                    .zIndex(1.0)
                     
-                    // 신고하기 버튼
+                    
                     Button {
                         
+                        present = false
                         
                     } label: {
                         
-                        RoundedCorners(tl: 0, tr: 0, bl: 10, br: 10)
+                        Rectangle()
                             .fill(.red)
                             .frame(height: 56)
                             .overlay {
                                 
-                                Text("신고하기")
+                                Text("확인")
                                     .font(.system(size: 18, weight: .semibold))
                                     .foregroundStyle(.white)
                             }
                     }
                 }
-                .frame(height: viewHeight)
-                
-                Spacer()
+                .frame(height: 226)
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+                .padding(.horizontal, 45)
             }
-            .padding(.horizontal, 21)
+        }
+        .onReceive(reportViewModel.$reportResponseModel, perform: { _ in
+            
+            if reportViewModel.reportResponseModel != nil {
+                
+                viewState = .checkSuccess
+            }
+        })
+        .onAppear {
+            
+            reportViewModel.onReportPostRequestFailed = { failure in
+                
+                if failure == .cantReportMySelf {
+                    
+                    self.alertMessage = "나의 팟을 신고할 수 없습니다"
+                } else {
+                    
+                    self.alertMessage = "신고 전송에 실패했습니다"
+                }
+                
+                self.showAlert = true
+            }
+        }
+        .alert("신고 전송 실패", isPresented: $showAlert) {
+            
+            Button("닫기") { present = false }
+            
+        } message: {
+            
+            Text(alertMessage)
+        }
+
+    }
+    
+    func limitText(_ upper: Int) {
+        if reportViewModel.reportDetailString.count > upper {
+            reportViewModel.reportDetailString = String(reportViewModel.reportDetailString.prefix(upper))
         }
     }
 }
@@ -358,6 +466,6 @@ extension View {
     }
 }
 
-#Preview {
-    PotReportView()
-}
+//#Preview {
+//    PotReportView()
+//}

@@ -7,9 +7,9 @@
 
 import Foundation
 
-struct SpotErrorMessageModel: Decodable {
+public struct SpotErrorMessageModel: Decodable {
     
-    var code: Int16
-    var message: String
+    public var code: Int
+    public var message: String
     
 }
