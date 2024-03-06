@@ -152,7 +152,6 @@ public struct PotDetailView: View {
                         .position(x: geo.size.width/2, y: (geo.size.height+geo.safeAreaInsets.top)/2)
                 }
                 .ignoresSafeArea(.container, edges: .top)
-                .ignoresSafeArea(.keyboard)
                 
                 // Gradient
                 VStack {
@@ -170,21 +169,18 @@ public struct PotDetailView: View {
                     )
                     .frame(height: 240)
                 }
-                .ignoresSafeArea(.keyboard, edges: .bottom)
                 
                 // Like
                 
-                HStack {
+                VStack {
                     
                     Spacer()
+                    Spacer()
                     
-                    // 공유, 좋아요, 댓글 컨테이너
-                    VStack {
+                    HStack {
                         
                         Spacer()
-                        Spacer()
                         
-                        // 좋아요 아이템
                         VStack(spacing: 5) {
                             Image.makeImageFromBundle(bundle: .module, name: "emotion_Btn", ext: .png)
                                 .resizable()
@@ -204,12 +200,11 @@ public struct PotDetailView: View {
                                 .foregroundStyle(.white)
                         }
                         .frame(height: 50)
-                        
-                        Spacer()
+                        .padding(.trailing, 21)
                         
                     }
-                    .padding(.trailing, 21)
                     
+                    Spacer()
                 }
                 
                 // ZStack위의 최초 VStack
@@ -302,7 +297,7 @@ public struct PotDetailView: View {
                         .foregroundStyle(.white)
                         .padding(.top, 12)
                         
-                        Spacer(minLength: 0)
+                        Spacer()
                         
                         // 프로필
                         HStack {
@@ -367,13 +362,14 @@ public struct PotDetailView: View {
                             Spacer(minLength: 44)
                             
                         }
-                        .ignoresSafeArea(.keyboard, edges: .bottom)
                         .font(.system(size: 16))
                         .foregroundStyle(.white)
                         
                     }
-                    .ignoresSafeArea(.keyboard, edges: .bottom)
                     .padding(.horizontal, 21)
+                    .layoutPriority(1)
+                    
+                    Spacer(minLength: 0)
                     
                     ScrollView(.horizontal) {
                         
@@ -403,7 +399,6 @@ public struct PotDetailView: View {
                     .frame(height: 32)
                     .padding(.vertical, 20)
                 }
-                .ignoresSafeArea(.keyboard, edges: .bottom)
                 
                 if viewModel.presentReactionView {
                     
@@ -416,7 +411,6 @@ public struct PotDetailView: View {
                 }
             }
             .ignoresSafeArea(.keyboard, edges: .bottom)
-            
         }
         .animation(.easeInOut(duration: viewModel.animTime), value: viewModel.presentReactionView)
         .animation(.easeInOut, value: viewModel.presentReportView)

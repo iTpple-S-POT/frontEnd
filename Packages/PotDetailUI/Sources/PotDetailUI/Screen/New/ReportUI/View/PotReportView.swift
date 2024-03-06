@@ -52,11 +52,6 @@ struct PotReportView: View {
     
     @FocusState var focusState
     
-    private var viewHeight: CGFloat {
-        
-        UIScreen.main.bounds.height * 0.7
-    }
-    
     private var isPostable: Bool {
         
         reportViewModel.reportType != nil
@@ -80,6 +75,7 @@ struct PotReportView: View {
                 VStack {
                     
                     Spacer()
+                        .layoutPriority(1.0)
                     
                     // 신고내역 작성뷰
                     VStack(spacing: 0) {
@@ -104,8 +100,12 @@ struct PotReportView: View {
                                         .frame(width: 20)
                                         .contentShape(Circle())
                                         .onTapGesture {
+                                            focusState = false
                                             
-                                            present = false
+                                            DispatchQueue.main.asyncAfter(deadline: .now()+0.3) {
+                                                
+                                                present = false
+                                            }
                                         }
                                 }
                                 .frame(height: 32)
@@ -210,53 +210,46 @@ struct PotReportView: View {
                                 }
                                 .zIndex(1.0)
                                 
-                                Spacer()
-                                
                                 Text("신고 내용")
                                 
-                                VStack {
+                                GeometryReader { geo in
                                     
-                                    TextField("", text: $reportViewModel.reportDetailString, axis: .vertical)
-                                        .textFieldStyle(TappableTextFieldStyle(verPadding: 12, horPadding: 12))
-                                        .placeholder(when: reportViewModel.reportDetailString.isEmpty, placeholder: {
-                                            DynamicText(
-                                                "신고 내용을 작성해 주세요 (250자 이내)",
-                                                textColor: .medium_gray,
-                                                weight: .semibold,
-                                                textAlignment: .left
-                                            )
-                                            .padding(.horizontal, 12)
-                                                .foregroundStyle(.gray)
-                                                .frame(height: 20)
-                                        })
-                                        .autocorrectionDisabled()
-                                        .textInputAutocapitalization(.never)
-                                        .font(.system(size: 16, weight: .semibold))
-                                        .foregroundStyle(.black)
-                                        .focused($focusState)
-                                        .toolbar {
-                                            ToolbarItem(placement: .keyboard) {
-                                                HStack {
-                                                    
-                                                    Spacer()
-                                                    
-                                                    Button("입력 완료") {  focusState = false }
-                                                        .padding(.trailing, 10)
-                                                }
-                                            }
+                                    ScrollView {
+                                        
+                                        VStack(alignment: .leading) {
+                                            
+                                            TextField("", text: $reportViewModel.reportDetailString, axis: .vertical)
+                                                .textFieldStyle(TappableTextFieldStyle(verPadding: 12, horPadding: 12))
+                                                .placeholder(when: reportViewModel.reportDetailString.isEmpty, placeholder: {
+                                                    DynamicText(
+                                                        "신고 내용을 작성해 주세요 (250자 이내)",
+                                                        textColor: .medium_gray,
+                                                        weight: .semibold,
+                                                        textAlignment: .left
+                                                    )
+                                                    .padding(.horizontal, 12)
+                                                        .foregroundStyle(.gray)
+                                                        .frame(height: 20)
+                                                })
+                                                .autocorrectionDisabled()
+                                                .textInputAutocapitalization(.never)
+                                                .font(.system(size: 16, weight: .semibold))
+                                                .foregroundStyle(.black)
+                                                .focused($focusState)
+                                            
+                                            Spacer()
                                         }
-                                        .onReceive(Just(reportViewModel.reportDetailString)) { _ in limitText(250) }
-                                        .ignoresSafeArea(.keyboard, edges: .bottom)
-                                    
-                                    Spacer()
+                                    }
+                                    .frame(width: geo.size.width, height: geo.size.height)
                                 }
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .strokeBorder(.gray, lineWidth: 1.0)
-                                    )
-                                    
+                                .frame(height: 240)
                                 
-                                Spacer(minLength: 65)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .strokeBorder(.gray, lineWidth: 1.0)
+                                )
+                                .ignoresSafeArea(.keyboard, edges: .bottom)
+                                    
                             }
                             .font(.system(size: 18, weight: .semibold))
                             .padding(21)
@@ -287,12 +280,24 @@ struct PotReportView: View {
                         }
                         .disabled(!isPostable)
                     }
-                    .frame(height: viewHeight)
                     
                     Spacer()
+                        .layoutPriority(1.0)
                 }
-                .padding(.horizontal, 21)
                 .ignoresSafeArea(.keyboard, edges: .bottom)
+                .padding(.horizontal, 21)
+                .toolbar {
+                    ToolbarItem(placement: .keyboard) {
+                        HStack {
+                            
+                            Spacer()
+                            
+                            Button("입력 완료") {  focusState = false }
+                                .padding(.trailing, 10)
+                        }
+                    }
+                }
+                .onReceive(Just(reportViewModel.reportDetailString)) { _ in limitText(250) }
                 
             case .waitingResponse:
                 EmptyView()
@@ -350,6 +355,8 @@ struct PotReportView: View {
                 .padding(.horizontal, 45)
             }
         }
+        .animation(.easeInOut, value: viewState)
+        .ignoresSafeArea(.keyboard, edges: .bottom)
         .onReceive(reportViewModel.$reportResponseModel, perform: { _ in
             
             if reportViewModel.reportResponseModel != nil {
