@@ -29,8 +29,21 @@ public struct RowTextButtonLabel: View {
         }
         .frame(height: 56)
         .contentShape(Rectangle())
-        .background(Rectangle().fill(.white))
-        
+        .background(
+            Rectangle()
+                .fill(.white)
+        )
+        .overlay {
+            
+            VStack {
+                
+                Spacer()
+                
+                Rectangle()
+                    .fill(.light_gray)
+                    .frame(height: 1.0)
+            }
+        }
     }
 }
 
