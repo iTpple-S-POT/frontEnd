@@ -26,24 +26,17 @@ public class MkMapViewCoordinator: NSObject {
     var mapView: MKMapView!
     
     var currentActiveCategoryDict: TagsDict!
-    
-    var mapState: MapViewState = .notDetermined
-    
-    var mapCenterChangedAfterCoordinationSubscriber: AnyCancellable!
-    
-    var mapCenterChangedSubscriber: AnyCancellable!
-    
-    let mapCenterChangedAfterCoordinationPublisher = PassthroughSubject<CLLocationCoordinate2D, Never>()
-    
-    let mapCenterChangedPublisher = PassthroughSubject<CLLocationCoordinate2D, Never>()
-    
+     
     private static let potAnnotationViewIdentifier = NSStringFromClass(PotAnnotationView.self)
     private static let potClusterAnnotationViewIdentifier = NSStringFromClass(PotClusterAnnotationView.self)
     private static let potClusterAnnotationId = "potAnnotation"
     
     override init() {
         super.init()
+        
         registerAnnotation()
+        
+        configureNotification()
     }
     
     // Annotation
@@ -54,12 +47,23 @@ public class MkMapViewCoordinator: NSObject {
         mapView.register(PotClusterAnnotationView.self, forAnnotationViewWithReuseIdentifier: Self.potClusterAnnotationViewIdentifier)
     }
     
-    func setUserMapEqual(location: CLLocationCoordinate2D) {
+    private func configureNotification() {
         
-        print("맵과 유저위치를 일치시킵니다..")
-        mapState = .movingToEqual
+        NotificationCenter.potMapCenter.addObserver(self, selector: #selector(makeMapToProjectCertaionCoordinate(_:)), name: .moveMapCenterToSpecificLocation, object: nil)
+    }
+    
+    @objc
+    func makeMapToProjectCertaionCoordinate(_ notification: Notification) {
         
-        mapView.setRegion(regionWith(center: location), animated: true)
+        guard let coordinate = notification.object as? [String: CGFloat] else { return }
+        
+        let lat = coordinate["latitude"]!
+        let lon = coordinate["longitude"]!
+        
+        let desRegion = regionWith(
+            center: CLLocationCoordinate2D(latitude: lat, longitude: lon))
+        
+        self.mapView.setRegion(desRegion, animated: true)
     }
     
     // span을 동일하게 유지하기 위해
@@ -118,28 +122,14 @@ extension MkMapViewCoordinator: MKMapViewDelegate {
     // map위치 변동
     public func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
         
-        // 맵중심 변동 Publisher
-        mapCenterChangedPublisher.send(mapView.centerCoordinate)
+        let coordinate = mapView.region.center
         
-        switch mapState {
-        case .movingToEqual:
-            // 3박자 조정중 맵이 움직이는 경우
-            print("위치가 일치합니다.")
-            
-            mapState = .userMapEqual
-        case .userMapEqual:
-            // 조정후 움직임: 유저가 지도를 움직임
-            
-            let movedCoordinate = mapView.region.center
-            // 무조건 일치하지 않음으로
-            mapState = .userMapNotEqual
-            
-            // 맵 스크린 컴포넌트 모델의 현재 위치를 업데이트
-            mapCenterChangedAfterCoordinationPublisher.send(movedCoordinate)
-        default:
-            return
-        }
+        let object: [String: CGFloat] = [
+            "latitude": coordinate.latitude,
+            "longitude": coordinate.longitude
+        ]
         
+        NotificationCenter.potMapCenter.post(name: .whenUserMoveTheMap, object: object)
     }
 }
 
@@ -148,22 +138,20 @@ public struct MapkitViewRepresentable: UIViewRepresentable {
     
     public typealias UIViewType = MKMapView
     
-    @Binding var isLastestCenterAndMapEqual: Bool
+    var initialCoordinate: CLLocationCoordinate2D
     
     @Binding var activeCategoryDict: TagsDict
     
-    @Binding var potObjects: Set<PotObject>
+    @Binding var potViewModels: Set<PotViewModel>
     
-    var latestCenter: CLLocationCoordinate2D
-    
-    var mapCenterReciever: (CLLocationCoordinate2D) -> Void
-    
-    public init(isLastestCenterAndMapEqual: Binding<Bool>, activeCategoryDict: Binding<TagsDict>, potObjects: Binding<Set<PotObject>> ,latestCenter: CLLocationCoordinate2D, mapCenterReciever: @escaping (CLLocationCoordinate2D) -> Void) {
-        self._isLastestCenterAndMapEqual = isLastestCenterAndMapEqual
+    public init(
+        initialCoordinate: CLLocationCoordinate2D,
+        activeCategoryDict: Binding<TagsDict>,
+        potViewModels: Binding<Set<PotViewModel>>
+    ) {
+        self.initialCoordinate = initialCoordinate
         self._activeCategoryDict = activeCategoryDict
-        self._potObjects = potObjects
-        self.latestCenter = latestCenter
-        self.mapCenterReciever = mapCenterReciever
+        self._potViewModels = potViewModels
     }
     
     public func makeUIView(context: Context) -> MKMapView {
@@ -181,11 +169,7 @@ public struct MapkitViewRepresentable: UIViewRepresentable {
         
         coordinator.mapView = mapView
         
-        setSubscription(coordinator: coordinator)
-        
-        let center = CJLocationManager.getUserLocationFromLocal()
-        
-        mapView.setRegion(coordinator.regionWith(center: center), animated: false)
+        mapView.setRegion(coordinator.regionWith(center: initialCoordinate), animated: false)
         
         return mapView
     }
@@ -208,92 +192,30 @@ public struct MapkitViewRepresentable: UIViewRepresentable {
         }
         
         // Annotation적용
-        makePotAnnotationsFrom(mapView: uiView, potObjects: potObjects)
-        
-        // True로 바인딩이 변경됬을때만 호출
-        // 버튼클릭, 최초 위치이동의 경우 밖에 없음
-        if self.isLastestCenterAndMapEqual {
-            
-            let coordi = context.coordinator
-            
-            coordi.setUserMapEqual(location: latestCenter)
-            
-        }
-        
+        makePotAnnotationsFrom(mapView: uiView)
     }
     
-    func makePotAnnotationsFrom(mapView: MKMapView, potObjects newPotObjects: Set<PotObject>) {
+    func makePotAnnotationsFrom(mapView: MKMapView) {
         
-        let newPotModels: Set<PotModel> = Set(newPotObjects.map {PotModel.makePotModelFrom(potObject: $0)})
+        let newPotModels: Set<PotViewModel> = self.potViewModels
         
-        let oldPotModels: Set<PotModel> = Set(mapView.annotations.compactMap {
+        let oldPotModels: Set<PotViewModel> = Set(mapView.annotations.compactMap {
             
             guard let potAnnot = $0 as? PotAnnotation else { return nil }
             
-            return potAnnot.potModel
+            let vm = PotViewModel(model: potAnnot.potModel)
+            
+            return vm
         })
         
         let newMinusOld = newPotModels.subtracting(oldPotModels)
         
-        let willAddAnnotations = newMinusOld.map { PotAnnotation(potModel: $0) }
-        let willDiscardAnnotations = oldPotModels.subtracting(newPotModels).map { PotAnnotation(potModel: $0) }
+        let willAddAnnotations = newMinusOld.map { PotAnnotation(potModel: $0.model) }
+        
+        let willDiscardAnnotations = oldPotModels.subtracting(newPotModels).map { PotAnnotation(potModel: $0.model) }
         
         mapView.addAnnotations(willAddAnnotations)
         mapView.removeAnnotations(willDiscardAnnotations)
-        
-        // viewCount update
-        DispatchQueue.global().async {
-            
-            let innerSet = newPotModels.subtracting(newMinusOld)
-            
-            let operationQueue = OperationQueue()
-            
-            operationQueue.underlyingQueue = .main
-            
-            mapView.annotations.forEach { annot in
-                
-                oldPotModels.forEach { model in
-                    
-                    innerSet.forEach { newModel in
-                        
-                        if newModel == model {
-                            
-                            operationQueue.addOperation {
-                                
-                                model.viewCount = newModel.viewCount
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    
-    func setSubscription(coordinator: MkMapViewCoordinator) {
-        
-        coordinator.mapCenterChangedAfterCoordinationSubscriber = coordinator.mapCenterChangedAfterCoordinationPublisher.sink { _ in
-            print("맵 센터 퍼블리셔 연결 종료")
-        } receiveValue: { coordinate in
-            
-            // 위치일치후 유저가 맵을 움직였을 때 한번만 호출됨
-            
-            // 메인에서 실행할 필요 없음
-            DispatchQueue.main.async {
-                self._isLastestCenterAndMapEqual.wrappedValue = false
-            }
-            
-            print("위치 일치후 유저가 맵을 움직임")
-            
-        }
-        
-        coordinator.mapCenterChangedSubscriber = coordinator.mapCenterChangedPublisher.sink { coordinate in
-            
-            print("유저가 맵을 움직임")
-            
-            // 새로운 지도의 중심
-            mapCenterReciever(coordinate)
-            
-        }
     }
     
     func filterAnnotations(mapView: MKMapView) {

@@ -17,8 +17,8 @@ struct SpotPotUploadRequestModel: Codable {
 }
 
 // MARK: - Location
-struct Location: Codable {
-    let lat, lon: Double
+public struct Location: Codable {
+    public let lat, lon: Double
 }
 
 

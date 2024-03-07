@@ -49,6 +49,24 @@ public class PotModel: ObservableObject {
     
 }
 
+public class PotViewModel: Hashable {
+    
+    public static func == (lhs: PotViewModel, rhs: PotViewModel) -> Bool {
+        lhs.model.id == rhs.model.id
+    }
+    
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(self.model.id)
+    }
+    
+    public var model: PotModel
+    
+    public init(model: PotModel) {
+        self.model = model
+    }
+}
+
+
 public extension PotModel {
     
     static func makePotModelFrom(potObject: PotObject) -> PotModel {

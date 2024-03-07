@@ -7,17 +7,17 @@
 
 import Foundation
 
-struct PotsResponseModel: Decodable {
+public struct PotsResponseModel: Decodable {
     
-    let id, userId: Int64
-    let categoryId: [Int64]
-    let potType: String
-    let content: String?
-    let location: Location
-    let imageKey, expiredAt: String
-    let hashtagList: [HashTagDTO]
-    let viewCount: Int64
-    let reactionTypeCounts: [ReactionCountDTO]?
+    public let id, userId: Int64
+    public let categoryId: [Int64]
+    public let potType: String
+    public let content: String?
+    public let location: Location
+    public let imageKey, expiredAt: String
+    public let hashtagList: [HashTagDTO]
+    public let viewCount: Int64
+    public let reactionTypeCounts: [ReactionCountDTO]?
 }
 
 public struct ReactionCountDTO: Decodable {
