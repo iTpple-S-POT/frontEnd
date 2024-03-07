@@ -101,7 +101,7 @@ public extension PotUploadScreenModel {
     /// 최종 화면으로 이동할 수 있는가?
     var isReadyToUpload: Bool {
         
-        imageInfo != nil && selectedCategoryId != nil
+        imageInfo != nil && selectedCategoryId != nil && !potText.isEmpty
     }
     
 }
