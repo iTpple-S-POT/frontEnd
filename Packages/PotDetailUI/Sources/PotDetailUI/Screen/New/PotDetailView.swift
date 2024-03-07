@@ -455,6 +455,13 @@ public struct PotDetailView: View {
             
             Button("닫기", role: .cancel) { }
         })
+        .onReceive(NotificationCenter.default.publisher(for: .potReportSuccess), perform: { _ in
+            
+            DispatchQueue.main.asyncAfter(deadline: .now()+0.3) {
+                
+                dismissAction()
+            }
+        })
         .environmentObject(viewModel)
         .environmentObject(potModel)
     }

@@ -21,6 +21,8 @@ public extension Notification.Name {
     
     static let potUpload: Self = .init("potUpload")
     
+    static let potReportSuccess: Self = .init("potReportSuccess")
+    
     static let moveMapCenterToSpecificLocation: Self = .init("moveMapCenterToSpecificLocation")
     
     static let specificPotRemovedRequest: Self = .init("specificPotRemovedRequest")

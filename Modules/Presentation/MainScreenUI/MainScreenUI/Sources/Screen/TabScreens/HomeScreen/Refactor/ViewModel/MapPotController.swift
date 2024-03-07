@@ -39,6 +39,8 @@ class MapPotController: ObservableObject {
         NotificationCenter.potMapCenter.addObserver(self, selector: #selector(potUploadAction(_:)), name: .potUpload, object: nil)
         
         NotificationCenter.potMapCenter.addObserver(self, selector: #selector(whenUserMoveTheMapCallback(_:)), name: .whenUserMoveTheMap, object: nil)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(potReportAction(_:)), name: .potReportSuccess, object: nil)
     }
     
     private var subscriptions: Set<AnyCancellable> = []
@@ -93,6 +95,17 @@ class MapPotController: ObservableObject {
                 hashtagList: hashtagList,
                 imageInfo: imageInfo
             )
+        }
+    }
+    
+    @objc
+    func potReportAction(_ notification: Notification) {
+        
+        if let object = notification.object as? [String: Int] {
+            
+            let potId = object["potId"]!
+            
+            Task { await self.removePotUsing(potId: potId) }
         }
     }
     
@@ -215,5 +228,14 @@ extension MapPotController {
     func appendPotViewModels(vms: [PotViewModel]) {
         
         potViewModels.formUnion(vms)
+    }
+    
+    @MainActor
+    func removePotUsing(potId: Int) {
+        
+        if let targetVM = potViewModels.first(where: { $0.model.id == potId }) {
+            
+            potViewModels.remove(targetVM)
+        }
     }
 }

@@ -24,7 +24,7 @@ enum ReportTypeModel: CaseIterable {
         case .type1:
             "음란물 / 불법 촬영물 유통"
         case .type2:
-            "유출 /사칭 / 사기"
+            "유출 / 사칭 / 사기"
         case .type3:
             "욕설 / 비하"
         case .type4:

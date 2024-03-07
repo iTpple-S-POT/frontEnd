@@ -157,7 +157,7 @@ struct PotReportView: View {
                                                         .foregroundStyle(.basicUiColor)
                                                         .frame(width: 22, height: 22)
                                                         .padding(10)
-                                                        .rotationEffect(.degrees(90), anchor: .center)
+                                                        .rotationEffect(.degrees(180), anchor: .center)
                                                         .contentShape(Rectangle())
                                                         .onTapGesture {
                                                             
@@ -337,6 +337,12 @@ struct PotReportView: View {
                     Button {
                         
                         present = false
+                        
+                        let object: [String: Any] = [
+                            "potId": potId
+                        ]
+                        
+                        NotificationCenter.default.post(name: .potReportSuccess, object: object)
                         
                     } label: {
                         

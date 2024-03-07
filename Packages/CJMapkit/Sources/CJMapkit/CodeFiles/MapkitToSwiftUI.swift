@@ -197,9 +197,9 @@ public struct MapkitViewRepresentable: UIViewRepresentable {
     
     func makePotAnnotationsFrom(mapView: MKMapView) {
         
-        let newPotModels: Set<PotViewModel> = self.potViewModels
+        let newPotViewModels: Set<PotViewModel> = self.potViewModels
         
-        let oldPotModels: Set<PotViewModel> = Set(mapView.annotations.compactMap {
+        let oldPotViewModels: Set<PotViewModel> = Set(mapView.annotations.compactMap {
             
             guard let potAnnot = $0 as? PotAnnotation else { return nil }
             
@@ -208,14 +208,39 @@ public struct MapkitViewRepresentable: UIViewRepresentable {
             return vm
         })
         
-        let newMinusOld = newPotModels.subtracting(oldPotModels)
+        let newMinusOld = newPotViewModels.subtracting(oldPotViewModels)
         
         let willAddAnnotations = newMinusOld.map { PotAnnotation(potModel: $0.model) }
         
-        let willDiscardAnnotations = oldPotModels.subtracting(newPotModels).map { PotAnnotation(potModel: $0.model) }
+        let discardAnnotationVm = oldPotViewModels.subtracting(newPotViewModels)
+        
+        if discardAnnotationVm.count > 0 {
+            
+            var annotDict: [Int64: PotAnnotation] = [:]
+            
+            mapView.annotations.forEach { annot in
+                
+                if let potAnnot = annot as? PotAnnotation {
+                    
+                    annotDict[potAnnot.potModel.id] = potAnnot
+                }
+            }
+            
+            var willRemovePotAnnots: [PotAnnotation] = []
+
+            discardAnnotationVm.forEach { vm in
+                
+                if let potAnnot = annotDict[vm.model.id] {
+                    
+                    willRemovePotAnnots.append(potAnnot)
+                }
+            }
+            
+            mapView.removeAnnotations(willRemovePotAnnots)
+        }
+        
         
         mapView.addAnnotations(willAddAnnotations)
-        mapView.removeAnnotations(willDiscardAnnotations)
     }
     
     func filterAnnotations(mapView: MKMapView) {
