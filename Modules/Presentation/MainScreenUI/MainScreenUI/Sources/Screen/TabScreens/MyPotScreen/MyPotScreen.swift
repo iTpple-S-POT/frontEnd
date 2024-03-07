@@ -107,21 +107,33 @@ struct MyPotScreen: View {
             
             ScrollView {
                 
-                VStack(spacing: 0) {
+                LazyVStack(spacing: itemSpacing) {
                     
-                    LazyVGrid(columns: columns, spacing: itemSpacing) {
+                    ForEach(Array(screenModel.myPotModels.enumerated()), id: \.element) { (index, _) in
                         
-                        ForEach(screenModel.myPotModels, id: \.id) { model in
+                        HStack(spacing: 0) {
                             
-                            MyPotCell(model: model)
+                            MyPotCell(model: screenModel.myPotModels[index])
                                 .frame(
                                     width: itemSize.width,
                                     height: itemSize.height
                                 )
+                            
+                            Spacer(minLength: itemSpacing)
+                            
+                            if index < screenModel.myPotModels.count-1 {
+                                
+                                MyPotCell(model: screenModel.myPotModels[index+1])
+                                    .frame(
+                                        width: itemSize.width,
+                                        height: itemSize.height
+                                    )
+                            }
                         }
                     }
                 }
                 .scrollIndicators(.hidden)
+                
             }
             .padding(.top, 56)
             .zIndex(0.0)
