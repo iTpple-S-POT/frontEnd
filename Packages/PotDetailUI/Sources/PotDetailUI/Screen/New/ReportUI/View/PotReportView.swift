@@ -93,7 +93,7 @@ struct PotReportView: View {
                                     
                                     Spacer()
                                     
-                                    Image(systemName: "xmark")
+                                    Image.makeImageFromBundle(bundle: .module, name: "report_xmark", ext: .png)
                                         .resizable()
                                         .scaledToFit()
                                         .foregroundStyle(.basicUiColor)
@@ -119,7 +119,7 @@ struct PotReportView: View {
                                         
                                     Spacer()
                                     
-                                    Image(systemName: "chevron.down")
+                                    Image.makeImageFromBundle(bundle: .module, name: "report_chevron", ext: .png)
                                         .resizable()
                                         .scaledToFit()
                                         .foregroundStyle(.basicUiColor)
@@ -151,12 +151,13 @@ struct PotReportView: View {
                                                         
                                                     Spacer()
                                                     
-                                                    Image(systemName: "chevron.up")
+                                                    Image.makeImageFromBundle(bundle: .module, name: "report_chevron", ext: .png)
                                                         .resizable()
                                                         .scaledToFit()
                                                         .foregroundStyle(.basicUiColor)
                                                         .frame(width: 22, height: 22)
                                                         .padding(10)
+                                                        .rotationEffect(.degrees(90), anchor: .center)
                                                         .contentShape(Rectangle())
                                                         .onTapGesture {
                                                             
