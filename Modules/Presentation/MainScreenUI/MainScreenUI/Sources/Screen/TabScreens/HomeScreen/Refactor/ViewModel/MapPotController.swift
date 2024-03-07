@@ -144,6 +144,13 @@ class MapPotController: ObservableObject {
     
     func moveMapToCurrentUserLocation() {
         
+        if !locationFetcher.isAuthorizationValid {
+            
+            NotificationCenter.potMapCenter.post(name: .needsOptionSettingForLocation, object: nil)
+            
+            return
+        }
+        
         let object: [String: CGFloat] = [
             "latitude": locationVMForCurrentUser.model.latitude,
             "longitude": locationVMForCurrentUser.model.longitude
