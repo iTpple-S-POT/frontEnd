@@ -10,10 +10,8 @@ struct MapScreenComponent: View {
 
     @StateObject private var mapPotController = MapPotController(
         potFetcher: APIRequestGlobalObject.shared,
-        locationFetcher: locationFetcher
+        locationFetcher: CJLocationFetcher.shared
     )
-    
-    static let locationFetcher = CJLocationFetcher()
     
     @State private var showAlert = false
     @State private var alertMessage = ""
@@ -106,7 +104,6 @@ struct MapScreenComponent: View {
             
             Text(alertMessage)
         }
-
     }
     
     func showNeedsAuthAlert() {

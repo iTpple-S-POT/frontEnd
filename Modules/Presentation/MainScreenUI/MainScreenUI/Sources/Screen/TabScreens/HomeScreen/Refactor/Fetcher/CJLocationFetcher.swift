@@ -11,6 +11,8 @@ import Combine
 
 class CJLocationFetcher: NSObject {
     
+    static let shared = CJLocationFetcher()
+    
     private let defaultLocation = LocationModel(
         latitude: 37.5518911,
         longitude: 126.9917937
@@ -20,7 +22,7 @@ class CJLocationFetcher: NSObject {
     
     let locationPublisher = PassthroughSubject<LocationViewModel, Never>()
     
-    override init() {
+    private override init() {
         
         super.init()
         
@@ -80,6 +82,8 @@ extension CJLocationFetcher: LocationFetcher {
         case .restricted, .denied:
             throw LocationFetcherError.needsAuthInSetting
         default:
+            manager.stopUpdatingLocation()
+            manager.startUpdatingLocation()
             return
         }
     }
