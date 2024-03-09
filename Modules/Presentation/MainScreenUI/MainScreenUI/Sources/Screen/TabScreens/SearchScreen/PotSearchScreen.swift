@@ -9,7 +9,6 @@ import SwiftUI
 import DefaultExtensions
 import GlobalObjects
 import Combine
-import CJMapkit
 import GlobalUIComponents
 
 public struct FrameToFitTextField: TextFieldStyle {
@@ -100,12 +99,12 @@ class PotSearchScreenModel: ObservableObject {
     
     func requestPotFromHashTag(hashTagId: Int64) async throws -> [PotModel] {
         
-        guard let location = CJLocationManager.shared.currentUserLocation else {
+        guard let coordinate = CJLocationFetcher.shared.manager.location?.coordinate else {
             
             throw PotUploadPrepareError.cantGetUserLocation(function: #function)
         }
         
-        let potObjects = try await APIRequestGlobalObject.shared.getPots(latitude: location.latitude, longitude: location.longitude, diameter: 1000, hashTagId: Int(hashTagId))
+        let potObjects = try await APIRequestGlobalObject.shared.getPots(latitude: coordinate.latitude, longitude: coordinate.longitude, diameter: 1000, hashTagId: Int(hashTagId))
         
         return potObjects.map { PotModel.makePotModelFrom(potObject: $0) }
     }
