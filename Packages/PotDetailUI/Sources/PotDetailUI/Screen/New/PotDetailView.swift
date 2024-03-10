@@ -19,6 +19,8 @@ class PotDetailViewModel: ObservableObject {
     
     @Published var presentReactionView = false
     
+    @Published var presentReportView = false
+    
     @Published var selectedReactionModel: ReactionModel?
     
     @Published var showAlert = false
@@ -62,6 +64,8 @@ public struct PotDetailView: View {
     
     @State private var isLineLimit = true
     
+    @State private var showConfirmationDialog = false
+    
     private var isDataFetched = false
     
     let dismissAction: () -> Void
@@ -101,7 +105,7 @@ public struct PotDetailView: View {
         if hour > 24 {
             
             return "\(Int(hour / 24))일 전"
-        } else if hour < 24 {
+        } else if (1..<24).contains(hour) {
             
             return "\(hour)시간 전"
         } else {
@@ -129,263 +133,287 @@ public struct PotDetailView: View {
     private var tagObject: TagCases { TagCases[potModel.categoryId ] }
     
     public var body: some View {
-        ZStack {
+        NavigationView {
             
-            Color
-                .lowBlack
-                .ignoresSafeArea()
-            
-            GeometryReader { geo in
+            ZStack {
                 
-                KFImage(URL(string: potModel.imageKey?.getPreSignedUrlString() ?? "")!)
-                    .resizable()
-                    .fade(duration: 0.5)
-                    .backgroundDecode()
-                    .aspectRatio(contentMode: .fill)
-                    .frame(width: geo.size.width, height: geo.size.height+geo.safeAreaInsets.top)
-                    .position(x: geo.size.width/2, y: (geo.size.height+geo.safeAreaInsets.top)/2)
-            }
-            .ignoresSafeArea(.container, edges: .top)
-            
-            // Gradient
-            VStack {
+                Color
+                    .lowBlack
+                    .ignoresSafeArea(.all)
                 
-                Spacer()
-                
-                LinearGradient(
-                    stops: [
-                        Gradient.Stop(color: .lowBlack, location: 0),
-                        Gradient.Stop(color: .lowBlack.opacity(0.54), location: 0.65),
-                        Gradient.Stop(color: .lowBlack.opacity(0), location: 1.0),
-                    ],
-                    startPoint: .bottom,
-                    endPoint: .top
-                )
-                .frame(height: 240)
-            }
-            
-            // Like
-            
-            HStack {
-                
-                Spacer()
-                
-                // 공유, 좋아요, 댓글 컨테이너
-                VStack {
+                GeometryReader { geo in
                     
-                    Spacer()
-                    Spacer()
-                    
-                    // 좋아요 아이템
-                    VStack(spacing: 5) {
-                        Image.makeImageFromBundle(bundle: .module, name: "emotion_Btn", ext: .png)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 32, height: 32)
-                            .contentShape(Circle())
-                            .onTapGesture {
-                                
-                                if userInfo != nil {
-                                        
-                                    viewModel.presentReactionView = true
-                                }
-                            }
-                        
-                        Text("\(reactionCount)")
-                            .font(.system(size: 12, weight: .semibold))
-                            .foregroundStyle(.white)
-                    }
-                    .frame(height: 50)
-                    
-                    Spacer()
-                    
+                    KFImage(URL(string: potModel.imageKey?.getPreSignedUrlString() ?? "")!)
+                        .resizable()
+                        .fade(duration: 0.5)
+                        .backgroundDecode()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: geo.size.width, height: geo.size.height+geo.safeAreaInsets.top)
+                        .position(x: geo.size.width/2, y: (geo.size.height+geo.safeAreaInsets.top)/2)
                 }
-                .padding(.trailing, 21)
+                .ignoresSafeArea(.container, edges: .top)
                 
-            }
-            
-            // ZStack위의 최초 VStack
-            VStack {
+                // Gradient
+                VStack {
+                    
+                    Spacer()
+                    
+                    LinearGradient(
+                        stops: [
+                            Gradient.Stop(color: .lowBlack, location: 0),
+                            Gradient.Stop(color: .lowBlack.opacity(0.54), location: 0.65),
+                            Gradient.Stop(color: .lowBlack.opacity(0), location: 1.0),
+                        ],
+                        startPoint: .bottom,
+                        endPoint: .top
+                    )
+                    .frame(height: 240)
+                }
+                
+                // Like
                 
                 VStack {
                     
-                    // 나가기, 카테고리
-                    ZStack {
-                        
-                        HStack(spacing: 8) {
-                            
-                            Spacer(minLength: 28)
-                            
-                            tagObject.getIcon(type: .point)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 28)
-                            
-                            Text(tagObject.getKorString())
-                                .font(.system(size: 18, weight: .semibold))
-                                .foregroundStyle(.white)
-                            
-                            Spacer()
-                            
-                        }
-                        .commonShadow()
-                        
-                        HStack(spacing: 0) {
-                            
-                            Image(systemName: "xmark")
-                                .resizable()
-                                .scaledToFit()
-                                .foregroundStyle(.white)
-                                .shadow(color: .black.opacity(0.3), radius: 4)
-                                .frame(width: 20, height: 20)
-                                .padding(10)
-                                .onTapGesture {
-                                    
-                                    dismissAction()
-                                }
-                            
-                            Spacer(minLength: 0)
-                            
-                        }
-                        
-                    }
-                    .frame(height: 56)
-                    
-                    // 지난 시간, 뷰 카운트
-                    VStack(spacing: 6) {
-                        
-                        HStack(spacing: 8) {
-                            Image.makeImageFromBundle(bundle: .module, name: "passed_time", ext: .png)
-                                .resizable()
-                                .scaledToFit()
-                            
-                            Text(timeIntervalString)
-                                .font(.system(size: 16))
-                            
-                            Spacer()
-                        }
-                        .frame(height: 24)
-                        
-                        HStack(spacing: 8) {
-                            Image.makeImageFromBundle(bundle: .module, name: "view_count", ext: .png)
-                                .resizable()
-                                .scaledToFit()
-                            
-                            Text("\(potModel.viewCount)")
-                            
-                            Spacer()
-                        }
-                        .frame(height: 24)
-                    }
-                    .commonShadow()
-                    .foregroundStyle(.white)
-                    .padding(.top, 12)
-                    
-                    Spacer(minLength: 0)
+                    Spacer()
+                    Spacer()
                     
                     HStack {
                         
-                        VStack(alignment: .leading) {
-                            
-                            // 유저 프로필
-                            HStack(spacing: 12) {
-                                
-                                Group {
-                                    
-                                    if let imageUrl = userInfo?.profileImageUrl, let url = URL(string: imageUrl), let data = try? Data(contentsOf: url), let uiImage = UIImage(data: data) {
-                                        Image(uiImage: uiImage)
-                                            .resizable()
-                                            .scaledToFit()
-                                            .frame(width: 40)
-                                        
-                                    } else {
-                                       Image(systemName: "person.crop.circle")
-                                            .resizable()
-                                            .scaledToFit()
-                                            .foregroundStyle(.white)
-                                            .frame(width: 40)
-                                    }
-                                    
-                                }
+                        Spacer()
+                        
+                        VStack(spacing: 5) {
+                            Image.makeImageFromBundle(bundle: .module, name: "emotion_Btn", ext: .png)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 32, height: 32)
                                 .contentShape(Circle())
                                 .onTapGesture {
-                                    viewModel.presentUploaderProfile = true
+                                    
+                                    if userInfo != nil {
+                                            
+                                        viewModel.presentReactionView = true
+                                    }
                                 }
+                            
+                            Text("\(reactionCount)")
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundStyle(.white)
+                        }
+                        .frame(height: 50)
+                        .padding(.trailing, 21)
+                        
+                    }
+                    
+                    Spacer()
+                }
+                
+                // ZStack위의 최초 VStack
+                VStack {
+                    
+                    VStack {
+                        
+                        // 나가기, 카테고리
+                        ZStack {
+                            
+                            HStack(spacing: 8) {
                                 
-                                Text(userInfo?.nickname ?? "비지정 닉네임")
-                                    .font(.system(size: 20, weight: .semibold))
+                                Spacer(minLength: 28)
+                                
+                                tagObject.getIcon(type: .point)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 28)
+                                
+                                Text(tagObject.getKorString())
+                                    .font(.system(size: 18, weight: .semibold))
                                     .foregroundStyle(.white)
+                                
+                                Spacer()
+                                
+                            }
+                            .commonShadow()
+                            
+                            HStack(spacing: 0) {
+                                
+                                Image(systemName: "xmark")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .foregroundStyle(.white)
+                                    .shadow(color: .black.opacity(0.3), radius: 4)
+                                    .frame(width: 20, height: 20)
+                                    .padding(10)
+                                    .onTapGesture {
+                                        
+                                        dismissAction()
+                                    }
                                 
                                 Spacer(minLength: 0)
                                 
-                                
+                                Image(systemName: "ellipsis")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .foregroundStyle(.white)
+                                    .shadow(color: .black.opacity(0.3), radius: 4)
+                                    .frame(width: 20, height: 20)
+                                    .rotationEffect(.degrees(90))
+                                    .padding(10)
+                                    .contentShape(Circle())
+                                    .onTapGesture {
+                                        
+                                        showConfirmationDialog = true
+                                    }
                             }
                             
-                            // 팟내용
-                            Text(potModel.content)
-                                .lineLimit(isLineLimit ? 2 : .max)
+                        }
+                        .frame(height: 56)
+                        
+                        // 지난 시간, 뷰 카운트
+                        VStack(spacing: 6) {
                             
-                            // 더보기및 접기
-                            if !potModel.content.isEmpty {
+                            HStack(spacing: 8) {
+                                Image.makeImageFromBundle(bundle: .module, name: "passed_time", ext: .png)
+                                    .resizable()
+                                    .scaledToFit()
                                 
-                                Button {
+                                Text(timeIntervalString)
+                                    .font(.system(size: 16))
+                                
+                                Spacer()
+                            }
+                            .frame(height: 24)
+                            
+                            HStack(spacing: 8) {
+                                Image.makeImageFromBundle(bundle: .module, name: "view_count", ext: .png)
+                                    .resizable()
+                                    .scaledToFit()
+                                
+                                Text("\(potModel.viewCount)")
+                                
+                                Spacer()
+                            }
+                            .frame(height: 24)
+                        }
+                        .commonShadow()
+                        .foregroundStyle(.white)
+                        .padding(.top, 12)
+                        
+                        Spacer()
+                        
+                        // 프로필
+                        HStack {
+                            
+                            VStack(alignment: .leading) {
+                                
+                                // 유저 프로필
+                                HStack(spacing: 12) {
                                     
-                                    isLineLimit.toggle()
+                                    Group {
+                                        
+                                        if let imageUrl = userInfo?.profileImageUrl, let url = URL(string: imageUrl), let data = try? Data(contentsOf: url), let uiImage = UIImage(data: data) {
+                                            Image(uiImage: uiImage)
+                                                .resizable()
+                                                .scaledToFit()
+                                                .frame(width: 40)
+                                            
+                                        } else {
+                                           Image(systemName: "person.crop.circle")
+                                                .resizable()
+                                                .scaledToFit()
+                                                .foregroundStyle(.white)
+                                                .frame(width: 40)
+                                        }
+                                        
+                                    }
+                                    .contentShape(Circle())
+                                    .onTapGesture {
+                                        viewModel.presentUploaderProfile = true
+                                    }
+                                    
+                                    Text(userInfo?.nickname ?? "비지정 닉네임")
+                                        .font(.system(size: 20, weight: .semibold))
+                                        .foregroundStyle(.white)
+                                    
+                                    Spacer(minLength: 0)
+                                    
+                                    
+                                }
+                                
+                                // 팟내용
+                                Text(potModel.content)
+                                    .lineLimit(isLineLimit ? 2 : .max)
+                                
+                                // 더보기및 접기
+                                if !potModel.content.isEmpty {
+                                    
+                                    Button {
+                                        
+                                        isLineLimit.toggle()
 
-                                } label: {
-                                    
-                                    Text(isLineLimit ? "더보기" : "접기")
-                                        .fontWeight(.semibold)
-                                        .underline(true, color: .white)
+                                    } label: {
+                                        
+                                        Text(isLineLimit ? "더보기" : "접기")
+                                            .fontWeight(.semibold)
+                                            .underline(true, color: .white)
+                                    }
                                 }
                             }
-                        }
-                        
-                        // 댓글 좋아요등을 위한 Spacer
-                        Spacer(minLength: 44)
-                        
-                    }
-                    .font(.system(size: 16))
-                    .foregroundStyle(.white)
-                    
-                }
-                .padding(.horizontal, 21)
-                
-                ScrollView(.horizontal) {
-                    
-                    HStack(spacing: 8) {
-                        Spacer()
-                            .frame(height: 21)
-                        
-                        ForEach(potModel.hashTagList, id: \.self) { tag in
                             
-                            Text("#\(tag.hashtag)")
-                                .font(.system(size: 16, weight: .semibold))
-                                .foregroundStyle(.white)
-                                .frame(height: 32)
-                                .padding(.horizontal, 15)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 30)
-                                        .strokeBorder(.white, lineWidth: 1)
-                                )
+                            // 댓글 좋아요등을 위한 Spacer
+                            Spacer(minLength: 44)
                             
                         }
+                        .font(.system(size: 16))
+                        .foregroundStyle(.white)
                         
                     }
-                    .shadow(color: .black, radius: 3, y: 2)
+                    .padding(.horizontal, 21)
+                    .layoutPriority(1)
                     
+                    Spacer(minLength: 0)
+                    
+                    ScrollView(.horizontal) {
+                        
+                        HStack(spacing: 8) {
+                            Spacer()
+                                .frame(height: 21)
+                            
+                            ForEach(potModel.hashTagList, id: \.self) { tag in
+                                
+                                Text("#\(tag.hashtag)")
+                                    .font(.system(size: 16, weight: .semibold))
+                                    .foregroundStyle(.white)
+                                    .frame(height: 32)
+                                    .padding(.horizontal, 15)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 30)
+                                            .strokeBorder(.white, lineWidth: 1)
+                                    )
+                                
+                            }
+                            
+                        }
+                        .shadow(color: .black, radius: 3, y: 2)
+                        
+                    }
+                    .scrollIndicators(.hidden)
+                    .frame(height: 32)
+                    .padding(.vertical, 20)
                 }
-                .scrollIndicators(.hidden)
-                .frame(height: 32)
-                .padding(.vertical, 20)
-            }
-            
-            if viewModel.presentReactionView {
                 
-                ReactionView()
+                if viewModel.presentReactionView {
+                    
+                    ReactionView()
+                }
+                
+                if viewModel.presentReportView {
+                    
+                    PotReportView(present: $viewModel.presentReportView, potId: Int(potModel.id))
+                }
             }
+            .ignoresSafeArea(.keyboard, edges: .bottom)
         }
         .animation(.easeInOut(duration: viewModel.animTime), value: viewModel.presentReactionView)
+        .animation(.easeInOut, value: viewModel.presentReportView)
         .onAppear {
             
             Task.detached {
@@ -418,6 +446,21 @@ public struct PotDetailView: View {
             Button("확인") { }
         }, message: {
             Text(viewModel.alertContent)
+        })
+        .confirmationDialog("", isPresented: $showConfirmationDialog, actions: {
+            Button("신고하기") {
+                
+                viewModel.presentReportView = true
+            }
+            
+            Button("닫기", role: .cancel) { }
+        })
+        .onReceive(NotificationCenter.default.publisher(for: .potReportSuccess), perform: { _ in
+            
+            DispatchQueue.main.asyncAfter(deadline: .now()+0.3) {
+                
+                dismissAction()
+            }
         })
         .environmentObject(viewModel)
         .environmentObject(potModel)

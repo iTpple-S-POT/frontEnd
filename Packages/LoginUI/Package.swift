@@ -29,7 +29,7 @@ let package = Package(
                 .product(name: "KakaoSDK", package: "kakao-ios-sdk"),
             ],
             resources: [
-                .process("Resources")
+                .process("Resources"),
             ]
         ),
         .testTarget(

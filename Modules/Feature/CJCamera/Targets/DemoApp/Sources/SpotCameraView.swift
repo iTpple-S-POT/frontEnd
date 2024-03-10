@@ -89,17 +89,17 @@ struct SpotCameraView: View {
                     
                     Spacer()
                     
-                    Button {
-                        
-                        viewModel.flashSwitch()
-                        
-                    } label: {
-                        Image(systemName: viewModel.isFlashModeOn ? "bolt.fill" : "bolt.slash.fill")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 32, height: 32)
-                            .foregroundStyle(.spot_red)
-                    }
+//                    Button {
+//                        
+//                        viewModel.flashSwitch()
+//                        
+//                    } label: {
+//                        Image(systemName: viewModel.isFlashModeOn ? "bolt.fill" : "bolt.slash.fill")
+//                            .resizable()
+//                            .scaledToFit()
+//                            .frame(width: 32, height: 32)
+//                            .foregroundStyle(.spot_red)
+//                    }
                 }
                 .frame(height: 56)
                 .background(Rectangle().fill(.white))

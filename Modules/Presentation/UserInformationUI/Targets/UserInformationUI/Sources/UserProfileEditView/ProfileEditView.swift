@@ -38,7 +38,7 @@ public struct ProfileEditView: View {
         
         let df = DateFormatter()
         
-        df.dateFormat = "YYYY-mm-dd"
+        df.dateFormat = "yyyy-MM-dd"
         
         return df
     }
@@ -46,6 +46,8 @@ public struct ProfileEditView: View {
     private var dateString: String {
         
         let birthDay = dateFormatter.string(from: configureModel.userBirthDay)
+        
+        print(birthDay)
         
         let splitted = birthDay.split(separator: "-")
         

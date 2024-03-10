@@ -253,7 +253,7 @@ extension PotListViewCell {
         if hour > 24 {
             
             return "\(Int(hour / 24))일 전"
-        } else if hour < 24 {
+        } else if (1..<24).contains(hour) {
             
             return "\(hour)시간 전"
         }

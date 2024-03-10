@@ -44,7 +44,7 @@ public struct LoginScreen: View {
             
             // 스플래쉬 이미지
             // TODO: 완성된 이미지 삽입
-            Image.makeImageFromBundle(bundle: .module, name: "login_illust", ext: .png)
+            Image("img_Login", bundle: .module)
                 .resizable()
                 .scaledToFit()
                 .layoutPriority(1)

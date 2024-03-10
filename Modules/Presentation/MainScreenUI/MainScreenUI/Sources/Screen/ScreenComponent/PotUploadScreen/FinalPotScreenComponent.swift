@@ -182,7 +182,7 @@ struct FinalPotScreenComponent: View {
                     let hashTagIdList = screenModelWithNav.potHashTags.map { $0.hashtagId }
                     
                     // 팟 업로드
-                    NotificationCenter.potSelection.post(
+                    NotificationCenter.potMapCenter.post(
                         name: .potUpload,
                         object: [
                             "categoryId" : screenModelWithNav.selectedCategoryId!,

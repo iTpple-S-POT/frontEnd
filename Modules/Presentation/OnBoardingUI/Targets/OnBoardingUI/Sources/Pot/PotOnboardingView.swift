@@ -132,7 +132,7 @@ public struct PotOnboardingView: View {
                         currentState: $currentStage
                     ) {
                         
-                        present = false
+                        present = true
                     }
                     .frame(width: geo.size.width, height: 149)
                     .background(

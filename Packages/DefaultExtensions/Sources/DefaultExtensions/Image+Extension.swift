@@ -13,6 +13,7 @@ public extension Image {
         case png = "png"
         case jpg = "jpg"
         case jpeg = "jpeg"
+        case svg = "svg"
     }
     
     /**

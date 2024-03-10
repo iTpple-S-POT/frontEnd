@@ -7,23 +7,25 @@ import GlobalObjects
 struct MapScreenComponent: View {
     
     @EnvironmentObject private var mainScreenModel: MainScreenModel
+
+    @StateObject private var mapPotController = MapPotController(
+        potFetcher: APIRequestGlobalObject.shared,
+        locationFetcher: CJLocationFetcher.shared
+    )
     
-    @StateObject private var screenModel = MapScreenComponentModel()
+    @State private var showAlert = false
+    @State private var alertMessage = ""
+    @State private var alertTitle = ""
     
     var body: some View {
         
         ZStack {
             
             MapkitViewRepresentable(
-                isLastestCenterAndMapEqual: $screenModel.isLastestCenterAndMapEqual,
+                initialCoordinate: mapPotController.locationVMForCurrentUser.getCLCoordinate2D(),
                 activeCategoryDict: $mainScreenModel.selectedTagDict,
-                potObjects: $screenModel.potObjects,
-                latestCenter: screenModel.lastestCenter) { mapCenter in
-                
-                print("지도 중심이 업데이트됨")
-                
-                screenModel.currentCenterPositionOfMap = mapCenter
-            }
+                potViewModels: $mapPotController.potViewModels
+            )
             .zIndex(0)
             
             VStack {
@@ -32,24 +34,20 @@ struct MapScreenComponent: View {
                 
                 HStack {
                     
-                    if screenModel.userPositionIsAvailable {
+                    Button {
                         
-                        Button {
-                            
-                            screenModel.moveMapToCurrentLocation()
-                            
-                        } label: {
-                            
-                            Image.makeImageFromBundle(bundle: .module, name: "pos_image", ext: .png)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 40)
-                            
-                        }
-                        .padding(.leading, 21)
-                        .transition(.opacity)
+                        mapPotController.moveMapToCurrentUserLocation()
+                        
+                    } label: {
+                        
+                        Image.makeImageFromBundle(bundle: .module, name: "pos_image", ext: .png)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 40)
                         
                     }
+                    .padding(.leading, 21)
+                    .transition(.opacity)
                     
                     Spacer()
                     
@@ -66,11 +64,9 @@ struct MapScreenComponent: View {
                 
                 Button {
                     
-                    screenModel.fetchPotsFromCurrentMapCenter()
+                    mapPotController.requestPots()
                     
                 } label: {
-                    
-                    
                     
                     HStack(spacing: 5) {
                         
@@ -97,23 +93,25 @@ struct MapScreenComponent: View {
             .zIndex(1)
             
         }
-        .onAppear {
+        .onReceive(NotificationCenter.Publisher(center: .potMapCenter, name: .needsOptionSettingForLocation, object: nil)) { _ in
             
-            do {
-                
-                // makeUIView이후에 정보가 들어오도록 설정
-                screenModel.registerLocationSubscriber()
-                
-                try screenModel.checkLocationAuthorization()
-                
-            }
-            catch {
-                
-                print("권한이 없음")
-                
-            }
-            
+            showNeedsAuthAlert()
         }
+        .alert(alertTitle, isPresented: $showAlert) {
+            
+            Button("닫기") { }
+        } message: {
+            
+            Text(alertMessage)
+        }
+    }
+    
+    func showNeedsAuthAlert() {
+        
+        showAlert = true
+        alertTitle = "위치정보 제공 동의가 필요합니다"
+        alertMessage = "설정 > S:POT > 위치"
+        
     }
 }
 

@@ -112,7 +112,7 @@ struct MyPageScreen: View {
                             nickName: userInfo.nickName ?? "비지정 닉네임",
                             platformDescription: {
                                 guard let loginType = userInfo.loginType else {
-                                    return "처리되지 못한 플랫폼"
+                                    return ""
                                 }
                                 
                                 switch loginType {

@@ -45,6 +45,17 @@ struct PotListView: View {
             .padding(.top, 56)
             .zIndex(0.0)
         }
+        .onReceive(NotificationCenter.default.publisher(for: .potReportSuccess), perform: { notification in
+            
+            if let object = notification.object as? [String: Int], let potId = object["potId"] {
+                
+                if let index = models.firstIndex(where: { $0.id == potId }) {
+                    
+                    models.remove(at: index)
+                }
+            }
+            
+        })
     }
 }
 

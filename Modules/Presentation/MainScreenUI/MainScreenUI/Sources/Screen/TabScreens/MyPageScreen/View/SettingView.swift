@@ -79,8 +79,24 @@ struct SettingView: View {
                 Spacer()
                 
             }
+            .zIndex(1)
             
             VStack(alignment: .leading, spacing: 0) {
+                
+                Text("정책")
+                    .font(.system(size: 16, weight: .semibold))
+                    .frame(height: 56)
+                    .padding(.leading, 21)
+                
+                NavigationLink {
+                    
+                    PersonalDataUsageDescriptionView()
+                        .navigationBarBackButtonHidden()
+                    
+                } label: {
+                    
+                    RowTextButtonLabel(title: "개인정보 처리 방침")
+                }
                 
                 Text("계정")
                     .font(.system(size: 16, weight: .semibold))
@@ -100,7 +116,7 @@ struct SettingView: View {
                 Spacer()
                 
             }
-            .padding(.top, 56)
+            .padding(.top, 56 + 8)
         }
         .alert(viewModel.alertTitle, isPresented: $viewModel.showComfirmAlert) {
             
@@ -133,7 +149,6 @@ struct SettingView: View {
             
             Button("확인") { }
         }
-
     }
 }
 
