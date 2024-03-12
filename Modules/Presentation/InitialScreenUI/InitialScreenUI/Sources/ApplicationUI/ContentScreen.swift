@@ -57,6 +57,10 @@ public struct ContentScreen: View {
         }
         .task {
             
+            APIRequestGlobalObject.SpotAPI.baseUrl = Bundle.module.apiURL
+            
+            print("Bundle.module.apiURL")
+            
             do {
                 
                 // 토큰

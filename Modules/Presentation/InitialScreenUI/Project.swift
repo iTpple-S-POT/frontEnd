@@ -27,6 +27,9 @@ let project = Project(name: "InitialScreenUI",
                               sources: [
                                 "InitialScreenUI/Sources/**",
                               ],
+                              resources: [
+                                "InitialScreenUI/Resources/**",
+                              ],
                               dependencies: [
                                 .package(product: "SplashUI"),
                                 .package(product: "LoginUI"),

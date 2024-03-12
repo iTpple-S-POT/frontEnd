@@ -69,7 +69,7 @@ public extension APIRequestGlobalObject {
         // Reaction
         case reaction
         
-        public static let baseUrl = "http://15.164.165.156"
+        public static var baseUrl = ""
         
         public func getApiUrl() throws -> URL {
             
