@@ -61,14 +61,14 @@ private func makeInfoPlist(merging other: [String: Plist.Value] = [:]) -> InfoPl
         "CFBundleShortVersionString": "\(version)",
         "CFBundleVersion": "\(bundleVersion)",
         "CFBundleDisplayName": "$(APP_DISPLAY_NAME)",
-        "NSLocationWhenInUseUsageDescription": "앱을 사용하는 동안 사용자의 위치를 특정합니다.",
+        "NSLocationWhenInUseUsageDescription": "회원님의 위치정보를 사용하여 지도의 정확한 위치에 업로드한 컨텐츠를 표시합니다. 그리고 회원님 주위의 다양한 컨텐츠를 수집합니다. 위치정보에 동의를 하지 않을 경우 게시물 작성및 조회 기능이 제한될 수 있습니다.",
         "LSApplicationQueriesSchemes": ["kakaokompassauth", "kakaolink", "kakaoplus"],
         "CFBundleURLTypes": [
             ["CFBundleURLSchemes" : ["kakao\(kakaoNativeAppKey)"]]
         ],
-        "NSPhotoLibraryUsageDescription": "팟에 사용되는 사진을 선택합니다.",
-        "NSCameraUsageDescription" : "팟에 사용될 이미지를 촬영합니다.",
-        "NSPhotoLibraryAddUsageDescription" : "촬영한 사진을 저장합니다.",
+        "NSPhotoLibraryUsageDescription": "게시되는 컨텐츠에 사용되는 이미지를 선택하기 위해 사진 어플리케이션의 접근을 요청합니다.",
+        "NSCameraUsageDescription" : "게시되는 컨텐츠애 포함될 사진을 촬영하기위해 카메라에 접근합니다.",
+        "NSPhotoLibraryAddUsageDescription" : "촬영한 사진을 사진 어플리케이션에 저장합니다.",
         "UIUserInterfaceStyle" : "Light",
         "ITSAppUsesNonExemptEncryption" : "NO",
     ]
